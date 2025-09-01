@@ -1,0 +1,10 @@
+target = SimpleTest
+classpath = .
+
+
+# keep exploring after the first fail
+search.multiple_errors = true
+
+# include an execution trace for every time we find that violation
+report.console.property_violation = error,trace,snapshot
+report.console.finished = result,statistics,error
