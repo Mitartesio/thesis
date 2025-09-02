@@ -1,6 +1,8 @@
 target = SimpleTest
 classpath = .
 
+listener = gov.nasa.jpf.listener.ChoiceGeneratorListener
+
 
 # keep exploring after the first fail
 search.multiple_errors = true
