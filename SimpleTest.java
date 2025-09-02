@@ -6,35 +6,32 @@ public class SimpleTest {
     static int y = 0;
 
     public static void main(String[] args) throws InterruptedException {
-        for (int i = 0; i < 1; i++) {
 
+        Thread t1 = new Thread(() -> {
+            a = 1;
+            x = b;
+        });
 
-            a = b = x = y = 0;
+        Thread t2 = new Thread(() -> {
+            b = 1;
+            y = a;
+        });
 
-            Thread t1 = new Thread(() -> {
-                a = 1;
-                x = b;
-            });
+        t1.start();
+        t2.start();
 
-            Thread t2 = new Thread(() -> {
-                b = 1;
-                y = a;
-            });
+        t1.join();
+        t2.join();
 
-            t1.start();
-            t2.start();
+        // if (x == 0 && y == 0) {
+        // System.out.println("Found unwanted interleaving: x=0, y=0 at iteration " +
+        // i);
+        // break;
+        // }
 
-            t1.join();
-            t2.join();
+        // This might make it work in the sense that we can verify that JPF should flag
+        // it every time x and y != 0
+        assert (x == 0 && y == 0) : "Interleaving exposes a bug where x = " + x + " and y = " + y;
 
-//             if (x == 0 && y == 0) {
-//                 System.out.println("Found unwanted interleaving: x=0, y=0 at iteration " + i);
-//                 break;
-//             }
-
-
-            assert x == 1 && y == 1 : "Interleaving exposes a bug where x = " + x + " and y = " +y;
-
-        }
     }
 }

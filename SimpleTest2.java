@@ -1,40 +1,28 @@
-public class SimpleTest2 {
 
-    static int a = 0;
-    static int b = 0;
+//This test is supposed to check if jpf is able to execute a loop and find the one instance (here 1/100000) case where
+//another threads sets the value answer to x.
+public class SimpleTest2 {
     static int x = 0;
-    static int y = 0;
+    static int answer;
 
     public static void main(String[] args) throws InterruptedException {
-        for (int i = 0; i < 1; i++) {
 
+        Thread t1 = new Thread(() -> {
+            for (int i = 0; i < 100; i++) {
+                x++;
+            }
+        });
 
-            a = b = x = y = 0;
+        Thread t2 = new Thread(() -> {
+            answer = x;
+        });
 
-            Thread t1 = new Thread(() -> {
-                a = 1;
-                x = b;
-            });
+        t1.start();
+        t2.start();
 
-            Thread t2 = new Thread(() -> {
-                b = 1;
-                y = a;
-            });
+        t1.join();
+        t2.join();
+        assert (answer != 50) : "Found it answer = " + answer;
 
-            t1.start();
-            t2.start();
-
-            t1.join();
-            t2.join();
-
-//             if (x == 0 && y == 0) {
-//                 System.out.println("Found unwanted interleaving: x=0, y=0 at iteration " + i);
-//                 break;
-//             }
-
-            //This might make it work in the sense that we can verify that JPF should flag it every time x and y != 0
-            assert !(x == 0 && y == 0) : "Interleaving exposes a bug where x = " + x + " and y = " +y;
-
-        }
     }
 }

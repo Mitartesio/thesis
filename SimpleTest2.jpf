@@ -1,4 +1,4 @@
-target = SimpleTest
+target = SimpleTest2
 classpath = .
 
 
@@ -6,5 +6,6 @@ classpath = .
 search.multiple_errors = true
 
 # include an execution trace for every time we find that violation
-report.console.property_violation = error,trace,snapshot
+#report.console.property_violation = error,trace,snapshot
 report.console.finished = result,statistics,error
+report.unique_errors = true
