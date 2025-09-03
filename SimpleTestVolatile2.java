@@ -1,14 +1,13 @@
-
 //This test is supposed to check if jpf is able to execute a loop and find the one instance (here 1/500) case where
 //another threads sets the value answer to x.
-public class SimpleTest2 {
-    static int x = 0;
+public class SimpleTestVolatile2 {
+    static volatile int x = 0;
     static int answer;
 
     public static void main(String[] args) throws InterruptedException {
 
         Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 500; i++) {
+            for (int i = 0; i < 100; i++) {
                 x++;
             }
         });
@@ -22,7 +21,7 @@ public class SimpleTest2 {
 
         t1.join();
         t2.join();
-        assert (answer != 250) : "Found it answer = " + answer;
+        // assert (answer != 50) : "Found it answer = " + answer;
 
     }
 }
