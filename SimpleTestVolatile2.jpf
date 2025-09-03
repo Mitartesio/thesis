@@ -1,5 +1,6 @@
 target = SimpleTestVolatile2
 classpath = .
+native_classpath = .
 listener = Listeners.Test_Listener
 
 # JPF search settings
