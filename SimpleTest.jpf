@@ -1,10 +1,13 @@
 target = SimpleTest
 classpath = .
+native_classpath = .
+listener = Listeners.Test_Listener2
 
+# JPF search settings
+search.class = gov.nasa.jpf.search.DFSearch
+search.multiple_errors = false
 
-# keep exploring after the first fail
-search.multiple_errors = true
-
-# include an execution trace for every time we find that violation
-report.console.property_violation = error,trace,snapshot
+# Reporting settings
+jpf.report.console.property_violation = error
 report.console.finished = result,statistics,error
+report.unique_errors = true

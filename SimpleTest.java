@@ -31,7 +31,8 @@ public class SimpleTest {
 
         // This might make it work in the sense that we can verify that JPF should flag
         // it every time x and y != 0
-        assert (x == 0 && y == 0) : "Interleaving exposes a bug where x = " + x + " and y = " + y;
+        // assert (x == 0 && y == 0) : "Interleaving exposes a bug where x = " + x + "
+        // and y = " + y;
 
     }
 }
