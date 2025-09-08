@@ -1,8 +1,14 @@
-target = SimpleTestVolatile2
+target = SimpleTest2
 classpath = .
-listener = Test_Listener
-search.multiple_errors = false
+native_classpath = .
+listener = Listeners.Listener_For_Counting_States
+
+# JPF search settings
 search.class = gov.nasa.jpf.search.DFSearch
+search.multiple_errors = false
+
+# Reporting settings
 jpf.report.console.property_violation = error
 report.console.finished = result,statistics,error
 report.unique_errors = true
+cg.randomize_choices = NONE

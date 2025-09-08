@@ -19,8 +19,10 @@ public class Test_Listener extends PropertyListenerAdapter {
 
         if (answerValue == 5) {
             System.out.println("The value of 5 was found!");
-            vm.getSystemState().setIgnored(true); // We throw an exception with this call to stop the search
+            vm.getSystemState().setIgnored(true);
         }
+
+        // assert (answerValue != 5) : "the answer is" + answerValue;
     }
 
 }

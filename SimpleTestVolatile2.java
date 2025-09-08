@@ -10,11 +10,11 @@ public class SimpleTestVolatile2 {
             for (int i = 0; i < 100; i++) {
                 x++;
             }
-        });
+        }, "t1");
 
         Thread t2 = new Thread(() -> {
             answer = x;
-        });
+        }, "t2");
 
         t1.start();
         t2.start();
