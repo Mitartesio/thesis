@@ -15,8 +15,14 @@ public class SimpleTest2 {
         }, "t1");
 
         Thread t2 = new Thread(() -> {
-            answer = x;
+            x++;
+            x++;
+            x++;
+            x++;
+            x++;
         }, "t2");
+
+        // Try and just catch getStatic.x
 
         t1.start();
         t2.start();

@@ -5,9 +5,9 @@ import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.ChoiceGenerator;
 import gov.nasa.jpf.vm.Instruction;
 import gov.nasa.jpf.vm.MJIEnv;
+import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 
 import gov.nasa.jpf.PropertyListenerAdapter;
-import gov.nasa.jpf.jvm.bytecode.DIRECTCALLRETURN;
 import gov.nasa.jpf.jvm.bytecode.GETSTATIC;
 import gov.nasa.jpf.jvm.bytecode.PUTSTATIC;
 import gov.nasa.jpf.search.Search;
@@ -15,6 +15,16 @@ import gov.nasa.jpf.search.Search;
 public class Listener_For_Counting_States extends PropertyListenerAdapter {
     private int countT1;
     private int countT2;
+    private int count = 0;
+
+    // Plan of execution
+
+    // Make it work:
+    // By using knowledge of x lets just count increments here
+
+    // Make it right:
+    // Find a way to dynamically get all shared fields
+    // Then store them and use same logic as above
 
     @Override
     public void instructionExecuted(VM vm, ThreadInfo ti, Instruction nextInst,
@@ -31,17 +41,11 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
 
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
-        Instruction inst = cg.getInsn();
-        if (inst instanceof PUTSTATIC) {
-            PUTSTATIC put = (PUTSTATIC) inst;
-            String fieldName = put.getFieldName();
-            ThreadInfo thread = vm.getCurrentThread();
-            String tname = thread.getName();
-            if (fieldName.equals("x")) {
-                countT1++;
-            } else if (fieldName.equals("answer") && tname.equals("t2")) {
-                countT2++;
-            }
+        ThreadInfo thread = vm.getCurrentThread();
+        if (thread.getName().equals("t1")) {
+            countT1++;
+        } else if (thread.getName().equals("t2")) {
+            countT2++;
         }
     }
 
