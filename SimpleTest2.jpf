@@ -1,17 +1,16 @@
 target = SimpleTest2
 classpath = .
 native_classpath = .
-listener = Listeners.Listener_For_Counting_States
+listener = Listeners.Listener_Force
 
 # JPF search settings
-#search.class = gov.nasa.jpf.search.DFSearch
-#search.multiple_errors = false
-#vm.shared.class = SimpleTest2
-#vm.direct_call = false
+search.class = gov.nasa.jpf.search.DFSearch
+search.multiple_errors = false
+vm.shared.class = SimpleTest2
 
-search.class = gov.nasa.jpf.search.RandomSearch
-search.RandomSearch.path_limit = 0
-cg.randomize_choices = NONE
+#search.class = gov.nasa.jpf.search.RandomSearch
+#search.RandomSearch.path_limit = 0
+#cg.randomize_choices = NONE
 
 # Reporting settings
 jpf.report.console.property_violation = error

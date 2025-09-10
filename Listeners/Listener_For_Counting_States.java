@@ -42,6 +42,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         ThreadInfo thread = vm.getCurrentThread();
+        cg.select(count);
         if (thread.getName().equals("t1")) {
             countT1++;
         } else if (thread.getName().equals("t2")) {
