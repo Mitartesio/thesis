@@ -8,7 +8,6 @@ import gov.nasa.jpf.vm.ChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
-import gov.nasa.jpf.vm.choice.ThreadChoiceFromSet;
 
 public class Listener_Force extends PropertyListenerAdapter {
     // git push --force origin main style

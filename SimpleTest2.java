@@ -15,7 +15,7 @@ public class SimpleTest2 {
         }, "t1");
 
         Thread t2 = new Thread(() -> {
-            x++;
+            answer = x;
         }, "t2");
 
         // Try and just catch getStatic.x
@@ -25,7 +25,7 @@ public class SimpleTest2 {
 
         t1.join();
         t2.join();
-        // assert (answer != 250) : "Found it answer = " + answer;
+        // assert (answer != 9) : "Found it answer = " + answer;
 
     }
 }
