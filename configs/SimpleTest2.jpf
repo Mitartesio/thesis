@@ -1,17 +1,17 @@
-target = SimpleTest2
+target = SUT.SimpleTest2
 
-classpath = .
-native_classpath = .
+classpath = out
+native_classpath = out
 
 listener = Listeners.Random_Scheduler
-+randomScheduler.className = SimpleTest2
++randomScheduler.className = SUT.SimpleTest2
 +randomScheduler.fieldName = answer
 +randomScheduler.notAllowed = 2
 
 # JPF search settings
 search.class = gov.nasa.jpf.search.DFSearch
 search.multiple_errors = false
-vm.shared.class = SimpleTest2
+vm.shared.class = SUT.SimpleTest2
 
 #search.class = gov.nasa.jpf.search.RandomSearch
 #search.RandomSearch.path_limit = 0

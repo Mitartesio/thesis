@@ -1,3 +1,5 @@
+package SUT;
+
 public class SimpleTest {
 
     static int a = 0;

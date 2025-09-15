@@ -1,4 +1,4 @@
-
+package SUT;
 //This test is supposed to check if jpf is able to execute a loop and find the one instance (here 1/500) case where
 //another threads sets the value answer to x.
 

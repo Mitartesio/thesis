@@ -1,4 +1,4 @@
-target = SimpleTest2
+target = SUT.SimpleTest2
 classpath = .
 native_classpath = .
 # listener = Listeners.Random_Scheduler
