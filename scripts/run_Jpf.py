@@ -10,7 +10,7 @@ if not JPF_HOME:
 JPF_CMD = str(pathlib.Path(JPF_HOME) / "bin" / "jpf")
 JPF_CP = f"{JPF_HOME}/build/jpf.jar:{JPF_HOME}/build/jpf-classes.jar:."
 
-# COmpile step Listener automatisk
+# COmpile Listener automatisk - Change this so it doesnt compile each run
 
 listener_src = pathlib.Path("Listeners/Random_Scheduler.java")
 if listener_src.exists():

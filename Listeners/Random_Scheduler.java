@@ -1,5 +1,6 @@
 package Listeners;
 
+
 import java.util.Random;
 
 import gov.nasa.jpf.PropertyListenerAdapter;
@@ -9,6 +10,9 @@ import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
+
+import utils.FoundViolation;
+
 
 //Random scheduler that will simply take a random choice at each state with a non-deterministic choice
 
@@ -23,6 +27,8 @@ public class Random_Scheduler extends PropertyListenerAdapter {
 
         ThreadInfo ti = vm.getCurrentThread();
         MJIEnv env = ti.getEnv();
+
+
         if (env.getStaticIntField("SimpleTest2", "answer") == valToFInd) {
             found = true;
         }
@@ -57,21 +63,19 @@ public class Random_Scheduler extends PropertyListenerAdapter {
     // terminate
     @Override
     public void stateAdvanced(Search search) {
-        // If value has been found
+        // If value has been found to violate the assertion
         if (found) {
-            System.out.println("1");
+            search.error(new FoundViolation("SimpleTest2","answer", valToFInd));
             search.terminate();
+            return;
         }
-        // If search is at end state we check if the current field of x == value to find
-        // to print 1 or 0 and the terminate
+
+        // If it's an end state we terminate
         if (search.isEndState()) {
-            if (found || search.getVM().getCurrentThread().getEnv().getStaticIntField("SimpleTest2",
-                    "answer") == valToFInd) {
-                System.out.println("JPF_FOUND 1");
-            } else {
-                System.out.println("JPF_FOUND 2");
-            }
             search.terminate();
         }
     }
+
 }
+
+
