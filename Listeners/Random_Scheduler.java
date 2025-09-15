@@ -3,6 +3,8 @@ package Listeners;
 
 import java.util.Random;
 
+
+import gov.nasa.jpf.JPFException;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.ChoiceGenerator;
@@ -13,6 +15,8 @@ import gov.nasa.jpf.vm.VM;
 
 import utils.FoundViolation;
 
+import gov.nasa.jpf.Config;
+
 
 //Random scheduler that will simply take a random choice at each state with a non-deterministic choice
 
@@ -21,15 +25,34 @@ public class Random_Scheduler extends PropertyListenerAdapter {
     private boolean found = false;
     private int valToFInd = 2;
 
+
+
+    private final String className;
+    private final String fieldName;
+    private final int notAllowed;
+
+    public Random_Scheduler(Config config) {
+        className = config.getString("randomScheduler.className");
+        fieldName = config.getString("randomScheduler.fieldName");
+
+        if (!config.hasValue("randomScheduler.notAllowed")) {
+            throw new JPFException("Missing required property: +randomScheduler.notAllowed");
+        }
+        notAllowed = config.getInt("randomScheduler.notAllowed");
+
+        if (className == null || fieldName == null) {
+            throw new JPFException("Missing required properties: +randomScheduler.className and/or +randomScheduler.fieldName");
+        }
+
+    }
+
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         // Check if cg is actully a ThreadChoiceGenerator
 
-        ThreadInfo ti = vm.getCurrentThread();
-        MJIEnv env = ti.getEnv();
+        int value = vm.getCurrentThread().getEnv().getStaticIntField(className, fieldName);
 
-
-        if (env.getStaticIntField("SimpleTest2", "answer") == valToFInd) {
+        if (value == notAllowed) {
             found = true;
         }
 
@@ -65,7 +88,7 @@ public class Random_Scheduler extends PropertyListenerAdapter {
     public void stateAdvanced(Search search) {
         // If value has been found to violate the assertion
         if (found) {
-            search.error(new FoundViolation("SimpleTest2","answer", valToFInd));
+            search.error(new FoundViolation(className,fieldName, notAllowed));
             search.terminate();
             return;
         }

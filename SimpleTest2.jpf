@@ -1,7 +1,12 @@
 target = SimpleTest2
+
 classpath = .
 native_classpath = .
+
 listener = Listeners.Random_Scheduler
++randomScheduler.className = SimpleTest2
++randomScheduler.fieldName = answer
++randomScheduler.notAllowed = 2
 
 # JPF search settings
 search.class = gov.nasa.jpf.search.DFSearch

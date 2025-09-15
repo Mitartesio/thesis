@@ -3,3 +3,4 @@ SimpleTest.class
 .idea/
 *.class
 .vscode/settings.json
+/.vscode/
