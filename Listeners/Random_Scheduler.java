@@ -12,7 +12,7 @@ import gov.nasa.jpf.vm.VM;
 
 //Random scheduler that will simply take a random choice at each state with a non-deterministic choice
 
-public class Random_Scehduler extends PropertyListenerAdapter {
+public class Random_Scheduler extends PropertyListenerAdapter {
     private Random random = new Random();
     private boolean found = false;
     private int valToFInd = 2;
@@ -67,9 +67,9 @@ public class Random_Scehduler extends PropertyListenerAdapter {
         if (search.isEndState()) {
             if (found || search.getVM().getCurrentThread().getEnv().getStaticIntField("SimpleTest2",
                     "answer") == valToFInd) {
-                System.out.println("1");
+                System.out.println("JPF_FOUND 1");
             } else {
-                System.out.println("0");
+                System.out.println("JPF_FOUND 2");
             }
             search.terminate();
         }
