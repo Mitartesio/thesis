@@ -3,6 +3,7 @@ package Listeners;
 import java.util.HashMap;
 import java.util.Map;
 
+import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.jvm.bytecode.DIRECTCALLRETURN;
 import gov.nasa.jpf.search.Search;
@@ -14,6 +15,10 @@ import gov.nasa.jpf.vm.VM;
 public class Listener_For_Counting_States2 extends PropertyListenerAdapter {
     private Map<String, Integer> threads = new HashMap<>();
     private String nextThread;
+
+    // public Listener_For_Counting_States2(Config config){
+
+    // }
 
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {

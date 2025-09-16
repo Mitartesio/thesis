@@ -1,13 +1,7 @@
 target = SUT.SimpleTest2
 classpath = .
 native_classpath = .
-listener = Listeners.Listener_For_Uniform_Search, Listeners.ValueReporter
-+uniformSearch.Thread_names = t1 t2
-+uniformSearch.Thread_operations = 21 3
-
-+valueReporter.className = SUT.SimpleTest2
-+valueReporter.fieldName = answer
-+valueReporter.label = JPF_ANSWER
+listener = Listeners.Listener_For_Counting_States2
 
 # JPF search settings
 search.class = gov.nasa.jpf.search.DFSearch
