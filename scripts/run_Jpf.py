@@ -60,7 +60,7 @@ def maybe_compile():
     if not class_files or src_mtime > cls_mtime:
         print(f"[info] compiling Java sources → {OUT_DIR} "
               f"(sources newer: {datetime.fromtimestamp(src_mtime) if src_mtime else 'n/a'})")
-        cmd = ["javac", "-cp", JPF_CP, "-d", str(OUT_DIR)] + [str(p) for p in sources]
+        cmd = ["javac", "--release", "11", "-cp", JPF_CP, "-d", str(OUT_DIR)] + [str(p) for p in sources]
         subprocess.run(cmd, check=True, cwd=ROOT)
     else:
         print("[info] classes up‑to‑date; skipping compile")
