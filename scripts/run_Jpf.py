@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import csv
 import os, pathlib, sys, subprocess
 from datetime import datetime
 
@@ -80,6 +80,11 @@ def resolve_config(arg: str | None) -> pathlib.Path:
 
 
 def main():
+
+    runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+
+    answers = []
+
     # 1) Maybe compile (only when sources changed)
     maybe_compile()
 
@@ -94,19 +99,43 @@ def main():
     print("Running JPF from:", JPF_CMD)
     cmd = [JPF_CMD, str(config)]
     print("[info] running:", " ".join(cmd))
-    proc = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        cwd=ROOT  # ensure relative paths in .jpf (like +classpath=out) resolve
-    )
-    for line in proc.stdout:
-        sys.stdout.write(line)
-    rc = proc.wait()
+
+    rc = 0
+    for i in range(runs):
+        val = None  # reset per run
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            cwd=ROOT  # ensure relative paths in .jpf (like +classpath=out) resolve
+        )
+        for line in proc.stdout:
+            sys.stdout.write(line)  # keep printing live
+            if line.startswith("JPF_ANSWER "):
+                parts = line.strip().split()
+                if len(parts) >= 2:
+                    try:
+                        val = int(parts[1])
+                    except ValueError:
+                        pass
+        rc = proc.wait()
+        answers.append(val)
+
+    out_file = ROOT / "reports" / "answers.csv"
+    out_file.parent.mkdir(exist_ok=True)
+
+    with out_file.open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["run", "answer"])
+        for i, v in enumerate(answers, start=1):
+            writer.writerow([i, v])
+
+    print(f"[ok] wrote answers to {out_file}")
+
+
     print(f"[info] jpf exited with code {rc}")
     sys.exit(rc)
-
 
 if __name__ == "__main__":
     main()

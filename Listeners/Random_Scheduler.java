@@ -23,9 +23,9 @@ import gov.nasa.jpf.Config;
 public class Random_Scheduler extends PropertyListenerAdapter {
     private Random random = new Random();
     private boolean found = false;
-    private int valToFInd = 2;
 
 
+    private final boolean violationMode;
 
     private final String className;
     private final String fieldName;
@@ -34,6 +34,7 @@ public class Random_Scheduler extends PropertyListenerAdapter {
     public Random_Scheduler(Config config) {
         className = config.getString("randomScheduler.className");
         fieldName = config.getString("randomScheduler.fieldName");
+        this.violationMode = config.getBoolean("randomScheduler.violationMode", true);
 
         if (!config.hasValue("randomScheduler.notAllowed")) {
             throw new JPFException("Missing required property: +randomScheduler.notAllowed");
@@ -86,9 +87,9 @@ public class Random_Scheduler extends PropertyListenerAdapter {
     // terminate
     @Override
     public void stateAdvanced(Search search) {
-        // If value has been found to violate the assertion
-        if (found) {
-            search.error(new FoundViolation(className,fieldName, notAllowed));
+
+        if (found && violationMode) {
+            search.error(new FoundViolation(className, fieldName, notAllowed));
             search.terminate();
             return;
         }

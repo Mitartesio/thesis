@@ -4,3 +4,5 @@ out/SimpleTest.class
 *.class
 .vscode/settings.json
 /.vscode/
+/plots/
+/reports/
