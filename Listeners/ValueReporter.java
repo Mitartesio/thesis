@@ -13,7 +13,7 @@ public class ValueReporter extends PropertyListenerAdapter {
     public ValueReporter(Config config) {
         className = config.getString("valueReporter.className");
         fieldName = config.getString("valueReporter.fieldName");
-        label     = config.getString("valueReporter.label", "JPF_ANSWER");
+        label = config.getString("valueReporter.label", "JPF_ANSWER");
 
         if (className == null || fieldName == null) {
             throw new gov.nasa.jpf.JPFException(
@@ -45,7 +45,5 @@ public class ValueReporter extends PropertyListenerAdapter {
             printValue(search);
         }
     }
-
-
 
 }
