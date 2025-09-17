@@ -1,7 +1,9 @@
 target = SUT.SimpleTest2
-classpath = .
-native_classpath = .
-listener = Listeners.Listener_For_Uniform_Search, Listeners.ValueReporter
+classpath = out
+native_classpath = out
+
+
+listener = Listeners.Listener_For_Uniform_Search,Listeners.ValueReporter
 +uniformSearch.Thread_names = t1 t2
 +uniformSearch.Thread_operations = 21 3
 

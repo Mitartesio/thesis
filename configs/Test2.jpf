@@ -1,6 +1,7 @@
 target = SUT.SimpleTest2
-classpath = .
-native_classpath = .
+
+classpath = out
+native_classpath = out
 listener = Listeners.Listener_For_Counting_States2
 
 # JPF search settings

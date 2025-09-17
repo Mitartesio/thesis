@@ -3,7 +3,7 @@ target = SUT.SimpleTest2
 classpath = out
 native_classpath = out
 
-listener = Listeners.Random_Scheduler
+listener = Listeners.Random_Scheduler, Listeners.ValueReporter
 +randomScheduler.className = SUT.SimpleTest2
 +randomScheduler.fieldName = answer
 +randomScheduler.notAllowed = 2

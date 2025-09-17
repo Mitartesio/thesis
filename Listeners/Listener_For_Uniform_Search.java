@@ -1,14 +1,18 @@
 package Listeners;
 
-import java.lang.management.ThreadInfo;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.ChoiceGenerator;
+import gov.nasa.jpf.vm.ClassInfo;
+import gov.nasa.jpf.vm.ClassLoaderInfo;
+import gov.nasa.jpf.vm.ElementInfo;
+import gov.nasa.jpf.vm.Heap;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
+import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
 import gov.nasa.jpf.Config;
 
@@ -18,7 +22,7 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     private Random random;
 
     public Listener_For_Uniform_Search(Config config) {
-        threads = new HashMap<>();
+        threads = new LinkedHashMap<>();
         String[] threadNames = config.getString("uniformSearch.Thread_names").split(" ");
         String[] threadOps = config.getString("uniformSearch.Thread_operations").split(" ");
         random = new Random();
@@ -45,23 +49,34 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
             int cumulative = 0;
             String nextThread = "";
             for (String name : threads.keySet()) {
+                // System.out.println("This is sum: " + sum + " this is threads value " +
+                // threads.get(name)
+                // + " this is cumulative " + cumulative);
                 cumulative += threads.get(name);
                 if (cumulative >= choice) {
                     nextThread = name;
-                    threads.put(name, threads.get(name) - 1);
-                    sum--;
+                    // System.out.println("I chose thread" + nextThread + " with the choice of" +
+                    // choice);
+                    if (threads.get(name) > 1) {
+                        threads.put(name, threads.get(name) - 1);
+                        sum--;
+                    }
                     break;
+
                 }
             }
 
             ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
 
-            Object[] chosenThreads = cg.getAll();
+            Object[] chosenThreads = tcg.getAllChoices();
 
             for (int i = 0; i < chosenThreads.length; i++) {
-                ThreadInfo myThread = (ThreadInfo) chosenThreads[i];
-                if (myThread.getThreadName().equals(nextThread)) {
-                    tcg.select(i);
+                if (chosenThreads[i] instanceof ThreadInfo) {
+                    ThreadInfo ti = (ThreadInfo) chosenThreads[i];
+                    if (ti.getName().equals(nextThread)) {
+                        // System.out.println("Found the thread");
+                        tcg.select(i);
+                    }
                 }
             }
         }
@@ -70,6 +85,15 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     @Override
     public void stateAdvanced(Search search) {
         if (search.isEndState()) {
+            // For debugging
+            // VM vm = search.getVM();
+            // Heap heap = vm.getHeap();
+            // for (ElementInfo ei : heap) {
+            // if (ei.getClassInfo().getName().equals("SUT.SimpleTest2")) {
+            // int value = ei.getIntField("answer");
+            // System.out.println("Answer = " + value);
+            // }
+            // }
             search.terminate();
         }
     }
