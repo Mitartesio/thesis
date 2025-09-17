@@ -16,10 +16,6 @@ public class Listener_For_Counting_States2 extends PropertyListenerAdapter {
     private Map<String, Integer> threads = new HashMap<>();
     private String nextThread;
 
-    // public Listener_For_Counting_States2(Config config){
-
-    // }
-
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         if (cg instanceof ThreadChoiceGenerator) {
@@ -40,12 +36,23 @@ public class Listener_For_Counting_States2 extends PropertyListenerAdapter {
 
             int totalChoices = tcg.getTotalNumberOfChoices();
 
+            boolean foundThread = false;
+
             for (int i = 0; i < totalChoices; i++) {
                 ThreadInfo thread = tcg.getChoice(i);
                 if (thread.getName().equals(nextThread) && !(cg.getInsn() instanceof DIRECTCALLRETURN)) {
+                    foundThread = true;
                     System.out.println("The thread: " + thread.getName() + " has tis operation " + cg.getInsn());
                     threads.put(thread.getName(), threads.get(thread.getName()) + 1);
                     tcg.select(i);
+                }
+            }
+
+            if (!foundThread) {
+                ThreadInfo thread = tcg.getChoice(0);
+                if (threads.containsKey(thread.getName())) {
+                    tcg.select(0);
+                    threads.put(thread.getName(), threads.get(thread.getName()) + 1);
                 }
             }
         }

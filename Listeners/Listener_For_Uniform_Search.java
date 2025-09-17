@@ -41,10 +41,25 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         if (cg instanceof ThreadChoiceGenerator) {
+
+            ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
+
+            Object[] chosenThreads = tcg.getAllChoices();
+
+            int actualSum = 0;
+            Map<String, Integer> myMap = new LinkedHashMap<>();
+
+            for (int i = 0; i < chosenThreads.length; i++) {
+                ThreadInfo ti = (ThreadInfo) chosenThreads[i];
+                if (threads.containsKey(ti.getName())) {
+                    myMap.put(ti.getName(), threads.get(ti.getName()));
+                }
+            }
+
             int choice = random.nextInt(sum) + 1;
             int cumulative = 0;
             String nextThread = "";
-            for (String name : threads.keySet()) {
+            for (String name : myMap.keySet()) {
                 cumulative += threads.get(name);
                 if (cumulative >= choice) {
                     nextThread = name;
@@ -52,19 +67,20 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                         threads.put(name, threads.get(name) - 1);
                         sum--;
                     }
+                    // System.out.println(nextThread);
                     break;
 
                 }
             }
 
-            ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
-
-            Object[] chosenThreads = tcg.getAllChoices();
+            // System.out.println("The instruction taken is: " + cg.getInsn() + " by: " +
+            // vm.getCurrentThread());
 
             for (int i = 0; i < chosenThreads.length; i++) {
                 if (chosenThreads[i] instanceof ThreadInfo) {
                     ThreadInfo ti = (ThreadInfo) chosenThreads[i];
                     if (ti.getName().equals(nextThread)) {
+                        // System.out.println(ti);
                         tcg.select(i);
                     }
                 }
