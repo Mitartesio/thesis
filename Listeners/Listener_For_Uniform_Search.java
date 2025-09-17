@@ -7,10 +7,6 @@ import java.util.Random;
 import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.ChoiceGenerator;
-import gov.nasa.jpf.vm.ClassInfo;
-import gov.nasa.jpf.vm.ClassLoaderInfo;
-import gov.nasa.jpf.vm.ElementInfo;
-import gov.nasa.jpf.vm.Heap;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
@@ -49,14 +45,9 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
             int cumulative = 0;
             String nextThread = "";
             for (String name : threads.keySet()) {
-                // System.out.println("This is sum: " + sum + " this is threads value " +
-                // threads.get(name)
-                // + " this is cumulative " + cumulative);
                 cumulative += threads.get(name);
                 if (cumulative >= choice) {
                     nextThread = name;
-                    // System.out.println("I chose thread" + nextThread + " with the choice of" +
-                    // choice);
                     if (threads.get(name) > 1) {
                         threads.put(name, threads.get(name) - 1);
                         sum--;
@@ -74,7 +65,6 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                 if (chosenThreads[i] instanceof ThreadInfo) {
                     ThreadInfo ti = (ThreadInfo) chosenThreads[i];
                     if (ti.getName().equals(nextThread)) {
-                        // System.out.println("Found the thread");
                         tcg.select(i);
                     }
                 }
@@ -85,15 +75,6 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     @Override
     public void stateAdvanced(Search search) {
         if (search.isEndState()) {
-            // For debugging
-            // VM vm = search.getVM();
-            // Heap heap = vm.getHeap();
-            // for (ElementInfo ei : heap) {
-            // if (ei.getClassInfo().getName().equals("SUT.SimpleTest2")) {
-            // int value = ei.getIntField("answer");
-            // System.out.println("Answer = " + value);
-            // }
-            // }
             search.terminate();
         }
     }
