@@ -1,0 +1,30 @@
+target = SUT.MinimizationTest
+
+classpath = out
+native_classpath = out
+
+listener = Listeners.Random_Scheduler,Listeners.ValueReporter
+
++randomScheduler.className = SUT.MinimizationTest
++randomScheduler.fieldName = answer
++randomScheduler.notAllowed = 2
++randomScheduler.violationMode = false
+
++valueReporter.className = SUT.MinimizationTest
++valueReporter.fieldName = answer
++valueReporter.label = JPF_ANSWER
+
+# JPF search settings
+search.class = gov.nasa.jpf.search.DFSearch
+search.multiple_errors = false
+vm.shared.class = SUT.MinimizationTest
+
+#search.class = gov.nasa.jpf.search.RandomSearch
+#search.RandomSearch.path_limit = 0
+#cg.randomize_choices = NONE
+
+# Reporting settings
+jpf.report.console.property_violation = error
+report.console.finished = result,statistics,error
+report.unique_errors = true
+cg.randomize_choices = NONE
