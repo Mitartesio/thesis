@@ -1,0 +1,15 @@
+target = SUT.MinimizationTest
+
+classpath = out
+native_classpath = out
+
+# JPF search settings
+search.class = gov.nasa.jpf.search.DFSearch
+search.multiple_errors = false
+vm.shared.class = SUT.MinimizationTest
+
+# Reporting settings
+jpf.report.console.property_violation = error
+report.console.finished = result,statistics,error
+report.unique_errors = true
+cg.randomize_choices = NONE
