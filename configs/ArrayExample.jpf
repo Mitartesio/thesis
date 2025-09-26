@@ -1,0 +1,16 @@
+target = SUT.ArrayExample
+classpath = out
+native_classpath = out
+
+listener = Listeners.Listener_For_Uniform_Search
++uniformSearch.Thread_names = t1 t2
++uniformSearch.Thread_operations = 5 5
+
+# JPF search settings
+search.class = gov.nasa.jpf.search.DFSearch
+search.multiple_errors = false
+
+# Reporting settings
+jpf.report.console.property_violation = error
+report.console.finished = result,statistics,error
+report.unique_errors = true
