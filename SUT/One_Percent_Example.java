@@ -27,7 +27,7 @@ public class One_Percent_Example {
         t1.join();
         t2.join();
 
-        assert (!(answer < 2) || !(answer > 995) || !(answer == 500 || answer == 699))
+        assert (answer > 2 && answer != 500 && answer != 699 && answer < 995)
                 : "Found one wrone asnwer with x: " + x;
     }
 
