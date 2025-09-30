@@ -103,6 +103,7 @@ def main():
     rc = 0
     for i in range(runs):
         val = None  # reset per run
+        violated = False
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -119,17 +120,19 @@ def main():
                         val = int(parts[1])
                     except ValueError:
                         pass
+            if line.startswith("JPF_VIOLATION"):  # <-- add this
+                violated = True
         rc = proc.wait()
-        answers.append(val)
+        answers.append((val, int(violated)))
 
     out_file = ROOT / "reports" / "answers.csv"
     out_file.parent.mkdir(exist_ok=True)
 
     with out_file.open("w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["run", "answer"])
-        for i, v in enumerate(answers, start=1):
-            writer.writerow([i, v])
+        writer.writerow(["run", "answer", "violated"])  # <-- header
+        for i, (v, viol) in enumerate(answers, start=1):
+            writer.writerow([i, v, viol])
 
     print(f"[ok] wrote answers to {out_file}")
 

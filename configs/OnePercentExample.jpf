@@ -2,9 +2,14 @@ target = SUT.One_Percent_Example
 classpath = out
 native_classpath = out
 
-listener = Listeners.Listener_For_Uniform_Search
+vm.args = -ea
+listener = Listeners.Listener_For_Uniform_Search,Listeners.ViolationCounter,Listeners.ValueReporter
 +uniformSearch.Thread_names = t1 t2
 +uniformSearch.Thread_operations = 2001 3
+
++valueReporter.className = SUT.One_Percent_Example   # your SUT class
++valueReporter.fieldName  = answer                   # static int field
++valueReporter.label      = JPF_ANSWER
 
 # JPF search settings
 search.class = gov.nasa.jpf.search.DFSearch

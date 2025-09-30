@@ -73,9 +73,7 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                     return;
                 }
             }
-        }
-
-        else if (allThreadsStarted) {
+        } else if (allThreadsStarted) {
             if (cg instanceof ThreadChoiceGenerator) {
 
                 ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
@@ -86,7 +84,7 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                     for (int i = 0; i < chosenThreads.length; i++) {
                         // System.out.println("Chose t1");
                         ThreadInfo ti = (ThreadInfo) chosenThreads[i];
-                        System.out.println(ti.getName());
+//                        System.out.println(ti.getName());
                         if (ti.getName().equals("t1")) {
                             threads.put("t1", threads.get("t1") - 1);
                             first = true;
@@ -124,8 +122,8 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                         // threads.get(ti.getName()));
                         // System.out.println("The thread now has this many operations left: " +
                         // threads.get(ti.getName()));
-                        System.out.println("I chose the thread: " + ti.getName() + "With this op: " +
-                                ti.getPC());
+                        /*System.out.println("I chose the thread: " + ti.getName() + "With this op: " +
+                                ti.getPC());*/
                         tcg.select(i);
                         return;
                     }
@@ -173,7 +171,7 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                         if (chosenThreads[i] instanceof ThreadInfo) {
                             ThreadInfo ti = (ThreadInfo) chosenThreads[i];
                             if (ti.getName().equals(nextThread)) {
-                                System.out.println("picked: " + ti.getName());
+//                                System.out.println("picked: " + ti.getName());
                                 tcg.select(i);
                             }
                         }
