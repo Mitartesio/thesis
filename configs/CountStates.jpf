@@ -1,4 +1,4 @@
-target = SUT.SimpleTest2
+target = SUT.MinimizationTest
 classpath = out
 native_classpath = out
 listener = Listeners.Listener_For_Counting_States2

@@ -29,7 +29,7 @@ public class MinimizationTest {
             } finally {
                 lock.unlock();
             }
-        }, "Tb");
+        }, "t2");
 
         Thread Ta = new Thread(() -> {
             lock.lock();
@@ -39,7 +39,7 @@ public class MinimizationTest {
             w.signal();
             lock.unlock();
             assert (z < 5) : "I found the error where !(z < 5)";
-        }, "Ta");
+        }, "t1");
 
         Ta.start();
         Tb.start();
