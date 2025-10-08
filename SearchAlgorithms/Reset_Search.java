@@ -23,21 +23,22 @@ public class Reset_Search extends Search {
 
         while (!done) {
 
-            System.out.println("I am running!!!");
+            // System.out.println("I am running!!!");
 
             if (initState == null) {
+                // System.out.println("Found state");
                 initState = vm.getRestorableState();
             }
 
-            System.out.println("The depth is: " + trials);
+            // System.out.println("The depth is: " + trials);
 
             if (isEndState() || !forward()) {
                 if (trials <= 0) {
                     done = true;
-                    System.out.println("I am done for good!");
+                    // System.out.println("I am done for good!");
                     break;
                 } else {
-                    System.out.println("I am done once");
+                    // System.out.println("Restart state");
                     trials--;
                     vm.restoreState(initState);
                 }

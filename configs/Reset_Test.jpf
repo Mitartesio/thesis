@@ -1,11 +1,11 @@
-target = SUT.SimpleTest2
+target = SUT.SmallTest
 classpath = out
 native_classpath = out
 
 vm.args = -ea
 listener = Listeners.Listener_For_Uniform_Search
 +uniformSearch.Thread_names = t1 t2
-+uniformSearch.Thread_operations = 10 9
++uniformSearch.Thread_operations = 4 4
 
 # JPF search settings
 search.class = SearchAlgorithms.Reset_Search

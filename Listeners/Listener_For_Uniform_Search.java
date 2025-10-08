@@ -1,8 +1,6 @@
 package Listeners;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -16,15 +14,27 @@ import gov.nasa.jpf.Config;
 
 public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     private Map<String, Integer> threads;
-    private int sum;
+
     private Random random;
-    private boolean allThreadsStarted = false;
+    private boolean allThreadsStarted;
+    private Config config;
+    private boolean first;
+    private boolean second;
 
     public Listener_For_Uniform_Search(Config config) {
+        this.config = config;
+        init(config);
+    }
+
+    private void init(Config config) {
+        random = new Random();
         threads = new LinkedHashMap<>();
+        first = false;
+        second = false;
+        allThreadsStarted = false;
+
         String[] threadNames = config.getString("uniformSearch.Thread_names").split(" ");
         String[] threadOps = config.getString("uniformSearch.Thread_operations").split(" ");
-        random = new Random();
 
         if (threadNames.length != threadOps.length) {
             throw new IllegalArgumentException(
@@ -34,15 +44,11 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
         try {
             for (int i = 0; i < threadNames.length; i++) {
                 threads.put(threadNames[i], Integer.parseInt(threadOps[i]));
-                sum += Integer.parseInt(threadOps[i]);
             }
         } catch (NumberFormatException e) {
             throw new NumberFormatException("The number of threads operations is not put in correctly");
         }
     }
-
-    boolean first = false;
-    boolean second = false;
 
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
@@ -158,7 +164,6 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                             nextThread = name;
                             if (threads.get(name) > 1) {
                                 threads.put(name, threads.get(name) - 1);
-                                sum--;
                             }
                             // System.out.println(nextThread);
                             break;
@@ -186,8 +191,8 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     @Override
     public void stateAdvanced(Search search) {
         if (search.isEndState()) {
-            // search.terminate();
-            System.out.println("I am end state");
+            init(config);
+            System.out.println("Just inited a new session, this is now the hashmap for t1: " + threads.get("t1"));
         }
     }
 
