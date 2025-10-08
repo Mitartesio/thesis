@@ -120,7 +120,7 @@ def main():
                         val = int(parts[1])
                     except ValueError:
                         pass
-            if line.startswith("JPF_VIOLATION"):  # <-- add this
+            if line.startswith("error"):  # <-- add this
                 violated = True
         rc = proc.wait()
         answers.append((val, int(violated)))
@@ -135,6 +135,18 @@ def main():
             writer.writerow([i, v, viol])
 
     print(f"[ok] wrote answers to {out_file}")
+
+    csv_path = pathlib.Path(ROOT) / "reports" / "answers.csv"  # adjust if needed
+    total = 0
+    n = 0
+    with csv_path.open() as f:
+        r = csv.DictReader(f)
+        for row in r:
+            n += 1
+            # handles empty cells: '', None → 0
+            total += int(row.get("violated") or 0)
+
+    print(f"violations: {total}/{n} ({(total / n * 100 if n else 0):.3f}%)")
 
 
     print(f"[info] jpf exited with code {rc}")
