@@ -1,8 +1,6 @@
 package Listeners;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -16,15 +14,27 @@ import gov.nasa.jpf.Config;
 
 public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     private Map<String, Integer> threads;
-    private int sum;
+
     private Random random;
-    private boolean allThreadsStarted = false;
+    private boolean allThreadsStarted;
+    private Config config;
+    private boolean first;
+    private boolean second;
 
     public Listener_For_Uniform_Search(Config config) {
+        this.config = config;
+        init(config);
+    }
+
+    private void init(Config config) {
+        random = new Random();
         threads = new LinkedHashMap<>();
+        first = false;
+        second = false;
+        allThreadsStarted = false;
+
         String[] threadNames = config.getString("uniformSearch.Thread_names").split(" ");
         String[] threadOps = config.getString("uniformSearch.Thread_operations").split(" ");
-        random = new Random();
 
         if (threadNames.length != threadOps.length) {
             throw new IllegalArgumentException(
@@ -34,15 +44,11 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
         try {
             for (int i = 0; i < threadNames.length; i++) {
                 threads.put(threadNames[i], Integer.parseInt(threadOps[i]));
-                sum += Integer.parseInt(threadOps[i]);
             }
         } catch (NumberFormatException e) {
             throw new NumberFormatException("The number of threads operations is not put in correctly");
         }
     }
-
-    boolean first = false;
-    boolean second = false;
 
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
@@ -84,7 +90,7 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                     for (int i = 0; i < chosenThreads.length; i++) {
                         // System.out.println("Chose t1");
                         ThreadInfo ti = (ThreadInfo) chosenThreads[i];
-//                        System.out.println(ti.getName());
+                        // System.out.println(ti.getName());
                         if (ti.getName().equals("t1")) {
                             threads.put("t1", threads.get("t1") - 1);
                             first = true;
@@ -122,8 +128,10 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                         // threads.get(ti.getName()));
                         // System.out.println("The thread now has this many operations left: " +
                         // threads.get(ti.getName()));
-                        /*System.out.println("I chose the thread: " + ti.getName() + "With this op: " +
-                                ti.getPC());*/
+                        /*
+                         * System.out.println("I chose the thread: " + ti.getName() + "With this op: " +
+                         * ti.getPC());
+                         */
                         tcg.select(i);
                         return;
                     }
@@ -156,7 +164,6 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                             nextThread = name;
                             if (threads.get(name) > 1) {
                                 threads.put(name, threads.get(name) - 1);
-                                sum--;
                             }
                             // System.out.println(nextThread);
                             break;
@@ -171,7 +178,7 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
                         if (chosenThreads[i] instanceof ThreadInfo) {
                             ThreadInfo ti = (ThreadInfo) chosenThreads[i];
                             if (ti.getName().equals(nextThread)) {
-//                                System.out.println("picked: " + ti.getName());
+                                // System.out.println("picked: " + ti.getName());
                                 tcg.select(i);
                             }
                         }
@@ -184,7 +191,8 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
     @Override
     public void stateAdvanced(Search search) {
         if (search.isEndState()) {
-            search.terminate();
+            init(config);
+            System.out.println("Just inited a new session, this is now the hashmap for t1: " + threads.get("t1"));
         }
     }
 
