@@ -66,8 +66,6 @@ def maybe_compile():
         print("[info] classes up‑to‑date; skipping compile")
 
 
-
-
 def resolve_config(arg: str | None) -> pathlib.Path:
     if arg:
         p = pathlib.Path(arg)
@@ -77,13 +75,44 @@ def resolve_config(arg: str | None) -> pathlib.Path:
     # Default config
     return CONFIGS_DIR / "SimpleTest2.jpf"
 
+def count_violations(csv_name: str):
+    csv_path = pathlib.Path(ROOT) / "reports" / "{csv_name}.csv"  
+    total = 0
+    n = 0
+    with csv_path.open() as f:
+        r = csv.DictReader(f)
+        for row in r:
+            n += 1
+            # handles empty cells: '', None → 0
+            total += int(row.get("violated") or 0)
+
+    print(f"violations: {total}/{n} ({(total / n * 100 if n else 0):.3f}%)")
 
 
-def main():
+def populate_csv(csv_name: str, answers):
+    out_file = ROOT / "reports" / "{csv_name}.csv"
+    out_file.parent.mkdir(exist_ok=True)
+
+    with out_file.open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["run", "answer", "violated"])  # <-- header
+        for i, (v, viol) in enumerate(answers, start=1):
+            writer.writerow([i, v, viol])
+
+    print(f"[ok] wrote answers to {out_file}")
+
+
+algo_to_jpf = {
+    "SimpleTest2Rand": "configs/SimpleTest.jpf",  # resolve_config()?
+    "SimpleTest2Uni": "configs/SimpleTest2.jpf",
+    "MiniRand": "configs/MinimizationTest.jpf",
+    "MiniUni": "configs/MinUniformTest.jpf"
+}
+
+
+def run_jpf(testname: str):  # config_path: str | None = None, runs: int = 1 as example parameters
 
     runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-
-    answers = []
 
     # 1) Maybe compile (only when sources changed)
     maybe_compile()
@@ -93,7 +122,6 @@ def main():
     config = resolve_config(sys.argv[1] if len(sys.argv) > 1 else None)
     if not config.exists():
         sys.exit(f"[error] JPF config file not found: {config}")
-
 
     # 3) Run JPF
     print("Running JPF from:", JPF_CMD)
@@ -153,5 +181,8 @@ def main():
     print(f"[info] jpf exited with code {rc}")
     sys.exit(rc)
 
+
 if __name__ == "__main__":
-    main()
+    #run_jpf(algo_to_jpf["SimpleTestRand"])
+    run_jpf("MiniUni")
+    count_violations()
