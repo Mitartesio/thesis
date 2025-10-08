@@ -6,12 +6,12 @@ native_classpath = out
 listener = Listeners.Random_Scheduler,Listeners.ValueReporter
 
 +randomScheduler.className = SUT.MinimizationTest
-+randomScheduler.fieldName = answer
-+randomScheduler.notAllowed = 2
-+randomScheduler.violationMode = false
++randomScheduler.fieldName = z
++randomScheduler.notAllowed = 5
++randomScheduler.violationMode = true
 
 +valueReporter.className = SUT.MinimizationTest
-+valueReporter.fieldName = answer
++valueReporter.fieldName = z
 +valueReporter.label = JPF_ANSWER
 
 # JPF search settings
