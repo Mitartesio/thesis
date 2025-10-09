@@ -88,7 +88,7 @@ def main():
     # 1) Maybe compile (only when sources changed)
     maybe_compile()
 
-
+    count = 0
     # 2) Resolve config path
     config = resolve_config(sys.argv[1] if len(sys.argv) > 1 else None)
     if not config.exists():
@@ -99,7 +99,6 @@ def main():
     print("Running JPF from:", JPF_CMD)
     cmd = [JPF_CMD, str(config)]
     print("[info] running:", " ".join(cmd))
-
     rc = 0
     for i in range(runs):
         val = None  # reset per run
@@ -124,8 +123,10 @@ def main():
                 violated = True
         rc = proc.wait()
         answers.append((val, int(violated)))
+        count += 1
+        print(f"THIS IS RUN NUMBER: {count}")
 
-    out_file = ROOT / "reports" / "answers.csv"
+    out_file = ROOT / "reports" / "simple_uniform.csv"
     out_file.parent.mkdir(exist_ok=True)
 
     with out_file.open("w", newline="") as f:
