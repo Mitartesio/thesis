@@ -190,9 +190,13 @@ public class Listener_For_Uniform_Search extends PropertyListenerAdapter {
 
     @Override
     public void stateAdvanced(Search search) {
-        if (search.isEndState()) {
-            init(config);
-            System.out.println("Just inited a new session, this is now the hashmap for t1: " + threads.get("t1"));
+        // if (search.isEndState()) {
+        //     init(config);
+        //     System.out.println("Just inited a new session, this is now the hashmap for t1: " + threads.get("t1"));
+        // }
+
+        if(search.isEndState()){
+            search.terminate();
         }
     }
 
