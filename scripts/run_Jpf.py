@@ -2,6 +2,7 @@
 import csv
 import os, pathlib, sys, subprocess
 from datetime import datetime
+from typing import List
 
 
 # Find the right paths:
@@ -89,7 +90,7 @@ def count_violations(csv_name: str):
     print(f"violations: {total}/{n} ({(total / n * 100 if n else 0):.3f}%)")
 
 
-def populate_csv(csv_name: str, answers):
+def populate_csv(csv_name:str, answers: List[int]):
     out_file = ROOT / "reports" / "{csv_name}.csv"
     out_file.parent.mkdir(exist_ok=True)
 
@@ -110,7 +111,7 @@ algo_to_jpf = {
 }
 
 
-def run_jpf(testname: str):  # config_path: str | None = None, runs: int = 1 as example parameters
+def run_jpf(alogodictionary: dict[str, str] | None = None, runs: int = 1):  # config_path: str | None = None, runs: int = 1 as example parameters
 
     runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 
@@ -125,7 +126,7 @@ def run_jpf(testname: str):  # config_path: str | None = None, runs: int = 1 as 
 
     # 3) Run JPF
     print("Running JPF from:", JPF_CMD)
-    cmd = [JPF_CMD, str(config)]
+    cmd = [JPF_CMD, str(config_path)]
     print("[info] running:", " ".join(cmd))
     rc = 0
     for i in range(runs):
