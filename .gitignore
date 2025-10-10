@@ -7,3 +7,5 @@ out/SimpleTest.class
 /plots/
 /reports/
 utils/CcpTest.py
+
+*.iml
