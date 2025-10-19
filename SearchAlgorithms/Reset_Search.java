@@ -1,7 +1,10 @@
 package SearchAlgorithms;
 
+import Listeners.Listener_Uniform_Adapts;
 import gov.nasa.jpf.Config;
+import gov.nasa.jpf.PropertyListenerAdapter;
 import gov.nasa.jpf.search.Search;
+import gov.nasa.jpf.search.SearchListener;
 import gov.nasa.jpf.vm.VM;
 import gov.nasa.jpf.vm.RestorableVMState;
 
@@ -33,6 +36,7 @@ public class Reset_Search extends Search {
             // System.out.println("The depth is: " + trials);
 
             if (isEndState() || !forward()) {
+                System.out.println("Found end state!");
                 if (trials <= 0) {
                     done = true;
                     // System.out.println("I am done for good!");
@@ -41,6 +45,12 @@ public class Reset_Search extends Search {
                     // System.out.println("Restart state");
                     trials--;
                     vm.restoreState(initState);
+                    for (SearchListener pt : this.listeners) {
+                        if (pt instanceof Listener_Uniform_Adapts) {
+                            Listener_Uniform_Adapts myListener = (Listener_Uniform_Adapts) pt;
+                            myListener.searchRestart();
+                        }
+                    }
                 }
             }
 
