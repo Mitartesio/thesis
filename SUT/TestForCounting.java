@@ -1,6 +1,6 @@
 package SUT;
 
-public class TestTest {
+public class TestForCounting {
     static int x;
 
     public static void main(String[] args) throws InterruptedException {

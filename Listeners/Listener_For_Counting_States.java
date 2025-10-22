@@ -1,67 +1,88 @@
 package Listeners;
 
-import gov.nasa.jpf.vm.VM;
-import gov.nasa.jpf.vm.ThreadInfo;
-import gov.nasa.jpf.vm.ChoiceGenerator;
-import gov.nasa.jpf.vm.Instruction;
-import gov.nasa.jpf.vm.MJIEnv;
-import gov.nasa.jpf.vm.ThreadChoiceGenerator;
+import java.util.HashMap;
+import java.util.Map;
 
+import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
-import gov.nasa.jpf.jvm.bytecode.GETSTATIC;
-import gov.nasa.jpf.jvm.bytecode.PUTSTATIC;
-import gov.nasa.jpf.search.Search;
+import gov.nasa.jpf.vm.ChoiceGenerator;
+import gov.nasa.jpf.vm.ThreadChoiceGenerator;
+import gov.nasa.jpf.vm.ThreadInfo;
+import gov.nasa.jpf.vm.VM;
 
 public class Listener_For_Counting_States extends PropertyListenerAdapter {
-    private int countT1;
-    private int countT2;
-    private int count = 0;
+    private int numberOfThreads;
+    private Map<String, Integer> threadsAndOperations;
+    private String nextThread;
+    private boolean found;
 
-    // Plan of execution
+    public Listener_For_Counting_States(Config config) {
+        this.numberOfThreads = Integer.parseInt(config.getString("numberOfThreads"));
+        this.threadsAndOperations = new HashMap<>();
+        found = false;
+    }
 
-    // Make it work:
-    // By using knowledge of x lets just count increments here
+    public void init() {
+        System.out.println("Number of threads: " + numberOfThreads);
+        if (numberOfThreads > 0) {
+            nextThread = null;
+            numberOfThreads--;
+        }
+    }
 
-    // Make it right:
-    // Find a way to dynamically get all shared fields
-    // Then store them and use same logic as above
-
-    @Override
-    public void instructionExecuted(VM vm, ThreadInfo ti, Instruction nextInst,
-            Instruction executedInsn) {
-        if (executedInsn instanceof PUTSTATIC) {
-            PUTSTATIC put = (PUTSTATIC) executedInsn;
-            String tname = ti.getName();
-            String fieldName = put.getFieldInfo().getName();
-            if (fieldName.equals("answer") && tname.equals("t2")) {
-                countT2++;
+    public boolean finished() {
+        if (numberOfThreads <= 0) {
+            found = true;
+            for (String string : threadsAndOperations.keySet()) {
+                System.out.println("Thread: " + string + " has this many ops: " + threadsAndOperations.get(string));
             }
         }
+        return numberOfThreads <= 0;
+    }
+
+    public Map<String, Integer> getThreadsAndOperations() {
+        return threadsAndOperations;
     }
 
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
-        ThreadInfo thread = vm.getCurrentThread();
-        cg.select(count);
-        if (thread.getName().equals("t1")) {
-            countT1++;
-        } else if (thread.getName().equals("t2")) {
-            countT2++;
+        if (!found) {
+            System.out.println("Running");
+            if (cg instanceof ThreadChoiceGenerator) {
+                ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
+                Object[] chosenThreads = tcg.getAllChoices();
+
+                int choice = -1;
+
+                // Loop through all available threads and put them into threadsAndOperations.
+                // This way we will keep track of all live threads throughout the program
+                for (int i = 0; i < chosenThreads.length; i++) {
+                    ThreadInfo ti = (ThreadInfo) chosenThreads[i];
+                    // System.out.println(ti.toString());
+
+                    if (!ti.getName().equals("main")) {
+                        threadsAndOperations.putIfAbsent(ti.getName(), 0);
+                    }
+
+                    // Insofar
+                    if (nextThread == null && !ti.getName().equals("main")
+                            && threadsAndOperations.get(ti.getName()) == 0) {
+                        nextThread = ti.getName();
+                    }
+
+                    if (ti.getName().equals(nextThread)) {
+                        // System.out.println(ti.getPC().toString());
+                        choice = i;
+                        threadsAndOperations.put(nextThread, threadsAndOperations.get(nextThread) + 1);
+                    }
+                }
+                // System.out.println("This many ops: " + threadsAndOperations.get(nextThread));
+                // System.out.println("Choice is: " + choice);
+                if (choice >= 0) {
+                    tcg.select(choice);
+                }
+            }
         }
     }
 
-    @Override
-    public void stateAdvanced(Search search) {
-        if (search.isEndState()) {
-            search.terminate();
-        }
-
-    }
-
-    @Override
-    public void searchFinished(Search search) {
-        System.out.println("The search is done!");
-        System.out.println("Number of operations t1: " + countT1);
-        System.out.println("Number of operations t2: " + countT2);
-    }
 }
