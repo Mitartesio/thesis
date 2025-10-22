@@ -10,18 +10,34 @@ import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
 
+/*
+ * The {@code Listener_For_Counting_States} is supposed to be combined with Search_With_Reset and Listener_Uniform_Adapts in order
+ * to get the URW-search through the state space of a concurrent program. This class is responsible for count the number of
+ * operations per thread. It will store these in a hashMap and be terminated by calling finished and by numberOfThreads
+ * being equal to 0
+ */
 public class Listener_For_Counting_States extends PropertyListenerAdapter {
     private int numberOfThreads;
     private Map<String, Integer> threadsAndOperations;
     private String nextThread;
     private boolean found;
 
+    /*
+     * @param Config file that is supposed to hold a field with the number of
+     * threads for the current program.
+     * The constructor will initialize all necessary fields for the search.
+     */
     public Listener_For_Counting_States(Config config) {
         this.numberOfThreads = Integer.parseInt(config.getString("numberOfThreads"));
         this.threadsAndOperations = new HashMap<>();
         found = false;
     }
 
+    /*
+     * This method will be called each time the search resets. All the necessary
+     * fields will be reset as long as
+     * numberOfThreads is greater than 0
+     */
     public void init() {
         System.out.println("Number of threads: " + numberOfThreads);
         if (numberOfThreads > 0) {
@@ -30,6 +46,12 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
         }
     }
 
+    /*
+     * This method is responsible for keeping track of whether the all threads have
+     * been searched through. When numberOfThreads
+     * reaches 0 it will set found to true and hereby stop the search. The method
+     * will return whether the listener is done or not.
+     */
     public boolean finished() {
         if (numberOfThreads <= 0) {
             found = true;
@@ -40,16 +62,30 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
         return numberOfThreads <= 0;
     }
 
+    /*
+     * Method for returning the map containing threads and operations
+     */
     public Map<String, Integer> getThreadsAndOperations() {
         return threadsAndOperations;
     }
 
+    /*
+     * @param VM the virtual machine tied to the current state
+     * 
+     * @param ChoiceGenerator<?> the choiceGenerator tied to the current state
+     * This method is responsible for picking a thread that insofar nextThread ==
+     * null. The method will pick nextThread
+     * whenever this is possible and keep count every time it is picked. The method
+     * will not do anything when found is true
+     */
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
+        // Only search insofar found == false
         if (!found) {
-            System.out.println("Running");
             if (cg instanceof ThreadChoiceGenerator) {
                 ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
+
+                // Threads available at the current state
                 Object[] chosenThreads = tcg.getAllChoices();
 
                 int choice = -1;
@@ -64,20 +100,20 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
                         threadsAndOperations.putIfAbsent(ti.getName(), 0);
                     }
 
-                    // Insofar
+                    // Find the nextThread that is not the main thread and has not been picked
+                    // before
                     if (nextThread == null && !ti.getName().equals("main")
                             && threadsAndOperations.get(ti.getName()) == 0) {
                         nextThread = ti.getName();
                     }
 
+                    // Pick ti if it is equal to nextThread
                     if (ti.getName().equals(nextThread)) {
-                        // System.out.println(ti.getPC().toString());
                         choice = i;
                         threadsAndOperations.put(nextThread, threadsAndOperations.get(nextThread) + 1);
                     }
                 }
-                // System.out.println("This many ops: " + threadsAndOperations.get(nextThread));
-                // System.out.println("Choice is: " + choice);
+                // Insofar the correct thread is found pick it
                 if (choice >= 0) {
                     tcg.select(choice);
                 }
