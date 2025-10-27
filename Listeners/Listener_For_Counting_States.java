@@ -28,7 +28,8 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
      * The constructor will initialize all necessary fields for the search.
      */
     public Listener_For_Counting_States(Config config) {
-        this.numberOfThreads = Integer.parseInt(config.getString("numberOfThreads"));
+        this.numberOfThreads = Integer.parseInt(config.getString("numberOfThreads")) - 1;
+        System.out.println("Number of threads are: " + numberOfThreads);
         this.threadsAndOperations = new HashMap<>();
         found = false;
     }
@@ -40,7 +41,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
      */
     public void init() {
         System.out.println("Number of threads: " + numberOfThreads);
-        if (numberOfThreads > 0) {
+        if (numberOfThreads >= 0) {
             nextThread = null;
             numberOfThreads--;
         }
@@ -82,6 +83,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         // Only search insofar found == false
         if (!found) {
+            System.out.println("Searching for thread: " + nextThread);
             if (cg instanceof ThreadChoiceGenerator) {
                 ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
 

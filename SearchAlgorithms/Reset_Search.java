@@ -44,6 +44,9 @@ public class Reset_Search extends Search {
     public void search() {
 
         while (!done) {
+            if (trials % 100 == 0) {
+                // System.out.println("Trials is: " + trials);
+            }
 
             // Initialize initial state if not initialized yet
             if (initState == null) {
@@ -101,6 +104,7 @@ public class Reset_Search extends Search {
                 notifyStateAdvanced();
 
                 if (hasPropertyTermination()) {
+                    System.out.println("Found BUG!!!");
                     break;
                 } else {
                     notifyStateProcessed();
@@ -108,6 +112,8 @@ public class Reset_Search extends Search {
             }
 
         }
+
+        System.out.println("Found no bug!!!");
 
     }
 

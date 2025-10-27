@@ -19,6 +19,6 @@ public class SmallTest {
         t1.join();
         t2.join();
 
-        System.out.println("Final x = " + x);
+        assert x != 8 : "x is 8";
     }
 }

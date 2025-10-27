@@ -20,4 +20,14 @@ public class Ccp {
         return k - 1;
     }
 
+    public static void main(String[] args) {
+        Ccp myCcp = new Ccp();
+
+        double[] arr = new double[] { 0.999, 0.001 };
+
+        double eps = 0.1;
+
+        System.out.println(myCcp.calcCcp(2, arr, eps));
+    }
+
 }

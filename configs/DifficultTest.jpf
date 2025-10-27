@@ -1,0 +1,20 @@
+target = SUT.DifficultTest
+classpath = out
+native_classpath = out
+
+vm.args = -ea
+
+listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States
+
+# JPF search settings
+search.class = SearchAlgorithms.Reset_Search
+#double[] arr = double[]{0.999,0.001}; and double eps = 0.1, k becomes 2302
++search_With_Reset.k = 5000
++numberOfThreads = 4
+search.multiple_errors = false
+
+
+# Reporting settings
+jpf.report.console.property_violation = error
+report.console.finished = result,statistics,error
+report.unique_errors = true

@@ -8,7 +8,9 @@ import java.util.Set;
 
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
+import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.ChoiceGenerator;
+import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
@@ -126,7 +128,7 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
                         break;
                     }
                 }
-
+                // System.out.println("Chosen thread is " + chosenThread);
                 // Find the thread in chosenThreads
                 for (int i = 0; i < chosenThreads.length; i++) {
                     ThreadInfo ti = (ThreadInfo) chosenThreads[i];
@@ -148,4 +150,12 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
             }
         }
     }
+
+    // @Override
+    // public void stateAdvanced(Search search) {
+    // if (search.isEndState()) {
+    // MJIEnv mmyEnv = search.getVM().getCurrentThread().getEnv();
+    // System.out.println(mmyEnv.getStaticIntField("SUT.DifficultTest", "x"));
+    // }
+    // }
 }
