@@ -4,13 +4,13 @@ native_classpath = out
 
 vm.args = -ea
 
-listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States
+listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty
 
 # JPF search settings
 search.class = SearchAlgorithms.Reset_Search
-#double[] arr = double[]{0.999,0.001}; and double eps = 0.1, k becomes 2302
-+search_With_Reset.k = 2302
-+numberOfThreads = 4
+#double[] arr = double[]{0.99,0.01}; and double eps = 0.1, k becomes 2302
++search_With_Reset.k = 230
++numberOfThreads = 2
 search.multiple_errors = false
 
 

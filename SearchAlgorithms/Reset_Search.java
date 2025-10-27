@@ -43,11 +43,9 @@ public class Reset_Search extends Search {
     @Override
     public void search() {
 
-        while (!done) {
-            if (trials % 100 == 0) {
-                // System.out.println("Trials is: " + trials);
-            }
+        notifySearchStarted();
 
+        while (!done) {
             // Initialize initial state if not initialized yet
             if (initState == null) {
                 initState = vm.getRestorableState();
@@ -102,6 +100,25 @@ public class Reset_Search extends Search {
 
             if (forward()) {
                 notifyStateAdvanced();
+
+                // If an error has occured
+                if (currentError != null) {
+                    notifyPropertyViolated();
+                    System.out.println(currentError.getDetails());
+
+                    if (hasPropertyTermination()) {
+                        break;
+                    }
+                    // for search.multiple_errors we go on and treat this as a new state
+                    // but hasPropertyTermination() will issue a backtrack request
+                }
+
+                // If memory limit has been reached
+                if (!checkStateSpaceLimit()) {
+                    notifySearchConstraintHit("memory limit reached: " + minFreeMemory);
+                    // can't go on, we exhausted our memory
+                    break;
+                }
 
                 if (hasPropertyTermination()) {
                     System.out.println("Found BUG!!!");

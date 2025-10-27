@@ -23,7 +23,7 @@ public class Ccp {
     public static void main(String[] args) {
         Ccp myCcp = new Ccp();
 
-        double[] arr = new double[] { 0.999, 0.001 };
+        double[] arr = new double[] { 0.99, 0.01 };
 
         double eps = 0.1;
 

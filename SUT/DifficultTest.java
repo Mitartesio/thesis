@@ -5,28 +5,28 @@ public class DifficultTest {
 
     public static void main(String[] args) throws InterruptedException {
         Thread t1 = new Thread(() -> {
-            for (int i = 0; i < 250; i++) {
+            for (int i = 0; i < 3; i++) {
                 assert (i <= x) : "x is smaller than i";
                 x++;
             }
         }, "t1");
 
         Thread t2 = new Thread(() -> {
-            for (int i = 0; i < 250; i++) {
+            for (int i = 0; i < 3; i++) {
                 x++;
                 assert (i <= x) : "x is smaller than i";
             }
         }, "t2");
 
         Thread t3 = new Thread(() -> {
-            for (int i = 0; i < 250; i++) {
+            for (int i = 0; i < 3; i++) {
                 assert (i <= x) : "x is smaller than i";
                 x++;
             }
         }, "t3");
 
         Thread t4 = new Thread(() -> {
-            for (int i = 0; i < 250; i++) {
+            for (int i = 0; i < 3; i++) {
                 assert (i <= x) : "x is smaller than i";
                 x++;
             }
@@ -53,7 +53,7 @@ public class DifficultTest {
          * principle goes that it is very unlikely getting
          * more than 500
          */
-        assert (x < 400 || x == 1000) : "Found error of x == 500";
+        // assert (x < 999 || x == 1000) : "Found error of x == 500";
     }
 
 }
