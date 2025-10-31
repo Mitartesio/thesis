@@ -85,7 +85,7 @@ def populate_csv(csv_name: str, answers: List[int]):
     print(f" answers -> {out_file}")
 
 
-def handle_jpf(algo_key=None, runs=1): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
+def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
     # sys.arg[0] python file to run, sys.arg[1] jpf.config, sys.arg[2] amount runs
     # sys.arg[0] doesn't count towards len()
 
@@ -162,4 +162,6 @@ algo_to_jpf = {
 
 
 if __name__ == "__main__":
+    # use args when calling file to get it to run the experiment you're trying to.
+    # if no args provided, utilizes the algo_to_jpf dictionary
     handle_jpf()
