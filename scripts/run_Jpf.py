@@ -2,7 +2,6 @@
 import csv
 import os, pathlib, sys, subprocess
 from datetime import datetime
-from typing import List
 
 
 # Find the right paths:
@@ -67,6 +66,8 @@ def maybe_compile():
         print("[info] classes up‑to‑date; skipping compile")
 
 
+
+
 def resolve_config(arg: str | None) -> pathlib.Path:
     if arg:
         p = pathlib.Path(arg)
@@ -76,57 +77,54 @@ def resolve_config(arg: str | None) -> pathlib.Path:
     # Default config
     return CONFIGS_DIR / "SimpleTest2.jpf"
 
-def count_violations(csv_name: str):
-    csv_path = pathlib.Path(ROOT) / "reports" / "{csv_name}.csv"  
-    total = 0
-    n = 0
-    with csv_path.open() as f:
-        r = csv.DictReader(f)
-        for row in r:
-            n += 1
-            # handles empty cells: '', None → 0
-            total += int(row.get("violated") or 0)
-
-    print(f"violations: {total}/{n} ({(total / n * 100 if n else 0):.3f}%)")
 
 
-def populate_csv(csv_name:str, answers: List[int]):
-    out_file = ROOT / "reports" / "{csv_name}.csv"
-    out_file.parent.mkdir(exist_ok=True)
-
-    with out_file.open("w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["run", "answer", "violated"])  # <-- header
-        for i, (v, viol) in enumerate(answers, start=1):
-            writer.writerow([i, v, viol])
-
-    print(f"[ok] wrote answers to {out_file}")
-
-
-algo_to_jpf = {
-    "SimpleTest2Rand": "configs/SimpleTest.jpf",  # resolve_config()?
-    "SimpleTest2Uni": "configs/SimpleTest2.jpf",
-    "MiniRand": "configs/MinimizationTest.jpf",
-    "MiniUni": "configs/MinUniformTest.jpf"
-}
-
-
-def run_jpf(alogodictionary: dict[str, str] | None = None, runs: int = 1):  # config_path: str | None = None, runs: int = 1 as example parameters
+def main():
 
     runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
+
+    answers = []
 
     # 1) Maybe compile (only when sources changed)
     maybe_compile()
 
-    count = 0
-    # 2) Resolve config path
-    config = resolve_config(sys.argv[1] if len(sys.argv) > 1 else None)
-    if not config.exists():
-        sys.exit(f"[error] JPF config file not found: {config}")
+    if alogodictionary == None:
+        alogodictionary = algo_to_jpf
 
-    # 3) Run JPF
+    if #len(sys.args) > 1:
+        # 2) Resolve config path
+        config = resolve_config(sys.argv[1] if len(sys.argv) > 1 else None)
+        if not config.exists():
+            sys.exit(f"[error] JPF config file not found: {config}")
+            csv_name = sys.argv[1].removeprefix("configs/")
+            csv_name = csv_name[:4]
+            rc, answers = multi_jpf_runs(config, csv_name, runs)
+            #return
+
+    else:
+        # no args were passed uses default dictionary
+        for algo_key, configfile in algo_to_jpf.items():
+            config_path = resolve_config(configfile) # or just algodictionary[key]
+            csv_name = algo_key
+            rc, answers = multi_jpf_runs(config_path, csv_name, runs)
+
+    populate_csv(csv_name, answers)
+
+    # readd the count of the csv? or just call after?
+
+    print(f"[info] jpf exited with code {rc}")
+    sys.exit(rc)
+
+
+def multi_jpf_runs(config_path: pathlib.Path, csv_name: str, runs: int, JPF_CMD=JPF_CMD):
+
+    if not config_path.exists():
+        sys.exit(f"[info] jpf exited with due to no .jpf filepath")
+    
+    answers = []
+
     print("Running JPF from:", JPF_CMD)
-    cmd = [JPF_CMD, str(config_path)]
+    cmd = [JPF_CMD, str(config)]
     print("[info] running:", " ".join(cmd))
     rc = 0
     for i in range(runs):
@@ -184,6 +182,4 @@ def run_jpf(alogodictionary: dict[str, str] | None = None, runs: int = 1):  # co
 
 
 if __name__ == "__main__":
-    #run_jpf(algo_to_jpf["SimpleTestRand"])
-    run_jpf("MiniUni")
-    count_violations()
+    main()
