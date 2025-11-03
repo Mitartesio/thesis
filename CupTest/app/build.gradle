@@ -23,6 +23,10 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+
+    // JPF jars in CupTest/libs/
+    compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+    testCompileOnly fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -30,6 +34,10 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(11)
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 11   // ensures class file version 55
 }
 
 application {

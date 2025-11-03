@@ -1,5 +1,5 @@
 target = SUT.DifficultTest
-classpath = out
+classpath = CupTest/app/build/classes/java/main
 native_classpath = out
 
 vm.args = -ea

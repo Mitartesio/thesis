@@ -3,60 +3,31 @@ import os, pathlib, sys, subprocess
 from datetime import datetime
 from typing import List, Tuple
 
-from legacy_run_Jpf import latest_mtime
+# Fixed path
 
-# Can we even make the experiments replicable without forcing our readers to both setup JPF and/or set the terminal shortcuts for jpf
-# All of this is hardcoded and is reliant on the shortcut path for jpf
 # Find the right paths:
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-OUT_DIR = ROOT / "out"
+CUPTEST = ROOT / "CupTest"
+BUILD_CLASSES = CUPTEST / "app" / "build" / "classes" / "java" / "main"
+BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
+LIBS = CUPTEST / "app" / "libs"
+
+
 CONFIGS_DIR = ROOT / "configs"
 
-# Find JPF location via environm,ent variable (hopefully also works in windows)
-JPF_HOME = os.environ.get("JPF_HOME")
-if not JPF_HOME:
-    sys.exit("[error] Please set JPF_HOME environment variable")
 
-JPF_CMD = str(pathlib.Path(JPF_HOME) / "bin" / "jpf")
+def gradle_compile():
 
-# Build compile classpath for javac (JPF jars + repo root so imports resolve) (so its OS dependent and should work on non-unix system, lets see)
-CP_SEP = os.pathsep
-JPF_CP = f"{JPF_HOME}/build/jpf.jar{CP_SEP}{JPF_HOME}/build/jpf-classes.jar{CP_SEP}{ROOT}"
+    """ So here we compile with gradle, which should ensure we've compiled with java 11"""
+    try:
 
+        print("Compiling with Gradle...")
+        subprocess.run(["./CupTest/gradlew","-p","./CupTest","build"],check=True, cwd=ROOT)
+        print("Finished Gradle compilation")
+    except subprocess.CalledProcessError as e:
+        sys.exit(f"[error] Gradle build failed: {e}")
 
-def maybe_compile():
-    """
-    Compile Java sources into out/ only if needed:
-    - if out/ is missing, or
-    - if any .java file is newer than the newest .class in out/
-    """
-    # Collect sources (add folders here if you add more Java code)
-    src_dirs = [ROOT / "SUT", ROOT / "Listeners", ROOT / "utils"]
-    sources = [p for d in src_dirs if d.exists() for p in d.rglob("*.java")]
-
-    if not sources:
-        print("[info] no Java sources found to compile (skipping)")
-        return
-
-    # Is this just the statistics printing?
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    class_files = list(OUT_DIR.rglob("*.class"))
-
-    src_mtime = latest_mtime(sources)
-    cls_mtime = latest_mtime(class_files) if class_files else 0.0
-
-    if not class_files or src_mtime > cls_mtime:
-        print(
-            f"[info] compiling Java sources → {OUT_DIR} "
-            f"(sources newer: {datetime.fromtimestamp(src_mtime) if src_mtime else 'n/a'})"
-        )
-        cmd = ["javac", "--release", "11", "-cp", JPF_CP, "-d", str(OUT_DIR)] + [
-            str(p) for p in sources
-        ]
-        subprocess.run(cmd, check=True, cwd=ROOT)
-    else:
-        print("[info] classes up‑to‑date; skipping compile")
 
 
 # Not sure if we need this:
@@ -113,9 +84,46 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     config = resolve_config(config_path)
     if not config.exists():
         sys.exit(f'no jpf config provided {config}')
-    
+
+    # Building the HOST JVM classpath, so basically so the JPF jars can recognize our search algorithm(s)
+    cp_parts = [
+        str(LIBS / "jpf.jar"),
+        str(LIBS / "jpf-classes.jar"),
+        str(BUILD_CLASSES),
+    ]
+    if BUILD_RES.exists():
+        cp_parts.append(str(BUILD_RES))
+    host_cp = os.pathsep.join(cp_parts)
+
+
+
+
     print(f"Running jpf with {test_name}")
-    cmd = [JPF_CMD, str(config)] #changing config Path object to str
+
+    # target_class = BUILD_CLASSES / "SUT" / "MinimizationTest.class"
+    # print("[debugging] target class file:", target_class)
+    # print("[debugging] exists? ", target_class.exists())
+    #
+    # # check: java -cp <BUILD_CLASSES> SUT.MinimizationTest (should not crash on class not found)
+    # probe = subprocess.run(
+    #     [JAVA, "-cp", str(BUILD_CLASSES), "SUT.MinimizationTest"],
+    #     cwd=ROOT, capture_output=True, text=True
+    # )
+    # For some reason doesnt work with just java, dont know why this one needs caps
+    # print("[debug] direct run exit:", probe.returncode)
+    # print("[debug] direct run out:", probe.stdout.strip())
+    # print("[debug] direct run err:", probe.stderr.strip())
+
+    java_cmd = [
+        "java",
+        "-cp", host_cp,
+
+        "gov.nasa.jpf.tool.RunJPF",
+        str(config)
+    ]
+
+
+    # cmd = [JPF_CMD, str(config)] #changing config Path object to str
     results = []
     #count = 0
     rc = 0
@@ -124,12 +132,13 @@ def run_jpf(test_name: str, config_path: str, runs: int):
         val = None
         violated = False
         subproc = subprocess.Popen(
-            cmd,
+            java_cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             cwd=ROOT
         )
+
         for line in subproc.stdout:
             sys.stdout.write(line)
             if line.startswith("JPF_ANSWER "):
@@ -164,6 +173,21 @@ algo_to_jpf = {
 
 
 if __name__ == "__main__":
+
+
+    # from pathlib import Path
+    #
+    # JAVA = os.environ.get("JAVA_HOME")
+    # JAVA = str(Path(JAVA) / "bin" / "java") if JAVA else "java"
+    #
+    # # Cehck which java we're running from
+    # print("[debug] using java:", JAVA)
+
+
     # use args when calling file to get it to run the experiment you're trying to.
     # if no args provided, utilizes the algo_to_jpf dictionary
+
+    gradle_compile()
+
+    # Give epsilon and p probability
     handle_jpf()

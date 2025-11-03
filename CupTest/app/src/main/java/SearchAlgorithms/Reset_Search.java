@@ -8,8 +8,8 @@ import gov.nasa.jpf.vm.VM;
 import gov.nasa.jpf.vm.RestorableVMState;
 
 /*
-*  The {@code Reset_Search} is supposed to be combined with Search_With_Reset and Listener_For_Counting in order
- * to get the URW-search through the state space of a concurrent program. This class is responsible for searching through the 
+ *  The {@code Reset_Search} is supposed to be combined with Search_With_Reset and Listener_For_Counting in order
+ * to get the URW-search through the state space of a concurrent program. This class is responsible for searching through the
  * state space and notify the listeners when an end-state has been reached
  */
 public class Reset_Search extends Search {
@@ -21,7 +21,7 @@ public class Reset_Search extends Search {
     /*
      * @param Config is supposed to hold a value "search_With_Reset.k" that is the
      * number of trials that should be run
-     * 
+     *
      * @param Vm the virtual machine tied to the search
      * The constructor will initialize all necessary fields
      */

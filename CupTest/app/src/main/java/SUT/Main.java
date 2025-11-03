@@ -3,6 +3,16 @@ package SUT;
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println("Hello World");
+
+//        String argument1 = args[0];
+//
+//        switch (argument1) {
+//            case "":
+//                System.out.println("No arguments provided");
+//                break;
+//
+//
+//        }
+
     }
 }
