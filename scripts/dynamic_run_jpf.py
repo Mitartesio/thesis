@@ -3,6 +3,8 @@ import os, pathlib, sys, subprocess
 from datetime import datetime
 from typing import List, Tuple
 
+from legacy_run_Jpf import latest_mtime
+
 # Can we even make the experiments replicable without forcing our readers to both setup JPF and/or set the terminal shortcuts for jpf
 # All of this is hardcoded and is reliant on the shortcut path for jpf
 # Find the right paths:
