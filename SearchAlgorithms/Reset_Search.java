@@ -5,6 +5,7 @@ import Listeners.Listener_Uniform_Adapts;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.VM;
+import utils.Ccp;
 import gov.nasa.jpf.vm.RestorableVMState;
 
 /*
@@ -27,7 +28,22 @@ public class Reset_Search extends Search {
      */
     public Reset_Search(Config config, VM vm) {
         super(config, vm);
-        trials = Integer.parseInt(config.getString("search_With_Reset.k"));
+        //The user can give a specific k value
+        try {
+            trials = Integer.parseInt(config.getString("search_With_Reset.k"));
+        //If they do not provide trial they will have to provide epsilon of double and probabilities
+        } catch (Exception e) {
+            Ccp calc = new Ccp();
+
+            //Get the string[] of probabilies from the file and convert to a double array
+            String[] probabilities = config.getString("search_with_reset.probabilities").split(" ");
+            double[] probabilitiesDoubles = new double[probabilities.length];
+            for(int i = 0; i<probabilities.length; i++){
+                probabilitiesDoubles[i] = Double.parseDouble(probabilities[i]);
+            }
+            double eps = config.getDouble("search_with_reset.eps");
+            this.trials = calc.calcCcp(probabilitiesDoubles.length, probabilitiesDoubles, eps);
+        }
         initState = null; // This will be initialized in the beginning of search.
         searching = false;
     }
@@ -121,7 +137,6 @@ public class Reset_Search extends Search {
                 }
 
                 if (hasPropertyTermination()) {
-                    System.out.println("Found BUG!!!");
                     break;
                 } else {
                     notifyStateProcessed();
@@ -129,8 +144,6 @@ public class Reset_Search extends Search {
             }
 
         }
-
-        System.out.println("Found no bug!!!");
 
     }
 
