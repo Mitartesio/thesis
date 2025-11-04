@@ -1,4 +1,4 @@
-out/SimpleTest.class
+LEGACY/out/SimpleTest.class
 
 .idea/
 *.class
@@ -6,6 +6,6 @@ out/SimpleTest.class
 /.vscode/
 /plots/
 /reports/
-utils/CcpTest.py
+LEGACY/utils/CcpTest.py
 
 *.iml
