@@ -3,6 +3,18 @@ package utils;
 public class Ccp {
 
     public int calcCcp(int N, double[] P, double eps) {
+
+        //Raise value error if the probabilities are greater than 1
+
+        double violationSum = 0.0;
+        for(double prob : P){
+            violationSum += prob;
+        }
+
+        if(violationSum > 1 + 1e-3){
+            throw new IllegalArgumentException("Probabilities must sum to ≤ 1");
+        }
+
         int k = N;
 
         double sum = eps;
