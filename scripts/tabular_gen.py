@@ -46,5 +46,5 @@ def write_latex_tabulars(results: dict, filename: str, problem: str = "default_p
 
 
 if __name__ == '__main__':
-    raw_res = read_results('reports/simple_randomsch.csv')
+    raw_res = read_results('reports/min_uniform.csv')
     write_latex_tabulars(raw_res, 'plots/test_table.tex') #utilize raw_res[<scheduler>]
