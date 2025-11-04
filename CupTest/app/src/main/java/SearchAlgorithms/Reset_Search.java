@@ -30,15 +30,15 @@ public class Reset_Search extends Search {
         super(config, vm);
         //The user can give a specific k value
         try {
-            trials = Integer.parseInt(config.getString("search_With_Reset.k"));
-        //If they do not provide trial they will have to provide epsilon of double and probabilities
+            trials = Integer.parseInt(config.getString("search_with_reset.k"));
+            //If they do not provide trial they will have to provide epsilon of double and probabilities
         } catch (Exception e) {
             Ccp calc = new Ccp();
 
             //Get the string[] of probabilies from the file and convert to a double array
             String[] probabilities = config.getString("search_with_reset.probabilities").split(" ");
             double[] probabilitiesDoubles = new double[probabilities.length];
-            for(int i = 0; i<probabilities.length; i++){
+            for (int i = 0; i < probabilities.length; i++) {
                 probabilitiesDoubles[i] = Double.parseDouble(probabilities[i]);
             }
             double eps = config.getDouble("search_with_reset.eps");
