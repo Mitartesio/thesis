@@ -60,7 +60,7 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
      * map with the initial number of operations per thread.
      */
     public void init() {
-        System.out.println("Config");
+//        System.out.println("Config");
         numberOfThreads = threadsAndOperations.size();
         for (String string : threadsAndOperations.keySet()) {
             liveThreads.put(string, threadsAndOperations.get(string));
@@ -69,7 +69,7 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
 
     /*
      * @param VM the current vm to the choiceGenerator point
-     * 
+     *
      * @param ChoiceGenerator<?> the choiceGenerator for the current state
      * This method is the main component of the class and is what bears the
      * responsibility of searching through the state space.
