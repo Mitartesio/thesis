@@ -8,10 +8,10 @@ public class DeadlockExample {
     private final Object lock1 = new Object();
     private final Object lock2 = new Object();
 
-//    public static void main(String[] args) {
-//        DeadlockExample example = new DeadlockExample();
-//        example.runDemo();
-//    }
+    public static void main(String[] args) {
+        DeadlockExample example = new DeadlockExample();
+        example.runDemo();
+    }
 
     public void runDemo() {
         Thread t1 = new Thread(() -> {

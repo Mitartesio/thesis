@@ -4,11 +4,23 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MinimizationTest {
-    static int x = 0, y = 0, z = 0; // , w = 0;
-    private static boolean conditionMet = false;
+    public int x, y, z; // , w = 0;
+    private boolean conditionMet;
+
+    public MinimizationTest() {
+        x = 0;
+        y = 0;
+        z = 0;
+        conditionMet = false;
+
+    }
 
     public static void main(String[] args) throws InterruptedException {
+        MinimizationTest test = new MinimizationTest();
+        test.run();
+    }
 
+    public void run() throws InterruptedException {
         ReentrantLock lock = new ReentrantLock();
         Condition w = lock.newCondition();
 
