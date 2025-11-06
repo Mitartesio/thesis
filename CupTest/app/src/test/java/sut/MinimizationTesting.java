@@ -1,5 +1,6 @@
 package sut;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 
@@ -15,6 +16,6 @@ public class MinimizationTesting {
 
     @RepeatedTest(10000)
     public void runTest() throws InterruptedException {
-        test.run();
+        Assertions.assertTrue(test.run());
     }
 }

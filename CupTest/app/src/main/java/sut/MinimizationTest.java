@@ -20,7 +20,7 @@ public class MinimizationTest {
         test.run();
     }
 
-    public void run() throws InterruptedException {
+    public boolean run() throws InterruptedException {
         ReentrantLock lock = new ReentrantLock();
         Condition w = lock.newCondition();
 
@@ -59,6 +59,7 @@ public class MinimizationTest {
         Ta.join();
         Tb.join();
 
+        return z < 5;
         // Only interleaving sequence in which the assert fails is B1, A1, B2, B3, A2,
         // A3, B4, B5, B6, A4
     }

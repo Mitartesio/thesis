@@ -9,9 +9,9 @@ listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_Sta
 # JPF search settings
 search.class = SearchAlgorithms.Reset_Search
 #double[] arr = double[]{0.999,0.001}; and double eps = 0.1, k becomes 2302
-#+search_with_reset.k = 5000
-+search_with_reset.probabilities = 0.99 0.01
-+search_with_reset.eps = 0.05
+#+search_with_reset.k = 500000
++search_with_reset.probabilities = 0.999 0.001
++search_with_reset.eps = 0.1
 +numberOfThreads = 2
 search.multiple_errors = false
 
