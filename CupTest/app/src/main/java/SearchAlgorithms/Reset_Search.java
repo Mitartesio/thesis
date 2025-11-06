@@ -19,6 +19,7 @@ public class Reset_Search extends Search {
     private RestorableVMState initState;
     private boolean searching;
     private int originalk;
+    private boolean violationFound;
 
     /*
      * @param Config is supposed to hold a value "search_With_Reset.k" that is the
@@ -124,6 +125,7 @@ public class Reset_Search extends Search {
                 // If an error has occured
                 if (currentError != null) {
                     notifyPropertyViolated();
+                    violationFound = true;
                     System.out.println(currentError.getDetails());
 
                     if (hasPropertyTermination()) {
@@ -148,7 +150,7 @@ public class Reset_Search extends Search {
             }
 
         }
-
+        System.out.println("violated " + violationFound);
     }
 
     @Override

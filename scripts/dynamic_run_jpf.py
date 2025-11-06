@@ -58,7 +58,6 @@ def setup():
         sys.exit(f"[error] Gradle build failed: {e}")
 
 
-
 # Not sure if we need this:
 def resolve_config(arg: str | None) -> pathlib.Path:
     if arg:
@@ -78,13 +77,20 @@ def populate_csv(csv_name: str, answers: List[int]):
     out_file = ROOT / "reports" / f"{csv_name}.csv"
     out_file.parent.mkdir(exist_ok=True)
 
+    # if we need runs back... to have a sample space to make mean or median performance
+    # with out_file.open("w", newline="") as f:
+    #     writer = csv.writer(f)
+    #     writer.writerow(["run", "k", "violated"])  # <-- header
+    #     for i, (k, viol) in enumerate(answers, start=1):
+    #         writer.writerow([k, viol])
+
     with out_file.open("w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["run", "answer", "violated"])  # <-- header
-        for i, (v, viol) in enumerate(answers, start=1):
-            writer.writerow([i, v, viol])
+        writer.writerow(["k", "violated"])  # <-- header
+        k, viol = answers
+        writer.writerow([k, viol])
 
-    print(f" answers -> {out_file}")
+    print(f" answers -> {out_file.stem}.csv")
 
 
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
@@ -101,10 +107,9 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
 
     else:
         # if algo_key is None:
-        runs = 1400
         for key, config_path in algo_to_jpf.items():
             print(f'Running {key} via {config_path}')
-            populate_csv(key, run_jpf(key, config_path, runs))
+            populate_csv(key, run_jpf(key, config_path))
         return
 
 
@@ -147,12 +152,11 @@ def run_jpf(test_name: str, config_path: str, runs: int):
         str(config)
     ]
 
-
     # cmd = [JPF_CMD, str(config)] #changing config Path object to str
     results = []
-    #count = 0
+    # count = 0
     rc = 0
-    
+
     for i in range(runs):
         val = None
         violated = False
@@ -173,11 +177,17 @@ def run_jpf(test_name: str, config_path: str, runs: int):
                         val = int(parts[1])
                     except ValueError:
                         pass
-            if line.startswith("error"):
-                violated = True
+            if line.startswith("violated"):
+                violated = line.split()[1].strip()
+                if violated == "true":
+                    violated = True
+                else:
+                    violated = False
+            if line.startswith("k:"):
+                k_value = int(line.split()[1])
         rc = subproc.wait()
-        results.append((val, int(violated)))
-        #count += 1
+        results.append((k_value, int(violated)))
+        # count += 1
     return results, rc
 
 
