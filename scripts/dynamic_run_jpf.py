@@ -60,7 +60,6 @@ def populate_csv(csv_name: str, answers: List[int]):
 
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
     # sys.arg[0] python file to run, sys.arg[1] jpf.config, sys.arg[2] amount runs
-    # sys.arg[0] doesn't count towards len()
 
     if len(sys.argv) > 1:
         config_file = sys.argv[1] #but needs to be sliced or similar, otherwise we get the entire path as the key..
@@ -170,6 +169,10 @@ algo_to_jpf = {
     "MiniRand": "configs/MinimizationTest.jpf",
     "MiniUni": "configs/MinUniformTest.jpf",
 }
+
+# def main():
+#     gradle_compile()
+#     handle_jpf()
 
 
 if __name__ == "__main__":
