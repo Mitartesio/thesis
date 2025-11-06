@@ -1,4 +1,4 @@
-package SUT;
+package sut;
 
 public class TestForCounting {
     static int x;

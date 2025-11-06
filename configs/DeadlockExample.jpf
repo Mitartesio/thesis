@@ -1,4 +1,4 @@
-target = SUT.LockExample
+target = sut.LockExample
 classpath = out
 native_classpath = out
 

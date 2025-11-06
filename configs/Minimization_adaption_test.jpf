@@ -1,4 +1,4 @@
-target = SUT.MinimizationTest
+target = sut.MinimizationTest
 classpath = out
 native_classpath = out
 

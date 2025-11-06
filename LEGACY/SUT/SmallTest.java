@@ -1,4 +1,4 @@
-package SUT;
+package sut;
 
 public class SmallTest {
     static int x = 0;

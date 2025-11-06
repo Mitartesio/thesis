@@ -1,4 +1,4 @@
-package SUT;
+package sut;
 
 import gov.nasa.jpf.vm.Verify;
 

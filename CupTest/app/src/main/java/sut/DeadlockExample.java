@@ -1,5 +1,6 @@
 package sut;
 
+
 public class DeadlockExample {
 
     public static final int answer = 5;

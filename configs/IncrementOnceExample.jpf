@@ -1,4 +1,4 @@
-target = SUT.IncrementOnceExample
+target = sut.IncrementOnceExample
 classpath = out
 native_classpath = out
 listener = Listeners.Listener_For_Counting_States2
