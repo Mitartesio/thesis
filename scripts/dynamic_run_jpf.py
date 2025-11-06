@@ -11,19 +11,48 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 CUPTEST = ROOT / "CupTest"
 BUILD_CLASSES = CUPTEST / "app" / "build" / "classes" / "java" / "main"
 BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
-LIBS = CUPTEST / "app" / "libs"
+JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
+JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 
 CONFIGS_DIR = ROOT / "configs"
 
 
-def gradle_compile():
+def setup():
 
-    """ So here we compile with gradle, which should ensure we've compiled with java 11"""
+    """ Check whether script is run with correct version of java (only checks if its java 11)"""
+    result = subprocess.run(["java","-version"], stderr=subprocess.PIPE, text=True)
+
+    output = result.stderr
+    # print(output)
+    if 'version' in output:
+        versionLine = output.splitlines()[0]
+        java_version = versionLine.split('"')[1]
+        if java_version.split(".")[0] == '11':
+            print("Correctly using java 11.xx.xx")
+        else:
+            print("WARNING: Using wrong version of java. please use java 11")
+            sys.exit(1)
+
+
+    """Here we're building the jars needed for jpf _ NOT CONFIRMED WORKING YET"""
+
+    if JPF_JAR.exists():
+        print("JPF JARs already exist, skipping JAR generation")
+    else:
+        try:
+            print("generating JPF jars...")
+            subprocess.run(["./jpf-core/gradlew","-p","./jpf-core","buildJars"],check=True, cwd=ROOT)
+            print("Finished JPF JAR building")
+        except subprocess.CalledProcessError as e:
+            sys.exit(f"[error] JAR generation failed: {e}")
+
+
+    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the grald build"""
+
     try:
-
         print("Compiling with Gradle...")
-        subprocess.run(["./CupTest/gradlew","-p","./CupTest","build"],check=True, cwd=ROOT)
+        subprocess.run(["./CupTest/gradlew","-p","./CupTest","build","-x","test"],check=True, cwd=ROOT)
         print("Finished Gradle compilation")
     except subprocess.CalledProcessError as e:
         sys.exit(f"[error] Gradle build failed: {e}")
@@ -60,7 +89,6 @@ def populate_csv(csv_name: str, answers: List[int]):
 
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
     # sys.arg[0] python file to run, sys.arg[1] jpf.config, sys.arg[2] amount runs
-    # sys.arg[0] doesn't count towards len()
 
     if len(sys.argv) > 1:
         config_file = sys.argv[1] #but needs to be sliced or similar, otherwise we get the entire path as the key..
@@ -87,16 +115,13 @@ def run_jpf(test_name: str, config_path: str, runs: int):
 
     # Building the HOST JVM classpath, so basically so the JPF jars can recognize our search algorithm(s)
     cp_parts = [
-        str(LIBS / "jpf.jar"),
-        str(LIBS / "jpf-classes.jar"),
+        str(JPF_JAR_FOLDER / "jpf.jar"),
+        str(JPF_JAR_FOLDER / "jpf-classes.jar"),
         str(BUILD_CLASSES),
     ]
     if BUILD_RES.exists():
         cp_parts.append(str(BUILD_RES))
     host_cp = os.pathsep.join(cp_parts)
-
-
-
 
     print(f"Running jpf with {test_name}")
 
@@ -171,6 +196,10 @@ algo_to_jpf = {
     "MiniUni": "configs/MinUniformTest.jpf",
 }
 
+# def main():
+#     gradle_compile()
+#     handle_jpf()
+
 
 if __name__ == "__main__":
 
@@ -187,7 +216,7 @@ if __name__ == "__main__":
     # use args when calling file to get it to run the experiment you're trying to.
     # if no args provided, utilizes the algo_to_jpf dictionary
 
-    gradle_compile()
+    setup()
 
     # Give epsilon and p probability
     handle_jpf()

@@ -18,6 +18,7 @@ public class Reset_Search extends Search {
     private int trials;
     private RestorableVMState initState;
     private boolean searching;
+    private int originalk;
 
     /*
      * @param Config is supposed to hold a value "search_With_Reset.k" that is the
@@ -31,6 +32,7 @@ public class Reset_Search extends Search {
         //The user can give a specific k value
         try {
             trials = Integer.parseInt(config.getString("search_with_reset.k"));
+            originalk = trials;
             //If they do not provide trial they will have to provide epsilon of double and probabilities
         } catch (Exception e) {
             Ccp calc = new Ccp();
@@ -43,7 +45,9 @@ public class Reset_Search extends Search {
             }
             double eps = config.getDouble("search_with_reset.eps");
             this.trials = calc.calcCcp(probabilitiesDoubles.length, probabilitiesDoubles, eps);
+            originalk = this.trials;
         }
+        System.out.println("k: " + originalk);
         initState = null; // This will be initialized in the beginning of search.
         searching = false;
     }
