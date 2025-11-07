@@ -33,4 +33,7 @@ gradle-app.setting
 # Java heap dump
 *.hprof
 
+#markdown files - personal notes
+*.md
+
 
