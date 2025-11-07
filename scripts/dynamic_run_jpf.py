@@ -72,23 +72,24 @@ def resolve_config(arg: str | None) -> pathlib.Path:
 # Populate csv, can be useful. Not sure if better to continue the root structure or convert to just finding it normally.
 def populate_csv(csv_name: str, answers: List[int]):
     if csv_name is None:
-        csv_name = "answers"
+        csv_name = "results"
 
     out_file = ROOT / "reports" / f"{csv_name}.csv"
     out_file.parent.mkdir(exist_ok=True)
-
-    # if we need runs back... to have a sample space to make mean or median performance
-    # with out_file.open("w", newline="") as f:
-    #     writer = csv.writer(f)
-    #     writer.writerow(["run", "k", "violated"])  # <-- header
-    #     for i, (k, viol) in enumerate(answers, start=1):
-    #         writer.writerow([k, viol])
-
-    with out_file.open("w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["k", "violated"])  # <-- header
-        k, viol = answers
-        writer.writerow([k, viol])
+    
+    if not out_file:
+        with out_file.open("w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["k", "violated"])  # <-- header
+            k, viol = answers[0]
+            writer.writerow([k, viol])
+    else:
+        print(len(answers))
+        with out_file.open("a", newline="") as f:
+            writer = csv.writer(f)
+            print(len(answers))
+            k, viol = answers[0]
+            writer.writerow([k, viol])
 
     print(f" answers -> {out_file.stem}.csv")
 
@@ -100,7 +101,7 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
         config_file = sys.argv[1] #but needs to be sliced or similar, otherwise we get the entire path as the key..
         runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
         csv_name = pathlib.Path(sys.argv[1]).stem
-        results, rc = run_jpf(csv_name, config_file, runs)
+        results, rc, k = run_jpf(csv_name, config_file, runs)
         populate_csv(csv_name, results)
         print(f'jpf exited with code {rc}')
         sys.exit(rc)
@@ -156,6 +157,7 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     results = []
     # count = 0
     rc = 0
+    k_value = 0
 
     for i in range(runs):
         val = None
@@ -178,17 +180,16 @@ def run_jpf(test_name: str, config_path: str, runs: int):
                     except ValueError:
                         pass
             if line.startswith("violated"):
-                violated = line.split()[1].strip()
-                if violated == "true":
+                vio_value = line.split()[1].strip()
+                if vio_value == "true":
                     violated = True
-                else:
-                    violated = False
             if line.startswith("k:"):
                 k_value = int(line.split()[1])
         rc = subproc.wait()
         results.append((k_value, int(violated)))
+        print(f"results contains: {len(results)} elements")
         # count += 1
-    return results, rc
+    return results, rc, k_value
 
 
 # Something like this:
