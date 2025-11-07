@@ -1,4 +1,4 @@
-target = sut.MinimizationTest
+target = sut.MinimizationTesting
 classpath = CupTest/app/build/classes/java/main
 # native_classpath = CupTest/app/build/resources/main
 

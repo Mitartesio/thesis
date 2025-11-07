@@ -27,6 +27,10 @@ dependencies {
     // JPF jars in CupTest/libs/
     compileOnly fileTree(dir: 'libs', include: ['*.jar'])
     testCompileOnly fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Make TestJPF resolvable by the IDE + tests
+    testImplementation files("${projectDir}/../../jpf-core/build/jpf.jar")
+    testRuntimeOnly files("${projectDir}/../../jpf-core/build/jpf.jar")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -48,4 +52,8 @@ application {
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
+
+    systemProperty "jpf.home", "${projectDir}/../../jpf-core"
+    // Enable Java asserts in your SUT if you use `assert`
+    jvmArgs "-ea"
 }

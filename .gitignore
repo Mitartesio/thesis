@@ -42,3 +42,5 @@ gradle-app.setting
 ### Gradle Patch ###
 # Java heap dump
 *.hprof
+/.version
+/build.properties
