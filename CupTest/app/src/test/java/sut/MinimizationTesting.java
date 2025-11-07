@@ -27,6 +27,7 @@ public class MinimizationTesting extends TestJPF {
     public void testMinimizationWithJpf() throws InterruptedException {
         if (verifyNoPropertyViolation(
                 "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
+//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = SearchAlgorithms.Reset_Search",
 //                "+search_with_reset.k = 500",
