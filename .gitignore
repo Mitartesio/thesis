@@ -13,6 +13,8 @@ LEGACY/utils/CcpTest.py
 #adding md to gitignore
 *.md
 
+*.png
+
 
 ### Gradle ###
 .gradle
