@@ -8,9 +8,7 @@ import java.util.Set;
 
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.PropertyListenerAdapter;
-import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.ChoiceGenerator;
-import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
@@ -32,6 +30,12 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
     // Dummy set for operations
     private Set<String> threadsToCheck;
 
+    //The max depth that can be reached
+    private int maxDepth;
+
+    //Current depth
+    private int currentDepth;
+
     /*
      * @param takes a Config file
      * This method instantiates the necessary variables for the search
@@ -42,6 +46,12 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
         threadsToCheck = new HashSet<>();
         this.liveThreads = new HashMap<>();
         random = new Random();
+
+        try {
+            maxDepth = config.getInt("maxDepth");
+        } catch (Exception e) {
+            maxDepth = Integer.MAX_VALUE;
+        }
     }
 
     /*
@@ -65,6 +75,7 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
         for (String string : threadsAndOperations.keySet()) {
             liveThreads.put(string, threadsAndOperations.get(string));
         }
+        currentDepth = 0;
     }
 
     /*
@@ -80,9 +91,11 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
      */
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
-        if (started) {
+        if (started && currentDepth < maxDepth) {
 
             if (cg instanceof ThreadChoiceGenerator) {
+
+                currentDepth++;
 
                 ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
 
