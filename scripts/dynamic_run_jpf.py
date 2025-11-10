@@ -76,18 +76,20 @@ def populate_csv(csv_name: str, answers: List[int]):
 
     out_file = ROOT / "reports" / f"{csv_name}.csv"
     out_file.parent.mkdir(exist_ok=True)
-    
-    if not out_file:
+
+    if not out_file.exists():
         with out_file.open("w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["k", "violated"])  # <-- header
+            writer.writerow(["problem", "k", "violated"])  # <-- header
+            problem = csv_name
             k, viol = answers[0]
-            writer.writerow([k, viol])
+            writer.writerow([problem, k, viol])
     else:
         with out_file.open("a", newline="") as f:
             writer = csv.writer(f)
+            problem = csv_name
             k, viol = answers[0]
-            writer.writerow([k, viol])
+            writer.writerow([problem, k, viol])
 
     print(f" answers -> {out_file.stem}.csv")
 
