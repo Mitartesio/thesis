@@ -99,7 +99,7 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
         config_file = sys.argv[1] #but needs to be sliced or similar, otherwise we get the entire path as the key..
         runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
         csv_name = pathlib.Path(sys.argv[1]).stem
-        for i in range(1, runs):
+        for i in range(0, runs):
             print(f"THIS IS THE {i}'TH RUN!!!!")
             results, rc, k = run_jpf(csv_name, config_file, runs)
             populate_csv(csv_name, results)
