@@ -84,10 +84,8 @@ def populate_csv(csv_name: str, answers: List[int]):
             k, viol = answers[0]
             writer.writerow([k, viol])
     else:
-        print(len(answers))
         with out_file.open("a", newline="") as f:
             writer = csv.writer(f)
-            print(len(answers))
             k, viol = answers[0]
             writer.writerow([k, viol])
 
@@ -101,8 +99,10 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
         config_file = sys.argv[1] #but needs to be sliced or similar, otherwise we get the entire path as the key..
         runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
         csv_name = pathlib.Path(sys.argv[1]).stem
-        results, rc, k = run_jpf(csv_name, config_file, runs)
-        populate_csv(csv_name, results)
+        for i in range(1, runs):
+            print(f"THIS IS THE {i}'TH RUN!!!!")
+            results, rc, k = run_jpf(csv_name, config_file, runs)
+            populate_csv(csv_name, results)
         print(f'jpf exited with code {rc}')
         sys.exit(rc)
 
@@ -159,36 +159,34 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     rc = 0
     k_value = 0
 
-    for i in range(runs):
-        val = None
-        violated = False
-        subproc = subprocess.Popen(
-            java_cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            cwd=ROOT
-        )
+    val = None
+    violated = False
+    subproc = subprocess.Popen(
+        java_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        cwd=ROOT
+    )
 
-        for line in subproc.stdout:
-            sys.stdout.write(line)
-            if line.startswith("JPF_ANSWER "):
-                parts = line.strip().split()
-                if len(parts) >= 2:
-                    try:
-                        val = int(parts[1])
-                    except ValueError:
-                        pass
-            if line.startswith("violated"):
-                vio_value = line.split()[1].strip()
-                if vio_value == "true":
-                    violated = True
-            if line.startswith("k:"):
-                k_value = int(line.split()[1])
-        rc = subproc.wait()
-        results.append((k_value, int(violated)))
-        print(f"results contains: {len(results)} elements")
-        # count += 1
+    for line in subproc.stdout:
+        sys.stdout.write(line)
+        if line.startswith("JPF_ANSWER "):
+            parts = line.strip().split()
+            if len(parts) >= 2:
+                try:
+                    val = int(parts[1])
+                except ValueError:
+                    pass
+        if line.startswith("violated"):
+            vio_value = line.split()[1].strip()
+            if vio_value == "true":
+                violated = True
+        if line.startswith("k:"):
+            k_value = int(line.split()[1])
+    rc = subproc.wait()
+    results.append((k_value, int(violated)))
+    # count += 1
     return results, rc, k_value
 
 
