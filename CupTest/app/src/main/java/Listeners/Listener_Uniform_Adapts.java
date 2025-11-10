@@ -47,12 +47,15 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
         this.liveThreads = new HashMap<>();
         random = new Random();
 
+        if(config.hasValue("maxDepth")){
         maxDepth = config.getInt("maxDepth");
-
-        if(maxDepth <= 0){
-            System.out.println("Changing maxDepth");
-            maxDepth = Integer.MAX_VALUE;
+        }else{
+        maxDepth = Integer.MAX_VALUE;    
         }
+
+        System.out.println(maxDepth);
+
+        currentDepth = 0;
     }
 
     /*

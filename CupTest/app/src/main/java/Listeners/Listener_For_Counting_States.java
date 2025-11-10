@@ -41,10 +41,10 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
         this.threadsAndOperations = new HashMap<>();
         found = false;
         
+        if(config.hasValue("maxDepth")){
         maxDepth = config.getInt("maxDepth");
-
-        if(maxDepth <= 0 && currentDepth < maxDepth){
-            maxDepth = Integer.MAX_VALUE;
+        }else{
+        maxDepth = Integer.MAX_VALUE;    
         }
         
         System.out.println(maxDepth);

@@ -4,9 +4,9 @@ import Listeners.Listener_For_Counting_States;
 import Listeners.Listener_Uniform_Adapts;
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.search.Search;
+import gov.nasa.jpf.vm.RestorableVMState;
 import gov.nasa.jpf.vm.VM;
 import utils.Ccp;
-import gov.nasa.jpf.vm.RestorableVMState;
 
 /*
  *  The {@code Reset_Search} is supposed to be combined with Search_With_Reset and Listener_For_Counting in order
@@ -28,13 +28,13 @@ public class Reset_Search extends Search {
      * @param Vm the virtual machine tied to the search
      * The constructor will initialize all necessary fields
      */
-    public Reset_Search(Config config, VM vm) throws Exception{
+    public Reset_Search(Config config, VM vm) throws IllegalArgumentException{
         super(config, vm);
-        //The user can give a specific k value
-        trials = Integer.parseInt(config.getString("search_with_reset.k"));
 
-        //If k has not been specified check by trials being greater than 0
-        if(trials <= 0){
+        if(config.hasValue("search_with_reset.k")){
+            //The user can give a specific k value
+            trials = Integer.parseInt(config.getString("search_with_reset.k"));
+        }else if(config.hasValue("search_with_reset.probabilities") && config.hasValue("search_with_reset.eps")){
             Ccp calc = new Ccp();
 
             //Get the string[] of probabilies from the file and convert to a double array
@@ -45,11 +45,8 @@ public class Reset_Search extends Search {
             }
             double eps = config.getDouble("search_with_reset.eps");
             this.trials = calc.calcCcp(probabilitiesDoubles.length, probabilitiesDoubles, eps);
-        }
-
-        //if trials is still 0 terminate with an error
-        if(trials <= 0){
-            throw new Exception("please specify trials");
+        }else{
+            throw new IllegalArgumentException("please specify k");
         }
 
         originalk = this.trials;
