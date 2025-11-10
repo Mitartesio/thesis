@@ -31,11 +31,10 @@ public class Reset_Search extends Search {
     public Reset_Search(Config config, VM vm) {
         super(config, vm);
         //The user can give a specific k value
-        try {
-            trials = Integer.parseInt(config.getString("search_with_reset.k"));
-            originalk = trials;
-            //If they do not provide trial they will have to provide epsilon of double and probabilities
-        } catch (Exception e) {
+        trials = Integer.parseInt(config.getString("search_with_reset.k"));
+
+        //If k has not been specified check by trials being greater than 0
+        if(trials <= 0){
             Ccp calc = new Ccp();
 
             //Get the string[] of probabilies from the file and convert to a double array
@@ -46,8 +45,15 @@ public class Reset_Search extends Search {
             }
             double eps = config.getDouble("search_with_reset.eps");
             this.trials = calc.calcCcp(probabilitiesDoubles.length, probabilitiesDoubles, eps);
-            originalk = this.trials;
         }
+
+        //if trials is still 0 terminate with an error
+        if(trials <= 0){
+            throw new IllegalArgument("please specify trials");
+        }
+
+        originalk = this.trials;
+
         System.out.println("k: " + originalk);
         initState = null; // This will be initialized in the beginning of search.
         searching = false;
@@ -74,7 +80,7 @@ public class Reset_Search extends Search {
 
             // If the current state is an end state or forward() returns false
             if (isEndState() || !forward()) {
-                //System.out.println(count);
+                System.out.println(count);
                 count++;
                 // If trials is 0 stop the search else restart from initial state
                 if (trials <= 0) {

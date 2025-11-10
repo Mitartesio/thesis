@@ -40,12 +40,14 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
         System.out.println("Number of threads are: " + (numberOfThreads + 1));
         this.threadsAndOperations = new HashMap<>();
         found = false;
-        try {
-            maxDepth = config.getInt("maxDepth");
-        } catch (Exception e) {
+        
+        maxDepth = config.getInt("maxDepth");
+
+        if(maxDepth <= 0 && currentDepth < maxDepth){
             maxDepth = Integer.MAX_VALUE;
         }
-
+        
+        System.out.println(maxDepth);
         currentDepth = 0;
     }
 
@@ -98,9 +100,9 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         // Only search insofar found == false
-        if (!found) {
+        if (!found && currentDepth < maxDepth) {
             currentDepth++;
-            //System.out.println("Searching for thread: " + nextThread);
+            System.out.println("Searching for thread: " + nextThread);
             if (cg instanceof ThreadChoiceGenerator) {
                 ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
 
