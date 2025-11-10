@@ -100,7 +100,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
         // Only search insofar found == false
         if (!found) {
             currentDepth++;
-            System.out.println("Searching for thread: " + nextThread);
+            //System.out.println("Searching for thread: " + nextThread);
             if (cg instanceof ThreadChoiceGenerator) {
                 ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
 
