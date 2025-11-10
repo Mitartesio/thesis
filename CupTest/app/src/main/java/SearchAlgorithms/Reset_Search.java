@@ -28,7 +28,7 @@ public class Reset_Search extends Search {
      * @param Vm the virtual machine tied to the search
      * The constructor will initialize all necessary fields
      */
-    public Reset_Search(Config config, VM vm) {
+    public Reset_Search(Config config, VM vm) throws Exception{
         super(config, vm);
         //The user can give a specific k value
         trials = Integer.parseInt(config.getString("search_with_reset.k"));
@@ -49,7 +49,7 @@ public class Reset_Search extends Search {
 
         //if trials is still 0 terminate with an error
         if(trials <= 0){
-            throw new IllegalArgument("please specify trials");
+            throw new Exception("please specify trials");
         }
 
         originalk = this.trials;
