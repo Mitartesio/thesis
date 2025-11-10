@@ -91,7 +91,7 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
      */
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
-        if (started && currentDepth < maxDepth) {
+        if (started) {
 
             if (cg instanceof ThreadChoiceGenerator) {
 

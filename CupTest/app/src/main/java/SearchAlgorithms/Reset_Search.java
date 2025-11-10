@@ -65,7 +65,7 @@ public class Reset_Search extends Search {
     public void search() {
 
         notifySearchStarted();
-
+        int count = 0;
         while (!done) {
             // Initialize initial state if not initialized yet
             if (initState == null) {
@@ -74,7 +74,8 @@ public class Reset_Search extends Search {
 
             // If the current state is an end state or forward() returns false
             if (isEndState() || !forward()) {
-
+                System.out.println(count);
+                count++;
                 // If trials is 0 stop the search else restart from initial state
                 if (trials <= 0) {
                     done = true;

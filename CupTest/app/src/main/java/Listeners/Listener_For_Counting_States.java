@@ -37,7 +37,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
     public Listener_For_Counting_States(Config config) {
 
         this.numberOfThreads = Integer.parseInt(config.getString("numberOfThreads")) - 1;
-        System.out.println("Number of threads are: " + numberOfThreads);
+        System.out.println("Number of threads are: " + (numberOfThreads + 1));
         this.threadsAndOperations = new HashMap<>();
         found = false;
         try {
@@ -88,7 +88,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
 
     /*
      * @param VM the virtual machine tied to the current state
-     * 
+     *
      * @param ChoiceGenerator<?> the choiceGenerator tied to the current state
      * This method is responsible for picking a thread that insofar nextThread ==
      * null. The method will pick nextThread
@@ -98,7 +98,7 @@ public class Listener_For_Counting_States extends PropertyListenerAdapter {
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
         // Only search insofar found == false
-        if (!found && currentDepth < maxDepth) {
+        if (!found) {
             currentDepth++;
             System.out.println("Searching for thread: " + nextThread);
             if (cg instanceof ThreadChoiceGenerator) {

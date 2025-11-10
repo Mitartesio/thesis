@@ -50,7 +50,7 @@ public class MinimizationTest {
             conditionMet = true;
             w.signal();
             lock.unlock();
-            //assert (z < 5) : "I found the error where !(z < 5)";
+            assert (z < 5) : "I found the error where !(z < 5)";
         }, "t1");
 
         Ta.start();
