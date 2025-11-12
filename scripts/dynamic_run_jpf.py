@@ -1,7 +1,9 @@
 import csv
 import os, pathlib, sys, subprocess
+from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple
+import pandas as pd
 
 # Fixed path
 
@@ -76,20 +78,37 @@ def populate_csv(csv_name: str, answers: List[int]):
 
     out_file = ROOT / "reports" / f"{csv_name}.csv"
     out_file.parent.mkdir(exist_ok=True)
-    
-    if not out_file:
+
+    if not out_file.exists():
         with out_file.open("w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["k", "violated"])  # <-- header
+            writer.writerow(["problem", "k", "violated"])  # <-- header
+            problem = csv_name
             k, viol = answers[0]
-            writer.writerow([k, viol])
+            writer.writerow([problem, k, viol])
     else:
         with out_file.open("a", newline="") as f:
             writer = csv.writer(f)
+            problem = csv_name
             k, viol = answers[0]
-            writer.writerow([k, viol])
+            writer.writerow([problem, k, viol])
 
     print(f" answers -> {out_file.stem}.csv")
+
+
+def combine_and_convert_csv(
+    csv1: str, csv2: str, combinedname: str):
+    csv1_path = ROOT / "reports" / f"{csv1}.csv"
+    csv2_path = ROOT / "reports" / f"{csv2}.csv"
+
+    output_path = ROOT / "reports" / f"{combinedname}.csv"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    csv1 = pd.read_csv(csv1_path)
+    csv2 = pd.read_csv(csv2_path)
+    csv1_df = pd.DataFrame(csv1)
+    csv2_df = pd.DataFrame(csv2)
+    combined_csv = pd.concat([csv1_df, csv2_df], ignore_index=True)
+    return combined_csv.to_csv(output_path, index=False, float_format="%.0f")
 
 
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
@@ -211,16 +230,6 @@ algo_to_jpf = {
 
 
 if __name__ == "__main__":
-
-
-    # from pathlib import Path
-    #
-    # JAVA = os.environ.get("JAVA_HOME")
-    # JAVA = str(Path(JAVA) / "bin" / "java") if JAVA else "java"
-    #
-    # # Cehck which java we're running from
-    # print("[debug] using java:", JAVA)
-
 
     # use args when calling file to get it to run the experiment you're trying to.
     # if no args provided, utilizes the algo_to_jpf dictionary

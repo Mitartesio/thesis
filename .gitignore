@@ -10,11 +10,14 @@ LEGACY/utils/CcpTest.py
 
 *.iml
 
-#adding md to gitignore
+#md
 *.md
 
+#png
 *.png
 
+#pycache
+scripts/__pycache__
 
 ### Gradle ###
 .gradle
