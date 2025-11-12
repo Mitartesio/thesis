@@ -18,6 +18,8 @@ LEGACY/utils/CcpTest.py
 
 ### Gradle ###
 .gradle
+/gradle
+
 **/build/
 !src/**/build/
 
@@ -44,3 +46,12 @@ gradle-app.setting
 *.hprof
 /.version
 /build.properties
+
+
+# Ignore Gradle project-specific cache directory
+
+# Ignore Gradle build output directory
+build
+
+
+
