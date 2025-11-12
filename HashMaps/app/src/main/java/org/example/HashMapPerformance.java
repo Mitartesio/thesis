@@ -36,9 +36,9 @@ public class HashMapPerformance {
                 Mark7(info.apply("SynchronizedMap"),
                         i -> exerciseMap(threadCount, perThread, range, addProb, removeProb,
                                 new SynchronizedMap<Integer, String>()));
-                Mark7(info.apply("StripedMap"),
-                        i -> exerciseMap(threadCount, perThread, range, addProb, removeProb,
-                                new StripedMap<Integer, String>(lockCount)));
+                // Mark7(info.apply("StripedMap"),
+                //         i -> exerciseMap(threadCount, perThread, range, addProb, removeProb,
+                //                 new StripedMapTest<Integer, String>(lockCount)));
                 Mark7(info.apply("StripedMapPadded"),
                         i -> exerciseMap(threadCount, perThread, range, addProb, removeProb,
                                 new StripedMapPadded<Integer, String>(lockCount)));
