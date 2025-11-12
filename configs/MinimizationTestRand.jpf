@@ -1,9 +1,9 @@
-target = sut.DeadlockExample
+target = sut.MinimizationTest
 classpath = CupTest/app/build/classes/java/main
 # native_classpath = out
 
 vm.args = -ea
-listener = Listeners.Random_Scheduler,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty
+listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty
 
 # JPF search settings
 search.class = SearchAlgorithms.Reset_Search

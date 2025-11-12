@@ -2,99 +2,34 @@ package gov.nasa.jpf.listener;
 
 import java.util.Random;
 
-import gov.nasa.jpf.JPFException;
 import gov.nasa.jpf.PropertyListenerAdapter;
-import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.ChoiceGenerator;
-import gov.nasa.jpf.vm.MJIEnv;
 import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 import gov.nasa.jpf.vm.ThreadInfo;
 import gov.nasa.jpf.vm.VM;
 
-//import utils.FoundViolation;
-
-import gov.nasa.jpf.Config;
-
-//Random scheduler that will simply take a random choice at each state with a non-deterministic choice
-
 public class Random_Scheduler extends PropertyListenerAdapter {
-    private Random random = new Random();
-    private boolean found = false;
+    private Random random;
 
-    private final boolean violationMode;
-
-    private final String className;
-    private final String fieldName;
-    private final int notAllowed;
-
-    public Random_Scheduler(Config config) {
-        className = config.getString("randomScheduler.className");
-        fieldName = config.getString("randomScheduler.fieldName");
-        this.violationMode = config.getBoolean("randomScheduler.violationMode", true);
-
-        if (!config.hasValue("randomScheduler.notAllowed")) {
-            throw new JPFException("Missing required property: +randomScheduler.notAllowed");
-        }
-        notAllowed = config.getInt("randomScheduler.notAllowed");
-
-        if (className == null || fieldName == null) {
-            throw new JPFException(
-                    "Missing required properties: +randomScheduler.className and/or +randomScheduler.fieldName");
-        }
-
+    public Random_Scheduler(){
+        this.random = new Random();
     }
 
     @Override
-    public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
-        // Check if cg is actully a ThreadChoiceGenerator
-
-        int value = vm.getCurrentThread().getEnv().getStaticIntField(className, fieldName);
-
-        if (value == notAllowed) {
-            found = true;
-        }
-
+    public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg){
+        
         if (cg instanceof ThreadChoiceGenerator) {
-            // Convert to ThreadChoiceGenerator to use getTotalNumberOfChoices method
             ThreadChoiceGenerator tcg = (ThreadChoiceGenerator) cg;
-            // Get the total number of choices
-            int numberOfThreads = tcg.getTotalNumberOfChoices();
 
-            // random choice
-            int choice = random.nextInt(numberOfThreads);
+            Object[] chosenThreads = tcg.getAllChoices();
 
-            // Uncomment this section for debugging: Will show which thread is chosen at
-            // each point!
+            int choice = random.nextInt(chosenThreads.length);
 
-            // Get all threads
-            // Object[] objs = tcg.getAllChoices();
+            //for debugging
+            // ThreadInfo ti = (ThreadInfo) chosenThreads[choice];
+            // System.out.println("Chosen thread: " + ti.getName());
 
-            // Cast to ThreadInfo
-            // ThreadInfo chosenThread = (ThreadInfo) objs[choice];
-
-            // System.out.println(chosenThread);
-
-            // Randomly choose the next thread
             tcg.select(choice);
-
         }
     }
-
-    // Every time a new state is found and it is actully an end state simply
-    // terminate
-    // @Override
-    // public void stateAdvanced(Search search) {
-
-    //     if (found && violationMode) {
-    //         search.error(new FoundViolation(className, fieldName, notAllowed));
-    //         search.terminate();
-    //         return;
-    //     }
-
-    //     // If it's an end state we terminate
-    //     if (search.isEndState()) {
-    //         search.terminate();
-    //     }
-    // }
-
 }
