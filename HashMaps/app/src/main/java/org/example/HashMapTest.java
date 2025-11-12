@@ -110,6 +110,8 @@ public class HashMapTest {
             final int myThread = t;
             threads[t] = new Thread(() -> {
 
+//                System.out.println("hello");
+
 
                 final int[] addedBy = new int[threadCount];
                 // Sum of keys added, minus sum of keys removed, by the thread in question
@@ -164,7 +166,7 @@ public class HashMapTest {
         }
 
 
-        // Start & join (JPF mode: no barrier needed; JVM stress: optionally add a latch)
+        // Start & join (JPF mode: no barrier needed; JVM stress: optionally add a latch like peter did)
         for (Thread th : threads) th.start();
         for (Thread th : threads) th.join();
 
