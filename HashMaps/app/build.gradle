@@ -23,6 +23,10 @@ dependencies {
 
     // This dependency is used by the application.
     implementation libs.guava
+
+    // Make TestJPF resolvable by the IDE + tests
+    testImplementation files("${projectDir}/../../jpf-core/build/jpf.jar")
+    testRuntimeOnly files("${projectDir}/../../jpf-core/build/jpf.jar")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

@@ -5,21 +5,21 @@ import gov.nasa.jpf.util.test.TestJPF;
 import org.junit.jupiter.api.*;
 
 
-public class StripedMapTest extends TestJPF{
-    private static int x;
-    private static int answer;
+public class StripedMapTest extends TestJPF {
+    MinimizationTest test;
 
-    @BeforeAll
-    static void setup(){
-        x = 0;
-        answer = 0;
-        StripedMap<Integer, Integer> myMap = new StripedMap<>(10);
+
+    @BeforeEach
+    public void setup() {
+
+        test = new MinimizationTest();
+
     }
 
     @Test
-    void test1() throws InterruptedException{
+    public void testMinimizationWithJpf() throws InterruptedException {
         if (verifyNoPropertyViolation(
-            "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main",
+                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/HashMaps/app/build/classes/java/test:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/HashMaps/app/build/classes/java/main",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
@@ -31,36 +31,11 @@ public class StripedMapTest extends TestJPF{
                 "+jpf.report.console.property_violation = error",
                 "+report.console.finished = result,statistics,error",
                 "+report.unique_errors = true"
-        )) {
 
-            
-            Thread t1 = new Thread(() -> {
-                try{
-                for(int i = 0; i<10; i++){
-                    x++;
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            });
-
-            Thread t2 = new Thread(() -> {
-                try{
-                answer = x;
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            });
-
-            t1.start();
-            t2.start();
-
-            t1.join();
-            t2.join();
-
-            Assertions.assertTrue(answer != 10);
-            assert answer != 10 : "Found error";
-            
-}   
+        )) {  // specifies the test goal, "jpfOptions" are optional
+            test = new MinimizationTest();
+            test.run();
+//            gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
+        }
     }
 }
