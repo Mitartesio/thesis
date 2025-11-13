@@ -1,0 +1,44 @@
+package sut;
+
+import static gov.nasa.jpf.util.test.TestJPF.*;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
+
+import gov.nasa.jpf.util.test.TestJPF;
+import org.junit.jupiter.api.Test;
+
+public class DeadlockTesting extends TestJPF{
+    DeadlockExample test;
+
+
+    @Test
+    public void testDeadlockExampleJpf() throws InterruptedException {
+        if (verifyNoPropertyViolation(
+            //target = sut.DeadlockExample
+            "classpath = CupTest/app/build/classes/java/main",
+            //# native_classpath = out
+
+            "vm.args = -ea",
+            "listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+
+            //# JPF search settings
+            "search.class = SearchAlgorithms.Reset_Search",
+            //#double[] arr = double[]{0.999,0.001}; and double eps = 0.1, k becomes 2302
+            // #+search_with_reset.k = 500000
+            "+search_with_reset.probabilities = 0.999 0.001",
+            "+search_with_reset.eps = 0.1",
+            "+numberOfThreads = 2",
+            "search.multiple_errors = false",
+
+            //# Reporting settings
+            "jpf.report.console.property_violation = error",
+            "report.console.finished = result,statistics,error",
+            "report.unique_errors = true"
+        )) {
+            test = new DeadlockExample();
+            test.runDemo();
+        }
+    }
+}
