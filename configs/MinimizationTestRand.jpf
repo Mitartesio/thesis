@@ -1,4 +1,4 @@
-target = sut.DeadlockExample
+target = sut.MinimizationTest
 classpath = CupTest/app/build/classes/java/main
 # native_classpath = out
 
@@ -13,6 +13,7 @@ search.class = SearchAlgorithms.Reset_Search
 +search_with_reset.eps = 0.1
 +numberOfThreads = 2
 search.multiple_errors = false
+
 
 # Reporting settings
 jpf.report.console.property_violation = error

@@ -47,11 +47,15 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
         this.liveThreads = new HashMap<>();
         random = new Random();
 
-        try {
-            maxDepth = config.getInt("maxDepth");
-        } catch (Exception e) {
-            maxDepth = Integer.MAX_VALUE;
+        if(config.hasValue("maxDepth")){
+        maxDepth = config.getInt("maxDepth");
+        }else{
+        maxDepth = Integer.MAX_VALUE;    
         }
+
+        System.out.println(maxDepth);
+
+        currentDepth = 0;
     }
 
     /*
@@ -91,7 +95,7 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
      */
     @Override
     public void choiceGeneratorAdvanced(VM vm, ChoiceGenerator<?> cg) {
-        if (started) {
+        if (started && currentDepth < maxDepth) {
 
             if (cg instanceof ThreadChoiceGenerator) {
 
@@ -164,11 +168,4 @@ public class Listener_Uniform_Adapts extends PropertyListenerAdapter {
         }
     }
 
-    // @Override
-    // public void stateAdvanced(Search search) {
-    // if (search.isEndState()) {
-    // MJIEnv mmyEnv = search.getVM().getCurrentThread().getEnv();
-    // System.out.println(mmyEnv.getStaticIntField("SUT.DifficultTest", "x"));
-    // }
-    // }
 }

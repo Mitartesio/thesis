@@ -10,11 +10,14 @@ LEGACY/utils/CcpTest.py
 
 *.iml
 
-#adding md to gitignore
+#md
 *.md
 
+#png
 *.png
 
+#pycache
+scripts/__pycache__
 
 ### Gradle ###
 .gradle
@@ -46,13 +49,4 @@ gradle-app.setting
 *.hprof
 /.version
 /build.properties
-
-
-# Ignore Gradle project-specific cache directory
-
-# Ignore Gradle build output directory
-build
 /extracted_folder
-
-
-
