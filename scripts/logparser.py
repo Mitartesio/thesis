@@ -35,7 +35,7 @@ def main():
     print(f"Scanning XML reports in: {REPORT_DIR}")
 
     if not REPORT_DIR.exists():
-        print(f"❌ ERROR: Directory does not exist: {REPORT_DIR}")
+        print(f"ERROR: Directory does not exist: {REPORT_DIR}")
         return
 
     # Read every XML report file
