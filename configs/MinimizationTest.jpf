@@ -4,10 +4,10 @@ classpath = CupTest/app/build/classes/java/main
 
 vm.args = -ea
 
-listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty
+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty
 
 # JPF search settings
-search.class = SearchAlgorithms.Reset_Search
+search.class = gov.nasa.jpf.search.Reset_Search
 #double[] arr = double[]{0.999,0.001}; and double eps = 0.1, k becomes 2302
 #+search_with_reset.k = 500000
 +search_with_reset.probabilities = 0.999 0.001
