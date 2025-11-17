@@ -56,4 +56,16 @@ tasks.named('test') {
     systemProperty "jpf.home", "${projectDir}/../../jpf-core"
     // Enable Java asserts in your SUT if you use `assert`
     jvmArgs "-ea"
+
+    // ADD THESE LINES:
+    testLogging {
+        showStandardStreams = true
+        showCauses = true
+        events "passed", "failed", "skipped", "standard_out", "standard_error"
+    }
+
+    outputs.upToDateWhen { false }  // force re-run
+
+    // FORCE Gradle to capture stdout into XML:
+    systemProperty "junit.jupiter.extensions.autodetection.enabled", "true"
 }

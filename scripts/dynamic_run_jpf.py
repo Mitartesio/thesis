@@ -21,7 +21,6 @@ CONFIGS_DIR = ROOT / "configs"
 
 
 def setup():
-
     """ Check whether script is run with correct version of java (only checks if its java 11)"""
     result = subprocess.run(["java","-version"], stderr=subprocess.PIPE, text=True)
 
@@ -35,7 +34,6 @@ def setup():
         else:
             print("WARNING: Using wrong version of java. please use java 11")
             sys.exit(1)
-
 
     """Here we're building the jars needed for jpf _ NOT CONFIRMED WORKING YET"""
 
@@ -210,6 +208,82 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     # count += 1
     return results, rc, k_value
 
+def run_gradle_tests(gradletestfile: str): # making it more modular
+    log_file = ROOT / "reports" / f"{gradletestfile}.log"
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    gradle_cmd = [
+        "./gradlew",
+        "test", 
+        "--tests",
+        f"sut.{gradletestfile}"
+    ]
+
+    print("Running Gradle tests...")
+    with open(log_file, "w") as f:
+        result = subprocess.run(
+            gradle_cmd,
+            cwd=str(CUPTEST),
+            stdout=f,
+            stderr=subprocess.STDOUT,
+            text=True,
+            #check=True makes it so it doesn't create the csv if the build fails
+        )
+
+    print(f"Gradle test finished with return code {result.returncode}")
+    print(f"Gradle test log saved to {log_file}")
+    return log_file
+
+def parse_console_log(log_file: Path, output_csv: Path): #need to make it so it takes str name instead
+    output_csv.parent.mkdir(parents=True, exist_ok=True)
+
+    rows = []
+    current_rep = None
+    current_result = None
+    repetition_count = 0
+    problem_name = log_file.stem
+    is_repetition_test = False
+
+    with open(log_file, "r") as f:
+        for line in f:
+            line = line.strip()
+            #   "MinimizationTesting > repetition 123 of 10000"
+            if "repetition" in line and "of" in line:
+                try:
+                    parts = line.split()
+                    rep_index = parts.index("repetition") + 1
+                    current_rep = int(parts[rep_index])
+                    # rep_number = int(parts[3]) # x of n
+                except Exception:
+                    current_rep = None
+
+            # Repeated tests
+            elif line.startswith("RESULT"):
+                current_result = 0 if line.split(":", 1)[1].strip().lower() == "true" else 1
+                # current_result = line.split(":", 1)[1].strip()
+
+            # for singular test run
+            if "repetition" not in line:
+                if line.endswith("PASSED"):
+                    repetition_count += 1
+                    rows.append([problem_name, repetition_count, 0]) # didnt find for instance deadlock.
+
+                elif line.endswith("FAILED"):
+                    repetition_count += 1
+                    rows.append([problem_name, repetition_count, 1])
+
+            if current_rep is not None and current_result is not None:
+                rows.append([problem_name, current_rep, current_result])
+                current_rep = None
+                current_result = None
+
+    with open(output_csv, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["problem", "k", "violated"])
+        writer.writerows(rows)
+
+    print(f"Parsing done. output -> {output_csv}")
+
 
 # Something like this:
 # INSTANCES_preSorted_Adaptive: List[Tuple[str, str]] = {
@@ -235,8 +309,14 @@ if __name__ == "__main__":
 
     # use args when calling file to get it to run the experiment you're trying to.
     # if no args provided, utilizes the algo_to_jpf dictionary
-
-    setup()
+    # setup()
 
     # Give epsilon and p probability
-    handle_jpf()
+    # handle_jpf()
+
+    log_file = run_gradle_tests("MinimizationTesting")
+    outputcsv = ROOT / "reports" / "MinimizationTesting.csv"
+    parse_console_log(log_file, outputcsv)
+    logfile = run_gradle_tests("DeadlockTesting")
+    output_csv = ROOT / "reports" / "DeadlockTesting.csv"
+    parse_console_log(logfile, output_csv)

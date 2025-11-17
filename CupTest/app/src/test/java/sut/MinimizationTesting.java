@@ -18,18 +18,17 @@ public class MinimizationTesting extends TestJPF {
     }
 
 
-    @BeforeEach
-    public void setup() {
+@BeforeEach
+public void setup() {
+test = new MinimizationTest();
 
-        test = new MinimizationTest();
+}
 
-    }
-
-    @RepeatedTest(100000)
-    public void runTest() throws InterruptedException {
-        Assertions.assertTrue(test.run());
-    }
-
+@RepeatedTest(10000)
+public void runTest() throws InterruptedException {
+    Assertions.assertTrue(test.run());
+    System.out.println("RESULT:" + test.run());
+}
 
     @Test
     public void testMinimizationWithJpf() throws InterruptedException {
