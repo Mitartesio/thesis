@@ -61,5 +61,6 @@ if __name__ == '__main__':
     raw_res = read_results('reports/test123.csv')
     med_mea = get_mean_median('reports/test123.csv')
     med_mea2 = get_mean_median("reports/combinedUniRand.csv")
+    combined = get_mean_median('reports/base_total.csv')
     #write_latex_tabulars(med_mea, 'plots/test_table.tex')
-    write_latex_tabulars(med_mea2, "plots/combined_table.tex")
+    write_latex_tabulars(combined, "plots/combined_table.tex")

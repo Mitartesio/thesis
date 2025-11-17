@@ -19,4 +19,6 @@ def combine_and_convert_csv(csv1: str, csv2: str, combinedname: str):
 if __name__ == '__main__':
     #combine_and_convert_csv("MinimizationTest", "DeadlockExample", "test123")
     #combine_and_convert_csv("MinimizationTestRand", "DeadlockExampleRand", "test123rand")
-    combine_and_convert_csv("test123", "test123rand", "combinedUniRand")
+    #combine_and_convert_csv("test123", "test123rand", "combinedUniRand")
+    combine_and_convert_csv("MinimizationTesting", "DeadlockTesting", "base_tests_jvm")
+    combine_and_convert_csv('combinedUniRand', 'base_tests_jvm', "base_total")
