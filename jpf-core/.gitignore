@@ -18,6 +18,9 @@ build/
 .gradle/
 reports/
 
+ # Intellij
+/.idea
+
 ####### Covers NetBeans IDE #######
 nbproject/private/
 nbbuild/
@@ -82,3 +85,4 @@ local
 temp.ser
 output.txt
 file
+/build-default/

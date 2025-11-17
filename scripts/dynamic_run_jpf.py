@@ -165,10 +165,11 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     java_cmd = [
         "java",
         "-cp", host_cp,
-
         "gov.nasa.jpf.tool.RunJPF",
         str(config)
     ]
+
+    print(java_cmd)
 
     # cmd = [JPF_CMD, str(config)] #changing config Path object to str
     results = []

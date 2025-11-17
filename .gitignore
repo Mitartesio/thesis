@@ -21,6 +21,8 @@ scripts/__pycache__
 
 ### Gradle ###
 .gradle
+/gradle
+
 **/build/
 !src/**/build/
 

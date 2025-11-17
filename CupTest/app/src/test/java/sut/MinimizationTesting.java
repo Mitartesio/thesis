@@ -29,8 +29,8 @@ public void runTest() throws InterruptedException {
         if (verifyNoPropertyViolation(
                 "+classpath=/home/tobia/master_thesis/jpf/Simple_Example_Thesis/CupTest/app/build/classes/java/test;/home/tobia/master_thesis/jpf/Simple_Example_Thesis/CupTest/app/build/classes/java/main",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
-                "+search.class = SearchAlgorithms.Reset_Search",
+                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+                "+search.class = gov.nasa.jpf.search.Reset_Search",
 //                "+search_with_reset.k = 500",
                 "+search_with_reset.probabilities = 0.999 0.001",
                 "+search_with_reset.eps = 0.1",
