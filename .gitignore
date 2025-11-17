@@ -50,3 +50,10 @@ gradle-app.setting
 /.version
 /build.properties
 /extracted_folder
+.DS_Store
+CupTest/.DS_Store
+CupTest/app/.DS_Store
+CupTest/app/bin/.DS_Store
+LEGACY/.DS_Store
+LEGACY/Benchmarks/.DS_Store
+LEGACY/jpf/.DS_Store

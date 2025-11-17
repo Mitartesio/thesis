@@ -1,15 +1,21 @@
 package sut;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.*;
 
 import gov.nasa.jpf.util.test.TestJPF;
-import org.junit.jupiter.api.Test;
+
+import java.io.File;
 
 
 public class MinimizationTesting extends TestJPF {
     MinimizationTest test;
+    public static String classPath;
+
+
+    @BeforeAll
+    public static void init() {
+        classPath = getClassPath();
+    }
 
 
     @BeforeEach
@@ -27,8 +33,10 @@ public class MinimizationTesting extends TestJPF {
 
     @Test
     public void testMinimizationWithJpf() throws InterruptedException {
+
         if (verifyNoPropertyViolation(
-                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
+//                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
+                "+classpath=" + classPath,
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
@@ -46,5 +54,17 @@ public class MinimizationTesting extends TestJPF {
             test.run();
 //            gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
         }
+    }
+
+    public static String getClassPath() {
+        String userDir = System.getProperty("user.dir");   //
+//        System.out.println(userDir);
+        String fs = File.separator;                   // For / or \ for win/osx, neet help which works, as \ escapes space in absolutep aths on osx. This is where our problem is if we have problem on windows.
+        String ps = File.pathSeparator;
+
+        String testClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "test";
+        String mainClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "main";
+
+        return testClasses + ps + mainClasses;
     }
 }

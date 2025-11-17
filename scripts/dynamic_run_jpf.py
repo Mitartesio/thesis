@@ -141,8 +141,9 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     # Building the HOST JVM classpath, so basically so the JPF jars can recognize our search algorithm(s)
     cp_parts = [
         str(JPF_JAR_FOLDER / "jpf.jar"),
-        str(JPF_JAR_FOLDER / "jpf-classes.jar"),
-        str(BUILD_CLASSES),
+        str(JPF_JAR_FOLDER / "jpf-classes.jar")
+        # ,
+        # str(BUILD_CLASSES),
     ]
     if BUILD_RES.exists():
         cp_parts.append(str(BUILD_RES))
