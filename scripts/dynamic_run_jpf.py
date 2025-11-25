@@ -309,14 +309,14 @@ if __name__ == "__main__":
 
     # use args when calling file to get it to run the experiment you're trying to.
     # if no args provided, utilizes the algo_to_jpf dictionary
-    # setup()
+    setup()
 
     # Give epsilon and p probability
-    # handle_jpf()
+    handle_jpf()
 
-    log_file = run_gradle_tests("MinimizationTesting")
-    outputcsv = ROOT / "reports" / "MinimizationTesting.csv"
-    parse_console_log(log_file, outputcsv)
-    logfile = run_gradle_tests("DeadlockTesting")
-    output_csv = ROOT / "reports" / "DeadlockTesting.csv"
-    parse_console_log(logfile, output_csv)
+    # log_file = run_gradle_tests("MinimizationTesting")
+    # outputcsv = ROOT / "reports" / "MinimizationTesting.csv"
+    # parse_console_log(log_file, outputcsv)
+    # logfile = run_gradle_tests("DeadlockTesting")
+    # output_csv = ROOT / "reports" / "DeadlockTesting.csv"
+    # parse_console_log(logfile, output_csv)

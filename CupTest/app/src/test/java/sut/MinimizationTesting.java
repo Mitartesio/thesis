@@ -1,5 +1,6 @@
 package sut;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 
 import gov.nasa.jpf.util.test.TestJPF;
@@ -18,17 +19,18 @@ public class MinimizationTesting extends TestJPF {
     }
 
 
-@BeforeEach
-public void setup() {
-test = new MinimizationTest();
+    @BeforeEach
+    public void setup() {
+        test = new MinimizationTest();
 
-}
+    }
 
-@RepeatedTest(10000)
-public void runTest() throws InterruptedException {
-    Assertions.assertTrue(test.run());
-    System.out.println("RESULT:" + test.run());
-}
+//@RepeatedTest(10000)
+//public void runTest() throws InterruptedException {
+//    Assertions.assertTrue(test.run());
+//    System.out.println("RESULT:" + test.run());
+//}
+
 
     @Test
     public void testMinimizationWithJpf() throws InterruptedException {
@@ -51,7 +53,8 @@ public void runTest() throws InterruptedException {
         )) {  // specifies the test goal, "jpfOptions" are optional
             test = new MinimizationTest();
             test.run();
-//            gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
+
+            //gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
         }
     }
 
