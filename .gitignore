@@ -50,3 +50,5 @@ gradle-app.setting
 /.version
 /build.properties
 /extracted_folder
+
+*.DS_STORE
