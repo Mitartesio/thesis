@@ -78,8 +78,35 @@ public class Reset_Search extends Search {
             }
             }
 
+            if (forward()) {
+                notifyStateAdvanced();
+
+                // If an error has occured
+                if (currentError != null) {
+                    notifyPropertyViolated();
+                    System.out.println(currentError.getDetails());
+
+                    if (hasPropertyTermination()) {
+                        break;
+                    }
+                    // for search.multiple_errors we go on and treat this as a new state
+                    // but hasPropertyTermination() will issue a backtrack request
+                }
+
+                // If memory limit has been reached
+                if (!checkStateSpaceLimit()) {
+                    notifySearchConstraintHit("memory limit reached: " + minFreeMemory);
+                    // can't go on, we exhausted our memory
+                    break;
+                }
+
+                if (hasPropertyTermination()) {
+                    break;
+                } else {
+                    notifyStateProcessed();
+                }
             // If the current state is an end state or forward() returns false
-            if (isEndState()) {
+            }else{
 
                 // If trials is 0 stop the search else restart from initial state
                 if (trials <= 0) {
@@ -121,35 +148,6 @@ public class Reset_Search extends Search {
                             }
                         }
                     }
-                }
-            }
-
-            if (forward()) {
-                notifyStateAdvanced();
-
-                // If an error has occured
-                if (currentError != null) {
-                    notifyPropertyViolated();
-                    System.out.println(currentError.getDetails());
-
-                    if (hasPropertyTermination()) {
-                        break;
-                    }
-                    // for search.multiple_errors we go on and treat this as a new state
-                    // but hasPropertyTermination() will issue a backtrack request
-                }
-
-                // If memory limit has been reached
-                if (!checkStateSpaceLimit()) {
-                    notifySearchConstraintHit("memory limit reached: " + minFreeMemory);
-                    // can't go on, we exhausted our memory
-                    break;
-                }
-
-                if (hasPropertyTermination()) {
-                    break;
-                } else {
-                    notifyStateProcessed();
                 }
             }
 
