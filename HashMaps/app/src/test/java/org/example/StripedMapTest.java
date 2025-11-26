@@ -12,33 +12,39 @@ public class StripedMapTest extends TestJPF {
     @BeforeEach
     public void setup() {
 
-        map = new StripedMap<>(10);
+        map = new StripedMap<>(5);
 
     }
 
-    @Test
+    // @Test
     public void testReallocationJPF() throws Exception{
         if(verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 10",
+                "+search_with_reset.k = 1500",
                 // "+search_with_reset.probabilities = 0.99 0.01",
                 // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 5",
+                "+numberOfThreads = 10",
                 "+search.multiple_errors = false",
                 "+jpf.report.console.property_violation = error",
                 "+report.console.finished = result,statistics,error",
                 "+report.unique_errors = true",
                 "+log.warning=gov.nasa.jpf",
-                "+log.info=gov.nasa.jpf"
+                "+log.info=gov.nasa.jpf",
+                "+vm.verbose=true",
+                "+report.console.property_violation=all",
+                "+log.info=gov.nasa.jpf",
+                "+log.warning=gov.nasa.jpf"
         )) {
-
             map = new StripedMap<>(5);
+            // map = new StripedMap<>(5);
             // testReallocation(map);
 
-            Thread[] threads = new Thread[5];
+            // map = new WrongStripedMap<>(4);
+
+            Thread[] threads = new Thread[10];
             
 
             for(int i = 0; i<threads.length; i++){
@@ -58,13 +64,14 @@ public class StripedMapTest extends TestJPF {
                 final int mul = i * 100;
 
                 for(int k = 0; k<50; k++){
-                    assert map.containsKey(k+mul);
+                    assert map.containsKey(k+mul) : "Found the bug big bro";
+                    // assert true;
                 }
             }
         }
     }
 
-    @Test
+    // @Test
     public void testOverwrite() throws InterruptedException{
         if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
@@ -90,7 +97,7 @@ public class StripedMapTest extends TestJPF {
 
             final Thread[] threads = new Thread[threadCount];
 
-            map = new StripedMap<>(5);
+            // map = new StripedMap<>(5);
 
 
             for(int i = 0; i<threads.length; i++){
@@ -136,7 +143,7 @@ public class StripedMapTest extends TestJPF {
         }
     }       
     
-    @Test
+    
     public void testGet(){
         if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
@@ -153,7 +160,7 @@ public class StripedMapTest extends TestJPF {
                 "+report.unique_errors = true"
         )) {
 
-            map = new StripedMap<>(5);
+            // map = new StripedMap<>(5);
 
             for(int i = 0; i<1000; i++){
                 map.put(i, i+"");

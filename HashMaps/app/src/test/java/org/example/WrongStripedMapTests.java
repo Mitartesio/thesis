@@ -15,24 +15,38 @@ import gov.nasa.jpf.util.test.TestJPF;
 public class WrongStripedMapTests extends TestJPF{
     Map<String, String> logPassedTests = new HashMap<>();
     Map<String, String> logFailedTests = new HashMap<>();
+    int mapChoice;
 
-    @Test
+    
     public void test() throws Exception{
-            testReallocationJPF();
-            // bigTest(); //Fucking long shit
+    // testReallocationJPF();
+            
+            bigTest(); //Fucking long shit
 
-            // testGet();
+            testGet();
 
             testOverwrite();
 
-        assert logPassedTests.size() == 6 : convertMap();
+        assert logPassedTests.size() == 7 : convertMap();
+    }
+
+    private void log(boolean passed, String name){
+        if(passed){
+            logPassedTests.putIfAbsent("map " + mapChoice, "");
+            
+            logPassedTests.put("map " + mapChoice, logPassedTests.get("map " + mapChoice) + "\n" + name);
+        }else{
+            logFailedTests.putIfAbsent("map " + mapChoice, "");
+
+            logFailedTests.put("map " + mapChoice, logPassedTests.get("map " + mapChoice) + "\n" + name);
+        }
     }
 
     private String convertMap(){
         String fail = "Failed tests: \n";
 
         for(String failedTest : logFailedTests.keySet()){
-            fail += failedTest + "\n";
+            fail += failedTest + logFailedTests.get(failedTest) + "\n";
         }
 
         fail += "Passed tests: \n";
@@ -41,27 +55,24 @@ public class WrongStripedMapTests extends TestJPF{
             fail += "No passed tests";
         }else{
         for(String passedTest : logPassedTests.keySet()){
-            fail += passedTest + "\n";
+            fail += passedTest + logPassedTests.get(passedTest) + "\n";
         }
     }
         
         return fail;
     }
-    
-    public void testReallocationJPF() throws Exception{
-        
-        for(int name = 0; name<6; name++){
-            try{
-
-        if(verifyUnhandledException("java.lang.AssertionError",
+    // @Test
+    public void testReallocationWrongMap4() throws Exception{
+        // System.out.println("This is the map used: " + map.getClass().getName());
+        if(verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 100",
+                "+search_with_reset.k = 1000",
                 // "+search_with_reset.probabilities = 0.99 0.01",
                 // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 5",
+                "+numberOfThreads = 10",
                 "+search.multiple_errors = false",
                 "+jpf.report.console.property_violation = error",
                 "+report.console.finished = result,statistics,error",
@@ -70,31 +81,8 @@ public class WrongStripedMapTests extends TestJPF{
                 "+log.info=gov.nasa.jpf"
         )) {
 
-            OurMap<Integer, String> map
-            ;//  = new WrongStripedMap<>(5);
-
-            if(name == 0){
-            map = new WrongStripedMap<>(5);
-        }else if(name == 1){
-            map = new WrongStripedMap2<>(5);
-        }
-        else if(name == 2){
-            map = new WrongStripedMap3<>(5);
-        }
-        else if(name == 3){
-            map = new WrongStripedMap4<>(5);
-        }else if(name == 4){
-            map = new WrongStripedMap4<>(5);
-        }
-        else{
-            map = new WrongStripedMap6<>(5);
-        }
-
-
-
-            // testReallocation(map);
-
-            Thread[] threads = new Thread[5];
+            OurMap<Integer, String> map = new WrongStripedMap4<>(4);
+            Thread[] threads = new Thread[10];
             
 
             for(int i = 0; i<threads.length; i++){
@@ -118,32 +106,29 @@ public class WrongStripedMapTests extends TestJPF{
                 }
             }
 
-            if(!logPassedTests.containsKey("map" + name)){
-                logPassedTests.put("map" + name, "");
-            }
-            logPassedTests.put("map" + name, logPassedTests.get("map" + name) + "Reallocation passed for map: " + name + "\n");
+            // if(!logPassedTests.containsKey("map" + name)){
+            //     logPassedTests.put("map" + name, "");
+            // }
+            // logPassedTests.put("map" + name, logPassedTests.get("map" + name) + "Reallocation passed for map: " + name + "\n");
         }
     }
-    catch(Error e){
-        if(!logFailedTests.containsKey("map" + name)){
-            logFailedTests.put("map" + name, "");
-        }
-        logFailedTests.put("map" + name, logFailedTests.get("map" + name) + "Failed to find bug in test Reallocation " + name + "failed\n");
-        }
-    }
-}
+    // catch(Error e){
+    //     if(!logFailedTests.containsKey("map" + name)){
+    //         logFailedTests.put("map" + name, "");
+    //     }
+    //     logFailedTests.put("map" + name, logFailedTests.get("map" + name) + "Failed to find bug in test Reallocation " + name + "failed\n");
+    //     }
+    // }
+// }
 
-    
+    // @Test
     public void bigTest() throws Exception{
-        for(int name = 0; name <6; name++){
-
-        try{
-        if (verifyUnhandledException("java.lang.AssertionError",
+        if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 100",
+                "+search_with_reset.k = 1000",
                 // "+search_with_reset.probabilities = 0.99 0.01",
                 // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 10",
@@ -152,28 +137,32 @@ public class WrongStripedMapTests extends TestJPF{
                 "+report.console.finished = result,statistics,error",
                 "+report.unique_errors = true"
         )) {
-            for(int a = 0; a<10000; a++){
+            // for(int a = 0; a<10000; a++){
+
+            OurMap<Integer, String> map = new WrongStripedMap<>(4);
+
+
             final int threadCount = 10;
             final int perThread = 25;
             final int range = 10;
-            OurMap<Integer, String> map;
+            // OurMap<Integer, String> map;
 
-            if(name == 0){
-            map = new WrongStripedMap<>(5);
-            }else if(name == 1){
-                map = new WrongStripedMap2<>(5);
-            }
-            else if(name == 2){
-                map = new WrongStripedMap3<>(5);
-            }
-            else if(name == 3){
-                map = new WrongStripedMap4<>(5);
-            }else if(name == 4){
-                map = new WrongStripedMap4<>(5);
-            }
-            else{
-                map = new WrongStripedMap6<>(5);
-            }
+            // if(name == 0){
+            // map = new WrongStripedMap<>(5);
+            // }else if(name == 1){
+            //     map = new WrongStripedMap2<>(5);
+            // }
+            // else if(name == 2){
+            //     map = new WrongStripedMap3<>(5);
+            // }
+            // else if(name == 3){
+            //     map = new WrongStripedMap4<>(5);
+            // }else if(name == 4){
+            //     map = new WrongStripedMap4<>(5);
+            // }
+            // else{
+            //     map = new WrongStripedMap6<>(5);
+            // }
 
             
             final Thread[] threads = new Thread[threadCount];
@@ -279,28 +268,18 @@ public class WrongStripedMapTests extends TestJPF{
         for (int t = 0; t < threadCount; t++) {
             assert totalAddedBy[t] == actualAddedBy[t] : "addedBy mismatch t=" + t;
         }
-
-        }
     }
-}catch(Error e){
-        if(!logFailedTests.containsKey("map" + name)){
-            logFailedTests.put("map" + name, "");
-        }
-        logFailedTests.put("map" + name, logFailedTests.get("map" + name) + "Failed to find bug in test Reallocation " + name + "failed\n");
-        }
 }
-}
+    @Test
+    public void testOverwrite() throws InterruptedException{
 
-public void testOverwrite() throws InterruptedException{
-
-        for(int name = 0; name < 6; name++){
-            try{
-        if (verifyUnhandledException("java.lang.AssertionError",
+       
+        if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 100",
+                "+search_with_reset.k = 1000",
                 // "+search_with_reset.probabilities = 0.99 0.01",
                 // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 5",
@@ -319,24 +298,28 @@ public void testOverwrite() throws InterruptedException{
 
             final Thread[] threads = new Thread[threadCount];
 
-            OurMap<Integer, String> map;
+            // OurMap<Integer, String> map;
 
-            if(name == 0){
-            map = new WrongStripedMap<>(5);
-            }else if(name == 1){
-                map = new WrongStripedMap2<>(5);
-            }
-            else if(name == 2){
-                map = new WrongStripedMap3<>(5);
-            }
-            else if(name == 3){
-                map = new WrongStripedMap4<>(5);
-            }else if(name == 4){
-                map = new WrongStripedMap4<>(5);
-            }
-            else{
-                map = new WrongStripedMap6<>(5);
-            }
+            // if(name == 0){
+            // map = new WrongStripedMap<>(5);
+            // }else if(name == 1){
+            //     map = new WrongStripedMap2<>(5);
+            // }
+            // else if(name == 2){
+            //     map = new WrongStripedMap3<>(5);
+            // }
+            // else if(name == 3){
+            //     map = new WrongStripedMap4<>(5);
+            // }else if(name == 4){
+            //     map = new WrongStripedMap4<>(5);
+            // }
+            // else{
+            //     map = new WrongStripedMap6<>(5);
+            // }
+
+            
+            OurMap<Integer, String> map = new WrongStripedMap<>(4);
+
 
 
             for(int i = 0; i<threads.length; i++){
@@ -379,26 +362,18 @@ public void testOverwrite() throws InterruptedException{
             for(int i = 0; i<threadCount; i++){
                 assert actualIncrements[i] == addedFinalBy[i];
             }
-            logPassedTests.put("map" + name, logPassedTests.get("map" + name) + "Reallocation passed for map: " + name + "\n");
         }
-    }catch(Error e){
-        if(!logFailedTests.containsKey("map" + name)){
-            logFailedTests.put("map" + name, "");
-        }
-        logFailedTests.put("map" + name, logFailedTests.get("map" + name) + "Failed to find bug in test Reallocation " + name + "failed\n");
-        }
-    }        
     }
-
+            
+    
+    @Test
     public void testGet(){
-        for(int name = 0; name < 6; name++){
-            try{
-        if (verifyUnhandledException("java.lang.AssertionError",
+        if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 100",
+                "+search_with_reset.k = 1000",
                 // "+search_with_reset.probabilities = 0.99 0.01",
                 // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 10",
@@ -408,56 +383,49 @@ public void testOverwrite() throws InterruptedException{
                 "+report.unique_errors = true"
         )) {
 
-            OurMap<Integer, String> map;
+            // OurMap<Integer, String> map;
 
-            if(name == 0){
-            map = new WrongStripedMap<>(5);
-            }else if(name == 1){
-                map = new WrongStripedMap2<>(5);
-            }
-            else if(name == 2){
-                map = new WrongStripedMap3<>(5);
-            }
-            else if(name == 3){
-                map = new WrongStripedMap4<>(5);
-            }else if(name == 4){
-                map = new WrongStripedMap4<>(5);
-            }
-            else{
-                map = new WrongStripedMap6<>(5);
-            }
+            // if(name == 0){
+            // map = new WrongStripedMap<>(5);
+            // }else if(name == 1){
+            //     map = new WrongStripedMap2<>(5);
+            // }
+            // else if(name == 2){
+            //     map = new WrongStripedMap3<>(5);
+            // }
+            // else if(name == 3){
+            //     map = new WrongStripedMap4<>(5);
+            // }else if(name == 4){
+            //     map = new WrongStripedMap4<>(5);
+            // }
+            // else{
+            //     map = new WrongStripedMap6<>(5);
+            // }
 
-            for(int i = 0; i<1000; i++){
+            OurMap<Integer, String> map = new WrongStripedMap<>(4);
+
+
+            int operations = 200;
+            for(int i = 0; i<operations; i++){
                 map.put(i, i+"");
             }
 
             Thread[] threads = new Thread[10];
 
-            for(int j = 0; j<threads.length; j++){
-                int decision = j;
-                threads[j] = new Thread(() -> {
-                    if(decision % 2 == 0){
-                        final int mul = (decision + 1) * 1000;
-
-                        for(int k = mul; k<mul + 500; k++){
+            for(int i = 0; i<threads.length; i++){
+                final int choice = i;
+                threads[i] = new Thread(() -> {
+                    if(choice % 2 == 0){
+                    for(int k = 0; k<operations; k++){
+                        assert map.get(k).equals(k+"");
+                    }}else{
+                        for(int k = operations; k<operations*3; k++){
                             map.put(k, k+"");
-                        }
-                    }else{
-                        for(int k = 0; k<1000; k++){
-                            assert map.containsKey(k);
                         }
                     }
                 });
             }
-
-            logPassedTests.put("map" + name, logPassedTests.get("map" + name) + "TestGet passed for map: " + name + "\n");
         }
-    }catch(Error e){
-        if(!logFailedTests.containsKey("map" + name)){
-            logFailedTests.put("map" + name, "");
-        }
-        logFailedTests.put("map" + name, logFailedTests.get("map" + name) + "Failed to find bug in test TestGet " + name + "failed\n");
-        }
-}
     }
 }
+

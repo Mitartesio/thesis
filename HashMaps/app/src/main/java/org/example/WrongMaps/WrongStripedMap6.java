@@ -7,7 +7,7 @@ package org.example.WrongMaps;// Thread-safe synchronized hash map using lock st
 
 //This class is only intended for bug injection and is not correctly implemented. 
 
-//The bug in question for this class is found in the field ItemNode that should be volatile method where the hashing happens outside of sync.
+//The bug in question for this class is found in the field ItemNode that should be volatile.
 
 import java.util.function.BiConsumer;
 

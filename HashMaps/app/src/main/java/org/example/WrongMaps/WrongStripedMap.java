@@ -12,6 +12,7 @@ package org.example.WrongMaps;
 import java.util.function.BiConsumer;
 
 import org.example.OurMap;
+import org.example.StripedMap;
 
 // A hash map that permits thread-safe concurrent operations, using
 // lock striping (intrinsic locks on Objects created for the purpose).
@@ -223,4 +224,116 @@ public class WrongStripedMap<K, V> implements OurMap<K, V> {
             return node;
         }
     }
+
+    // public static void main(String[] args) throws InterruptedException {
+        
+    //     //Test 1
+
+    //     final WrongStripedMap<Integer, String> mapTest1 = new WrongStripedMap<>(5);
+    //         // map = new StripedMap<>(5);
+    //         // testReallocation(map);
+
+    //         // map = new WrongStripedMap<>(4);
+
+    //         Thread[] threads = new Thread[10];
+            
+
+    //         for(int i = 0; i<threads.length; i++){
+    //             final int mul = i * 100;
+    //             threads[i] = new Thread(() -> {
+    //                 for(int k = 0; k<50; k++){
+    //                     mapTest1.put(k+mul, k + "");
+    //                 }
+    //             });
+    //         }
+
+    //         for(int i = 0; i<threads.length; i++)threads[i].start();
+
+    //         for(int i = 0; i<threads.length; i++)threads[i].join();
+
+    //         for(int i = 0; i<threads.length; i++){
+    //             final int mul = i * 100;
+
+    //             for(int k = 0; k<50; k++){
+    //                 assert mapTest1.containsKey(k+mul) : "Found the bug big bro";
+    //                 // assert true;
+    //             }
+    //         }
+
+    //     //Test 2
+    //     final int range = 7;
+
+    //         final int threadCount = 5;
+
+    //         final int operations = 50;
+
+    //         final int[] addedFinalBy = new int[threadCount];
+
+    //         final WrongStripedMap<Integer, String> mapTest2 = new WrongStripedMap<>(4);
+
+
+    //         for(int i = 0; i<threads.length; i++){
+
+    //             String threadName = "thread " + i;
+    //             threads[i] = new Thread(() -> {
+    //                 final int[] addedBy = new int[threadCount];
+    //                 for(int j = 0; j<operations; j++){
+    //                     int key = j % range;
+
+    //                     String oldThread = mapTest2.put(key, threadName);   
+
+    //                     if(oldThread != null){
+    //                     addedBy[Integer.parseInt(oldThread.substring(oldThread.length()-1))]--;}
+                        
+    //                     addedBy[Integer.parseInt(threadName.substring(threadName.length()-1))]++;
+                    
+    //                 }
+
+    //                 synchronized(addedBy){
+    //                     for(int j = 0; j<addedBy.length; j++){
+    //                         addedFinalBy[j] += addedBy[j];
+    //                     }
+    //                 }
+    //             });
+    //         }
+
+    //         for(int i = 0; i<threadCount; i++){
+    //             threads[i].start();
+    //         }
+
+    //         for(int i = 0; i<threadCount; i++){
+    //             threads[i].join();
+    //         }
+
+    //         int[] actualIncrements = new int[threadCount];
+            
+    //         mapTest2.forEach((key, value) -> actualIncrements[Integer.parseInt(value.substring(value.length()-1))]++);
+
+    //         for(int i = 0; i<threadCount; i++){
+    //             assert actualIncrements[i] == addedFinalBy[i];
+    //         }
+
+    //     //test 3
+    //     final WrongStripedMap<Integer, String> mapTest3 = new WrongStripedMap<>(4);
+
+
+    //         int operationsTest3 = 200;
+    //         for(int i = 0; i<operationsTest3; i++){
+    //             mapTest3.put(i, i+"");
+    //         }
+
+    //         for(int i = 0; i<threads.length; i++){
+    //             final int choice = i;
+    //             threads[i] = new Thread(() -> {
+    //                 if(choice % 2 == 0){
+    //                 for(int k = 0; k<operationsTest3; k++){
+    //                     assert mapTest3.get(k).equals(k+"");
+    //                 }}else{
+    //                     for(int k = operationsTest3; k<operationsTest3*3; k++){
+    //                         mapTest3.put(k, k+"");
+    //                     }
+    //                 }
+    //             });
+    //         }
+    // }
 }
