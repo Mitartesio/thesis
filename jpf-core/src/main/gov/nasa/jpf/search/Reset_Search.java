@@ -6,7 +6,9 @@ import gov.nasa.jpf.Config;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.VM;
 import gov.nasa.jpf.util.Ccp;
+import gov.nasa.jpf.vm.ChoiceGenerator;
 import gov.nasa.jpf.vm.RestorableVMState;
+import gov.nasa.jpf.vm.ThreadChoiceGenerator;
 
 /*
  *  The {@code Reset_Search} is supposed to be combined with Search_With_Reset and Listener_For_Counting in order
@@ -68,7 +70,11 @@ public class Reset_Search extends Search {
         while (!done) {
             // Initialize initial state if not initialized yet
             if (initState == null) {
+                VM vm = getVM();
+                ChoiceGenerator<?> cg = vm.getChoiceGenerator();
+                if(cg instanceof ThreadChoiceGenerator){
                 initState = vm.getRestorableState();
+            }
             }
 
             // If the current state is an end state or forward() returns false
@@ -79,14 +85,13 @@ public class Reset_Search extends Search {
                     done = true;
                     break;
                 } else {
-                    // decrement trials
-                    trials--;
-
                     // restore initial state
                     vm.restoreState(initState);
 
                     // If searching call init on Listener_Uniform_Adapts
                     if (searching) {
+                        // decrement trials
+                        trials--;
                         for (int i = 0; i < this.listeners.length; i++) {
                             if (this.listeners[i] instanceof Listener_Uniform_Adapts) {
                                 Listener_Uniform_Adapts searchListener = (Listener_Uniform_Adapts) this.listeners[i];
