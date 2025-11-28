@@ -16,6 +16,8 @@ BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
 JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
 JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
+JACONTEBE_ROOT = ROOT / "JaConTeBe"
+
 
 CONFIGS_DIR = ROOT / "configs"
 
@@ -180,12 +182,19 @@ def run_jpf(test_name: str, config_path: str, runs: int):
 
     val = None
     violated = False
+
+
+    # IF we run the JaConTeBe config this boolean catches it and fixed the correct root path needed for jacontebe. It's a rough fix, but probably the simplest.
+    is_jacontebe = "JaConTeBe/" in str(config)
+    work_directory = JACONTEBE_ROOT if is_jacontebe else ROOT
+
+
     subproc = subprocess.Popen(
         java_cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        cwd=ROOT
+        cwd=work_directory
     )
 
     for line in subproc.stdout:

@@ -62,6 +62,8 @@ public class Test44032 {
     }
 
     public static void main(String[] args) {
+        
+        System.out.println("hello");
         Reporter.reportStart("log4j44032", 0, "race");
         if(!OptionHelper.optionParse(args)){
             return;
@@ -75,5 +77,6 @@ public class Test44032 {
             }
         }
         Reporter.reportEnd(buggy);
+        System.out.println("hello");
     }
 }

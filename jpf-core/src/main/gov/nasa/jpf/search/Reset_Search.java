@@ -68,7 +68,7 @@ public class Reset_Search extends Search {
         notifySearchStarted();
 
         while (!done) {
-            System.out.println("I am doint another run and trials is: " + trials);
+            
             // Initialize initial state if not initialized yet
             if (initState == null) {
                 VM vm = getVM();
@@ -107,6 +107,7 @@ public class Reset_Search extends Search {
                 }
             // If the current state is an end state or forward() returns false
             }else{
+                System.out.println("I am doint another run and trials is: " + trials);
 
                 // If trials is 0 stop the search else restart from initial state
                 if (trials <= 0) {

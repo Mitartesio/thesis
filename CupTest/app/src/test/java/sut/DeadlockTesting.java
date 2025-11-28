@@ -25,8 +25,8 @@ public class DeadlockTesting extends TestJPF {
     public void testDeadlockExampleJpf() throws InterruptedException {
         if (verifyNoPropertyViolation(
                 //target = sut.DeadlockExample
-                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
-//                "classpath =" + classPath,
+//                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
+                "+classpath =" + classPath,
                 //# native_classpath = out
 
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",

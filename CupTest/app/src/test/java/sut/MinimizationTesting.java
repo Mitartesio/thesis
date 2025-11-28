@@ -25,11 +25,11 @@ public class MinimizationTesting extends TestJPF {
 
     }
 
-//@RepeatedTest(10000)
-//public void runTest() throws InterruptedException {
-//    Assertions.assertTrue(test.run());
-//    System.out.println("RESULT:" + test.run());
-//}
+    @RepeatedTest(10000)
+    public void runTest() throws InterruptedException {
+        Assertions.assertTrue(test.run());
+        System.out.println("RESULT:" + test.run());
+    }
 
 
     @Test
@@ -39,7 +39,8 @@ public class MinimizationTesting extends TestJPF {
 //                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
                 "+classpath=" + classPath,
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+                "+vm.args=-ea",
+                "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
 //                "+search_with_reset.k = 500",
                 "+search_with_reset.probabilities = 0.999 0.001",

@@ -25,6 +25,7 @@ package org.example;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CyclicBarrier;
 
 /**
  * A class that numbers strings, so they can be placed in bitsets.
@@ -36,7 +37,36 @@ public class StringNumberer extends ArrayNumberer<NumberedString> {
 
     private final Map<String, NumberedString> stringToNumbered = new HashMap<String, NumberedString>(1024);
 
+    // ADDED FOR TEST SYNCHRONIZATION
+//    ****************
+    private static volatile CyclicBarrier startBarrier;
+
+    public static void setStartBarrier(CyclicBarrier barrier) {
+        startBarrier = barrier;
+    }
+
+    private static void awaitBarrierIfSet() {
+        CyclicBarrier b = startBarrier;
+        if (b != null) {
+            try {
+                b.await();
+            } catch (Exception e) {
+                // In tests we can just wrap or ignore
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    // ***************
+
+
     public synchronized NumberedString findOrAdd(String s) {
+        // ADDED FOR TEST SYNCHRONIZATION
+        // ****************
+        // At this point we have ensured that barrier holds until findOrAdd has been called
+        awaitBarrierIfSet();  // <-- This is the barrier signal for the other thread to be allowed to start. We ensure
+        // ****************
+
+
         NumberedString ret = stringToNumbered.get(s);
         if (ret == null) {
             ret = new NumberedString(s);
