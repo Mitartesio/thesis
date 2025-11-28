@@ -48,7 +48,7 @@ def setup():
             sys.exit(f"[error] JAR generation failed: {e}")
 
 
-    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the grald build"""
+    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the gralde build"""
 
     try:
         print("Compiling with Gradle...")
@@ -197,7 +197,7 @@ def run_jpf(test_name: str, config_path: str, runs: int):
                     val = int(parts[1])
                 except ValueError:
                     pass
-        if line.startswith("violated"):
+        if line.startswith("violated") or line.startswith("Deadlock"):
             vio_value = line.split()[1].strip()
             if vio_value == "true":
                 violated = True
