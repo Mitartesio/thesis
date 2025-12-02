@@ -56,22 +56,30 @@ application {
 }
 
 tasks.named('test') {
-    // Use JUnit Platform for unit tests.
+    // Use JUnit Platform for unit tests
     useJUnitPlatform()
 
+    // Use Java toolchain for the test JVM (forces Java 11 dynamically)
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+
+    // System property for JPF home
     systemProperty "jpf.home", "${projectDir}/../../jpf-core"
-    // Enable Java asserts in your SUT if you use `assert`
+
+    // Enable Java asserts in SUT
     jvmArgs "-ea"
 
-    // ADD THESE LINES:
+    // Test logging configuration
     testLogging {
         showStandardStreams = true
         showCauses = true
         events "passed", "failed", "skipped", "standard_out", "standard_error"
     }
 
-    outputs.upToDateWhen { false }  // force re-run
+    // Force Gradle to rerun tests
+    outputs.upToDateWhen { false }
 
-    // FORCE Gradle to capture stdout into XML:
+    // Force Gradle to capture stdout into XML
     systemProperty "junit.jupiter.extensions.autodetection.enabled", "true"
 }

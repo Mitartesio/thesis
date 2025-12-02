@@ -43,7 +43,6 @@ public class CircularBufferBadTest {
 
     @RepeatedTest(10)
     public void runTest() throws Exception {
-        // Use arrays to capture assertion exceptions from threads
         final Exception[] t1Exception = { null };
         final Exception[] t2Exception = { null };
 
@@ -68,9 +67,36 @@ public class CircularBufferBadTest {
         t1.join();
         t2.join();
 
-        // If either thread threw an exception (AssertionError), test fails
+        // If either thread throws an exception, test fails
         boolean bugDetected = (t1Exception[0] != null) || (t2Exception[0] != null);
         Assertions.assertTrue(bugDetected, "Expected concurrency bug: circular buffer assertion failed");
+    }
+
+    //Not sure this makes sense to do. As JVM already has a hard time with deadlocks
+    //I htink the throw exception catching might just be better.
+    @RepeatedTest(10)
+    public void runTest2() throws Exception {
+
+        Thread t1 = new Thread(CircularBufferBad::t1);
+        Thread t2 = new Thread(CircularBufferBad::t2);
+
+        t1.start();
+        t2.start();
+
+        t1.join();
+        t2.join();
+
+        int first = getStaticInt("first");
+        int next = getStaticInt("next");
+        boolean send = getStaticBoolean("send");
+        boolean receive = getStaticBoolean("receive");
+
+        // If race condition happened, the buffer would be inconsistent
+        // t2 assertion might have failed internally, we check logical inconsistency
+        boolean inconsistencyDetected = first != next || send || receive;
+
+        Assertions.assertTrue(inconsistencyDetected,
+                "Expected concurrency bug: CircularBuffer state inconsistent after threads");
     }
 
 
@@ -105,4 +131,29 @@ public class CircularBufferBadTest {
         f.setAccessible(true);
         f.set(null, value);
     }
+
+    private int getStaticInt(String name) throws Exception {
+        Field f = CircularBufferBad.class.getDeclaredField(name);
+        f.setAccessible(true);
+        return f.getInt(null);
+    }
+
+    private boolean getStaticBoolean(String name) throws Exception {
+        Field f = CircularBufferBad.class.getDeclaredField(name);
+        f.setAccessible(true);
+        return f.getBoolean(null);
+    }
+
+    private char getStaticChar(String name) throws Exception {
+        Field f = CircularBufferBad.class.getDeclaredField(name);
+        f.setAccessible(true);
+        return f.getChar(null);
+    }
+
+    private Object getStaticObject(String name) throws Exception {
+        Field f = CircularBufferBad.class.getDeclaredField(name);
+        f.setAccessible(true);
+        return f.get(null);
+    }
+
 }
