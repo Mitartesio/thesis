@@ -88,6 +88,9 @@ public class Phase01BadTest {
         return testClasses + ps + mainClasses;
     }
 
+    // Reflection methods created to handle the private fields and methods of the
+    // tested class
+
     private void setStaticInt(String name, int value) throws Exception {
         Field f = Phase01Bad.class.getDeclaredField(name);
         f.setAccessible(true);

@@ -42,7 +42,7 @@ public class AccountBadTest extends TestJPF {
         // test.t2 = new Thread(() -> test.withdraw());
     }
 
-    @RepeatedTest(100)
+    @RepeatedTest(10000)
     public void runTest() throws Exception {
         Thread t1 = threadFor("deposit");
         Thread t2 = threadFor("withdraw");
