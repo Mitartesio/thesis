@@ -37,9 +37,11 @@ public class AccountBad {
     private static void check_result() {
         m.lock();
         try {
-            if (deposit_done && withdraw_done)
-                bug.set(true);
+            if (deposit_done && withdraw_done) {
+                boolean okay = (balance == (x - y) - z);
+              if (!okay) bug.set(true);
             assert balance == (x - y) - z : "Assert failed - Bug found!"; /* BAD */
+            }
         } finally {
             m.unlock();
         }
