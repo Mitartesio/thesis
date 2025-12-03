@@ -5,15 +5,30 @@ package sctbench.cs.origin;
 import java.util.concurrent.atomic.*;
 
 public class TokenRingBad {
-    static int x1 = 1;
-    static int x2 = 2; 
-    static int x3 = 1;
+    static int x1;
+    static int x2;
+    static int x3;
 
-    static AtomicBoolean flag1 = new AtomicBoolean(false);
-    static AtomicBoolean flag2 = new AtomicBoolean(false);
-    static AtomicBoolean flag3 = new AtomicBoolean(false);
+    static AtomicBoolean flag1;
+    static AtomicBoolean flag2;
+    static AtomicBoolean flag3;
+
+    static AtomicBoolean bug = new AtomicBoolean(false);
 
     public static void main(String[] args) {
+        runOnce();
+    }
+
+    public static boolean runOnce() {
+        x1 = 1;
+        x2 = 2;
+        x3 = 1;
+        flag1 = new AtomicBoolean(false);
+        flag2 = new AtomicBoolean(false);
+        flag3 = new AtomicBoolean(false);
+
+        bug.set(false);
+
         Thread id1 = new Thread(() -> {
             synchronized (TokenRingBad.class) {
                 x1 = (x3 + 1) % 4;
@@ -24,7 +39,7 @@ public class TokenRingBad {
         Thread id2 = new Thread(() -> {
             synchronized (TokenRingBad.class) {
                 x2 = x1;
-                flag2.set(true);  
+                flag2.set(true);
             }
         });
 
@@ -37,9 +52,9 @@ public class TokenRingBad {
 
         Thread id4 = new Thread(() -> {
             synchronized (TokenRingBad.class) {
-                if (flag1.get() && flag2.get() && flag3.get()) {
-                    assert (x1 == x2 && x2 == x3); /* BAD */
-                }
+                boolean ok = (x1 == x2 && x2 == x3);
+                if (!ok) bug.set(true);
+                assert (x1 == x2 && x2 == x3) : "Bug found!";
             }
         });
 
@@ -47,5 +62,15 @@ public class TokenRingBad {
         id2.start();
         id3.start();
         id4.start();
+
+        try {
+            id1.join();
+            id2.join();
+            id3.join();
+            id4.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return bug.get();
     }
 }

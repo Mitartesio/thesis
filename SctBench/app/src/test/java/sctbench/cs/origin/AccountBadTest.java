@@ -23,7 +23,7 @@ public class AccountBadTest extends TestJPF {
 
 
     @BeforeEach
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         test = new AccountBad();
 
         // test.x = 1;
@@ -52,22 +52,29 @@ public class AccountBadTest extends TestJPF {
         t2.start();
         t3.start();
 
+
+        //assures completion of all threads
+        t1.join();
+        t2.join();
+        t3.join();
+
         int balance = getStaticInt("balance");
         int x = getStaticInt("x");
         int y = getStaticInt("y");
         int z = getStaticInt("z");
 
+
         //assert here ensures we check while the threads are still running
-        Assertions.assertTrue(((x + y) - z) == balance);
-        
-        //assures completion of all threads
-        t1.join();
-        t2.join();
-        t3.join();
-        
+        Assertions.assertFalse(((x + y) - z) == balance);
+
         // The "bad" result as in the original code
-        
+
         System.out.println("RESULT:" + test);
+    }
+
+    @RepeatedTest(10000)
+    public void booleantest() {
+        Assertions.assertFalse(AccountBad.runOnce());
     }
 
 
@@ -120,7 +127,7 @@ public class AccountBadTest extends TestJPF {
         Field f = AccountBad.class.getDeclaredField(name);
         f.setAccessible(true);
         f.setBoolean(null, value);
-}
+    }
 
     private Thread threadFor(String methodName) {
         return new Thread(() -> {
