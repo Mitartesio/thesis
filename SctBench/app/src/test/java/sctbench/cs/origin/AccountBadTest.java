@@ -25,55 +25,11 @@ public class AccountBadTest extends TestJPF {
     @BeforeEach
     public void setup() throws Exception {
         test = new AccountBad();
-
-        // test.x = 1;
-        // test.y = 2;
-        // test.z = 4;
-        // test.balance = test.x;
-        setStaticInt("x", 1);
-        setStaticInt("y", 2);
-        setStaticInt("z", 4);
-        setStaticInt("balance", 1);
-        setStaticBoolean("deposit_done", false);
-        setStaticBoolean("withdraw_done", false);
-
-        // test.t3 = new Thread(() -> test.check_result());
-        // test.t1 = new Thread(() -> test.deposit());
-        // test.t2 = new Thread(() -> test.withdraw());
-    }
-
-    @RepeatedTest(10000)
-    public void runTest() throws Exception {
-        Thread t1 = threadFor("deposit");
-        Thread t2 = threadFor("withdraw");
-        Thread t3 = threadFor("check_result");
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-
-        //assures completion of all threads
-        t1.join();
-        t2.join();
-        t3.join();
-
-        int balance = getStaticInt("balance");
-        int x = getStaticInt("x");
-        int y = getStaticInt("y");
-        int z = getStaticInt("z");
-
-
-        //assert here ensures we check while the threads are still running
-        Assertions.assertFalse(((x + y) - z) == balance);
-
-        // The "bad" result as in the original code
-
-        System.out.println("RESULT:" + test);
     }
 
     @RepeatedTest(10000)
     public void booleantest() {
+        //bug is found if test fails
         Assertions.assertFalse(AccountBad.runOnce());
     }
 
@@ -115,36 +71,4 @@ public class AccountBadTest extends TestJPF {
 
         return testClasses + ps + mainClasses;
     }
-
-    // Reflection methods created to handle the private fields and methods of the tested class
-    private void setStaticInt(String name, int value) throws Exception {
-        Field f = AccountBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.setInt(null, value); // null because static
-    }
-
-    private void setStaticBoolean(String name, boolean value) throws Exception {
-        Field f = AccountBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.setBoolean(null, value);
-    }
-
-    private Thread threadFor(String methodName) {
-        return new Thread(() -> {
-            try {
-                Method m = AccountBad.class.getDeclaredMethod(methodName);
-                m.setAccessible(true);
-                m.invoke(test);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    private int getStaticInt(String name) throws Exception {
-        Field f = AccountBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        return f.getInt(null);
-    }
-
 }
