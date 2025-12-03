@@ -2,6 +2,9 @@ package gov.nasa.jpf.search;
 
 import gov.nasa.jpf.listener.Listener_For_Counting_States;
 import gov.nasa.jpf.listener.Listener_Uniform_Adapts;
+
+import java.util.Map;
+
 import gov.nasa.jpf.Config;
 import gov.nasa.jpf.search.Search;
 import gov.nasa.jpf.vm.VM;
@@ -21,6 +24,7 @@ public class Reset_Search extends Search {
     private RestorableVMState initState;
     private boolean searching;
     private int originalk;
+    private Map<String, Integer> threadsAndOperations;
 
     /*
      * @param Config is supposed to hold a value "search_With_Reset.k" that is the
@@ -52,6 +56,10 @@ public class Reset_Search extends Search {
         System.out.println("k: " + originalk);
         initState = null; // This will be initialized in the beginning of search.
         searching = false;
+    }
+
+    public Map<String, Integer> getThreadsAndOperations(){
+        return threadsAndOperations;
     }
 
     /*
@@ -111,6 +119,7 @@ public class Reset_Search extends Search {
                 // If trials is 0 stop the search else restart from initial state
                 if (trials <= 0) {
                     done = true;
+                    notifySearchFinished();
                     break;
                 } else {
                     // restore initial state
@@ -139,6 +148,7 @@ public class Reset_Search extends Search {
                                             // Initialize Listener_Uniform_Adapts with threads and number of operations
                                             Listener_Uniform_Adapts searchListener = (Listener_Uniform_Adapts) this.listeners[j];
                                             searchListener.start(countListener.getThreadsAndOperations());
+                                            threadsAndOperations = countListener.getThreadsAndOperations();
                                         }
                                     }
                                 } else {
