@@ -1,6 +1,7 @@
 // Translated from: https://github.com/mc-imperial/sctbench/blob/d59ab26ddaedcd575ffb6a1f5e9711f7d6d2d9f2/benchmarks/concurrent-software-benchmarks/arithmetic_prog_bad.c
 package sctbench.cs.origin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,6 +15,8 @@ public class ArithmeticProgBad {
   private static ReentrantLock m = new ReentrantLock();
   private static Condition empty = m.newCondition();
   private static Condition full = m.newCondition();
+
+  private static AtomicBoolean bug = new AtomicBoolean(false);
 
   private static void thread1() {
     int i = 0;
@@ -63,9 +66,18 @@ public class ArithmeticProgBad {
     flag = true;
   }
 
-  public static void main(String[] args) {
+  public static void setBoolean(boolean b) {
+    bug.set(b);
+  }
+
+  public static boolean run() {
+    int n = N;
+    flag = false;
+    m = new ReentrantLock();
+    empty = m.newCondition();
+    full = m.newCondition();
     num = 0;
-    total = 0;
+    total = 0l;
 
     Thread t1 = new Thread(() -> thread1());
     Thread t2 = new Thread(() -> thread2());
@@ -79,9 +91,15 @@ public class ArithmeticProgBad {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-
     if (flag) {
-      assert total != ((N * (N + 1)) / 2); // BAD
+      bug.set(true);
+      assert total != ((n * (n + 1)) / 2) : "Assert Failed - Bug found!"; // BAD
     }
+
+    return bug.get();
+  }
+
+  public static void main(String[] args) {
+    run();
   }
 }
