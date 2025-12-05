@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class QueueBadTest {
@@ -26,75 +27,16 @@ public class QueueBadTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        // Reset static fields
-        setObject("mutex", new ReentrantLock());
-        setObject("queue", new QueueBad.QType());
-        setObject("stored_elements", new int[QueueBad.SIZE]);
-        setStaticBoolean("enqueue_flag", true);
-        setStaticBoolean("dequeue_flag", false);
-
-        // Initialize queue
-        Method init = QueueBad.class.getDeclaredMethod("init", QueueBad.QType.class);
-        init.setAccessible(true);
-        init.invoke(null, getObject("queue"));
+        test = new QueueBad();
     }
 
     //passes if it finds any exception or assertion error such as the ones in the class itself
-    @RepeatedTest(10)
-    public void runTest() throws Exception {
-        final Exception[] t1Exception = { null };
-        final Exception[] t2Exception = { null };
-
-        Thread t1 = new Thread(() -> {
-            try {
-                Method thread1 = QueueBad.class.getDeclaredMethod("main", String[].class);
-                thread1.setAccessible(true);
-                thread1.invoke(null, (Object) new String[] {});
-            } catch (Exception e) {
-                t1Exception[0] = e;
-            }
-        });
-
-        Thread t2 = new Thread(() -> {
-            try {
-                Method thread1 = QueueBad.class.getDeclaredMethod("main", String[].class);
-                thread1.setAccessible(true);
-                thread1.invoke(null, (Object) new String[] {});
-            } catch (Exception e) {
-                t2Exception[0] = e;
-            }
-        });
-
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-
-        boolean bugDetected = (t1Exception[0] != null) || (t2Exception[0] != null);
-        Assertions.assertTrue(bugDetected, "Expected concurrency bug: queue assertion failed");
+    @RepeatedTest(10000)
+    public void testboolean() {
+        Assertions.assertFalse(QueueBad.run());
     }
 
     // Here, the threads are run normally, and you check the post-condition after all threads join.
-
-    //The assertion is outside the threads, comparing some final state 
-    // of shared data.
-    @RepeatedTest(10)
-    public void runTest2() throws Exception {
-        Thread t1 = threadFor("main");
-        Thread t2 = threadFor("main");
-
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-
-        int[] stored = (int[]) getObject("stored_elements");
-        QueueBad.QType q = (QueueBad.QType) getObject("queue");
-
-        // checks that first element should match
-        Assertions.assertEquals(stored[0], q.element[0], "Queue bug detected");
-    }
-
 
     public static String getClassPath() {
         String userDir = System.getProperty("user.dir"); //
@@ -108,38 +50,5 @@ public class QueueBadTest {
         String mainClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "main";
 
         return testClasses + ps + mainClasses;
-    }
-
-
-    // Reflection methods created to handle the private fields and methods of the
-    // tested class
-    private void setStaticBoolean(String name, boolean value) throws Exception {
-        Field f = QueueBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.setBoolean(null, value);
-    }
-
-    private void setObject(String name, Object value) throws Exception {
-        Field f = QueueBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.set(null, value);
-    }
-
-    private Object getObject(String name) throws Exception {
-        Field f = QueueBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        return f.get(null);
-    }
-
-    private Thread threadFor(String methodName) {
-        return new Thread(() -> {
-            try {
-                Method m = QueueBad.class.getDeclaredMethod(methodName, String[].class);
-                m.setAccessible(true);
-                m.invoke(null, (Object) new String[] {});
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 }
