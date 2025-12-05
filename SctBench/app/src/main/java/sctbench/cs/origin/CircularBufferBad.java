@@ -1,5 +1,7 @@
 package sctbench.cs.origin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 // Translated from: https://github.com/mc-imperial/sctbench/blob/d59ab26ddaedcd575ffb6a1f5e9711f7d6d2d9f2/benchmarks/concurrent-software-benchmarks/circular_buffer_bad.c
 
 import java.util.concurrent.locks.Lock;
@@ -22,6 +24,8 @@ public class CircularBufferBad {
     static boolean receive; 
 
     static Lock m = new ReentrantLock();
+
+    static AtomicBoolean bug = new AtomicBoolean(false);
   
     static void initLog(int max) {
       buffer_size = max;
@@ -45,7 +49,7 @@ public class CircularBufferBad {
       if (next < buffer_size && buffer_size > 0) {
         buffer[next] = (char)b; 
         next = (next+1) % buffer_size;
-        assert next < buffer_size;
+        assert next < buffer_size;//ensures index within its bounds
       }
       else {
         return ERROR; 
@@ -74,7 +78,9 @@ public class CircularBufferBad {
         m.lock();
         try {
           if (receive) {
-            assert removeLogElement() == i; /* BAD */
+            boolean okay = removeLogElement() == i;
+            assert okay : "Assert failed - Bug found!"; /* BAD */
+            if (!okay) bug.set(true);
             receive = FALSE; 
             send = TRUE;
           }
@@ -83,23 +89,31 @@ public class CircularBufferBad {
         }
       }
     }
-  
-    public static void main(String[] args) {
+
+    public static boolean run() {
       Thread id1 = new Thread(() -> t1());
       Thread id2 = new Thread(() -> t2());
-  
+
+      buffer = new char[BUFFER_MAX];
+
       initLog(10);
       send = TRUE;
       receive = FALSE;
- 
+      bug = new AtomicBoolean(false);
+
       id1.start();
       id2.start();
-  
+
       try {
         id1.join();
         id2.join();
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
+      return bug.get();
+    }
+  
+    public static void main(String[] args) {
+      run();
     }
 }

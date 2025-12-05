@@ -2,11 +2,16 @@
 
 package sctbench.cs.origin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class BluetoothDriverBad {
     private static final boolean TRUE = true;
     private static final boolean FALSE = false;
     
     private static boolean stopped;
+
+    private static AtomicBoolean bug = new AtomicBoolean(false);
+
 
     private static class Device {
         int pendingIo;
@@ -41,7 +46,8 @@ public class BluetoothDriverBad {
         int status = BCSP_IoIncrement(e);
         if (status == 0) {
             // do work here
-            assert !stopped;
+            if (!stopped) bug.set(true);
+            assert !stopped : "Assert Failed - Bug found!";
         }
         BCSP_IoDecrement(e);
     }
@@ -55,13 +61,14 @@ public class BluetoothDriverBad {
         }
     }
 
-    public static void main(String[] args) {
+    public static boolean run() {
         Device e = new Device();
 
         e.pendingIo = 1;
         e.stoppingFlag = FALSE;
         e.stoppingEvent = FALSE;
         stopped = FALSE;
+        bug = new AtomicBoolean(false);
 
         Thread thread = new Thread(() -> BCSP_PnpStop(e));
         thread.start();
@@ -71,5 +78,11 @@ public class BluetoothDriverBad {
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
+        
+        return bug.get();
+    }
+
+    public static void main(String[] args) {
+        run();
     }
 }

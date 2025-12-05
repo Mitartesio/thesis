@@ -1,5 +1,7 @@
 package sctbench.cs.origin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 // Translated from: https://github.com/mc-imperial/sctbench/blob/d59ab26ddaedcd575ffb6a1f5e9711f7d6d2d9f2/benchmarks/concurrent-software-benchmarks/phase01_bad.c
 
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
@@ -11,6 +13,7 @@ public class Phase01Bad {
   static ReentrantLock x = new ReentrantLock();
   static ReentrantLock y = new ReentrantLock();
   static int lockStatus = 0;
+  static AtomicBoolean bug;
 
   static void thread1() {
     if (lockStatus == 1) {
@@ -33,7 +36,12 @@ public class Phase01Bad {
     y.unlock();
   }
 
-  public static void main(String[] args) {
+  public static boolean run() {
+    x = new ReentrantLock();
+    y = new ReentrantLock();
+    lockStatus = 0;
+    bug = new AtomicBoolean(false);
+
     Thread t1 = new Thread(() -> thread1());
     Thread t2 = new Thread(() -> thread1());
 
@@ -46,5 +54,11 @@ public class Phase01Bad {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+
+    return bug.get();
+  }
+
+  public static void main(String[] args) {
+    run();
   }
 }

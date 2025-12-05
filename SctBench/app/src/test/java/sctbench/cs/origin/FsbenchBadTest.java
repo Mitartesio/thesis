@@ -24,61 +24,13 @@ public class FsbenchBadTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        int numBlocks = getStaticInt("NUMBLOCKS");
-        int numInode = getStaticInt("NUMINODE");
-        int numThreads = getStaticInt("NUM_THREADS");
-
-        setStaticLockArray("locki", new ReentrantLock[numBlocks]);
-        setStaticLockArray("lockb", new ReentrantLock[numBlocks]);
-        setStaticIntArray("busy", new int[numBlocks]);
-        setStaticIntArray("inode", new int[numInode]);
-        setStaticThreadArray("threads", new Thread[numThreads]);
-
-        // Initialize the locks
-        for (int i = 0; i < numBlocks; i++) {
-            getStaticLockArray("locki")[i] = new ReentrantLock();
-            getStaticLockArray("lockb")[i] = new ReentrantLock();
-        }
+        test = new FsbenchBad();
     }
 
-    // 6 out of 32 threads will deterministically fail this assertion every single
-    // time, no concurrency needed.
-    // 26 numblocks, 32numinode, num_threads 27.
-    // assertions might make it too easy to find
-    // It is a logic bug that happens inside a multi-threaded context. Not a true race condition
-    // Might be due to the translation from Fray.
-    @RepeatedTest(100)
-    public void runTest() throws Exception {
-        final Exception[] exceptions = new Exception[getStaticInt("NUM_THREADS")];
-
-        for (int i = 0; i < getStaticInt("NUM_THREADS"); i++) {
-            final int tid = i;
-            Thread t = new Thread(() -> {
-                try {
-                    invokeStaticMethod("threadRoutine", int.class, tid);
-                } catch (Exception e) {
-                    exceptions[tid] = e;
-                }
-            });
-            getStaticThreadArray("threads")[i] = t;
-            t.start();
-        }
-
-        for (int i = 0; i < getStaticInt("NUM_THREADS"); i++) {
-            getStaticThreadArray("threads")[i].join();
-        }
-
-        boolean bugDetected = false;
-        for (Exception e : exceptions) {
-            if (e != null) {
-                bugDetected = true;
-                break;
-            }
-        }
-
-        Assertions.assertTrue(bugDetected, "Expected concurrency bug: FsbenchBad should trigger assertion failure");
+    @RepeatedTest(1000)
+    public void testboolean() {
+        Assertions.assertFalse(FsbenchBad.run());
     }
-
 
 
 
@@ -94,48 +46,5 @@ public class FsbenchBadTest {
         String mainClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "main";
 
         return testClasses + ps + mainClasses;
-    }
-
-    // --- Reflection helper methods --- Fields and methods are private in Fsbench
-    private void invokeStaticMethod(String methodName, Class<?> paramType, Object param) throws Exception {
-        Method m = FsbenchBad.class.getDeclaredMethod(methodName, paramType);
-        m.setAccessible(true);
-        m.invoke(null, param);
-    }
-
-    private int getStaticInt(String fieldName) throws Exception {
-        Field f = FsbenchBad.class.getDeclaredField(fieldName);
-        f.setAccessible(true);
-        return f.getInt(null);
-    }
-
-    private ReentrantLock[] getStaticLockArray(String fieldName) throws Exception {
-        Field f = FsbenchBad.class.getDeclaredField(fieldName);
-        f.setAccessible(true);
-        return (ReentrantLock[]) f.get(null);
-    }
-
-    private Thread[] getStaticThreadArray(String fieldName) throws Exception {
-        Field f = FsbenchBad.class.getDeclaredField(fieldName);
-        f.setAccessible(true);
-        return (Thread[]) f.get(null);
-    }
-
-    private void setStaticLockArray(String fieldName, ReentrantLock[] value) throws Exception {
-        Field f = FsbenchBad.class.getDeclaredField(fieldName);
-        f.setAccessible(true);
-        f.set(null, value);
-    }
-
-    private void setStaticIntArray(String fieldName, int[] value) throws Exception {
-        Field f = FsbenchBad.class.getDeclaredField(fieldName);
-        f.setAccessible(true);
-        f.set(null, value);
-    }
-
-    private void setStaticThreadArray(String fieldName, Thread[] value) throws Exception {
-        Field f = FsbenchBad.class.getDeclaredField(fieldName);
-        f.setAccessible(true);
-        f.set(null, value);
     }
 }

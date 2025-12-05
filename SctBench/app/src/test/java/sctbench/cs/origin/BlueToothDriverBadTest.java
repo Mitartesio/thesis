@@ -24,39 +24,14 @@ public class BlueToothDriverBadTest extends TestJPF{
 
     @BeforeEach
     public void setup() throws Exception {
-        
-        // first declared class
-        Class<?> deviceClass = BluetoothDriverBad.class.getDeclaredClasses()[0]; 
-        device = deviceClass.getDeclaredConstructor().newInstance();
-
-        setPrivateField(device, "pendingIo", 1);
-        setPrivateField(device, "stoppingFlag", false);
-        setPrivateField(device, "stoppingEvent", false);
-
-        setStaticBoolean("stopped", false);
+        test = new BluetoothDriverBad();
     }
 
-    @RepeatedTest(100)
-    public void runTest() throws Exception {
-        Thread t1 = threadForStatic("BCSP_PnpStop", device);
-        Thread t2 = threadForStatic("BCSP_PnpAdd", device);
-
-        t1.start();
-        t2.start();
-        
-        t1.join();
-        t2.join();
-        
-        boolean stopped = getStaticBoolean("stopped");
-        //System.out.println("Final state: stopped=" + stopped);
-        
-        // The "bad" concurrency result: stopped may become TRUE too early
-        Assertions.assertFalse(stopped, 
-            "Expected concurrency bug: stopped should not be true yet");
-            
-        System.out.println("RESULT:" + stopped);
+    @RepeatedTest(100000) //finds it every time
+    public void booleantest() {
+        // bug is found if test fails
+        Assertions.assertFalse(BluetoothDriverBad.run());
     }
-
 
 
 
@@ -72,37 +47,5 @@ public class BlueToothDriverBadTest extends TestJPF{
         String mainClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "main";
 
         return testClasses + ps + mainClasses;
-    }
-
-    // Reflection methods created to handle the private fields and methods of the
-    // tested class
-    private void setPrivateField(Object obj, String fieldName, Object value) throws Exception {
-        Field f = obj.getClass().getDeclaredField(fieldName);
-        f.setAccessible(true);
-        f.set(obj, value);
-    }
-
-    private void setStaticBoolean(String name, boolean value) throws Exception {
-        Field f = AccountBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.setBoolean(null, value);
-    }
-
-    private Thread threadForStatic(String methodName, Object arg) {
-        return new Thread(() -> {
-            try {
-                Method m = BluetoothDriverBad.class.getDeclaredMethod(methodName, arg.getClass());
-                m.setAccessible(true);
-                m.invoke(null, arg);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
-
-    private boolean getStaticBoolean(String name) throws Exception {
-        Field f = BluetoothDriverBad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        return f.getBoolean(null);
     }
 }

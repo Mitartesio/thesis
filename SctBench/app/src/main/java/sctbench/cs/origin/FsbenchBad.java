@@ -2,6 +2,7 @@
 
 package sctbench.cs.origin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -17,6 +18,8 @@ public class FsbenchBad {
     private static int[] inode = new int[NUMINODE];
 
     private static Thread[] threads = new Thread[NUM_THREADS];
+
+    private static AtomicBoolean bug = new AtomicBoolean();
 
     private static void threadRoutine(int tid) {
         assert tid >= 0 && tid < NUM_THREADS;
@@ -39,11 +42,25 @@ public class FsbenchBad {
                 b = (b + 1) % NUMBLOCKS;
             }
         }
-        assert i >= 0 && i < NUMBLOCKS;
+        boolean okay = (i >= 0 && i < NUMBLOCKS);
+        //assert i >= 0 && i < NUMBLOCKS : "Assert failed - Bug found!";
+        if (!okay) {
+            bug.set(true); 
+            return;
+            }
         locki[i].unlock(); // BAD: array locki upper bound
     }
 
-    public static void main(String[] args) {
+    public static boolean run() {
+        locki = new Lock[NUMBLOCKS];
+        lockb = new Lock[NUMBLOCKS];
+        busy = new int[NUMBLOCKS];
+        inode = new int[NUMINODE];
+
+        threads = new Thread[NUM_THREADS];
+
+        bug = new AtomicBoolean();
+
         for (int i = 0; i < NUMBLOCKS; i++) {
             locki[i] = new ReentrantLock();
             lockb[i] = new ReentrantLock();
@@ -62,6 +79,11 @@ public class FsbenchBad {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
+        }  
+        return bug.get();
+    }
+
+    public static void main(String[] args) {
+        run();
     }
 }

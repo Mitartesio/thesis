@@ -26,52 +26,18 @@ public class Phase01BadTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        setStaticInt("lockStatus", 0);
-        setStaticObject("x", new ReentrantLock());
-        setStaticObject("y", new ReentrantLock());
+        test = new Lazy01Bad();
     }
 
     //Passes everytime due to these: if (lockStatus == 1) {
     //System.out.println("Deadlock detected");
     //throw new RuntimeException();
-    @RepeatedTest(100)
-    public void runTest() throws Exception {
-        final Exception[] t1Ex = { null };
-        final Exception[] t2Ex = { null };
 
-        Thread t1 = threadFor("thread1", t1Ex);
-        Thread t2 = threadFor("thread1", t2Ex);
 
-        t1.start();
-        t2.start();
-        t1.join();
-        t2.join();
-
-        boolean bugDetected = (t1Ex[0] != null) || (t2Ex[0] != null);
-        Assertions.assertTrue(bugDetected, "Expected concurrency bug: Phase01Bad deadlock detected");
+    @RepeatedTest(1000)
+    public void testboolean() {
+        Assertions.assertFalse(Phase01Bad.run());
     }
-
-    //Passes everytime due to these: if (lockStatus == 1) {
-    //System.out.println("Deadlock detected");
-    //throw new RuntimeException();
-    @RepeatedTest(100)
-    public void runTest2() throws Exception {
-        Thread t1 = threadFor("thread1");
-        Thread t2 = threadFor("thread2");
-
-        t1.start();
-        t2.start();
-
-        // can add small delay if needed
-        // Thread.sleep(10);
-
-        int status = getStaticInt("lockStatus");
-        assertTrue(status <= 1, "lockStatus should not exceed 1 (concurrency bug)");
-
-        t1.join();
-        t2.join();
-    }
-
 
 
     public static String getClassPath() {
@@ -86,50 +52,5 @@ public class Phase01BadTest {
         String mainClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "main";
 
         return testClasses + ps + mainClasses;
-    }
-
-    // Reflection methods created to handle the private fields and methods of the
-    // tested class
-
-    private void setStaticInt(String name, int value) throws Exception {
-        Field f = Phase01Bad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.setInt(null, value);
-    }
-
-    private int getStaticInt(String name) throws Exception {
-        Field f = Phase01Bad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        return f.getInt(null);
-    }
-
-    private void setStaticObject(String name, Object value) throws Exception {
-        Field f = Phase01Bad.class.getDeclaredField(name);
-        f.setAccessible(true);
-        f.set(null, value);
-    }
-
-    private Thread threadFor(String methodName, Exception[] exArray) {
-        return new Thread(() -> {
-            try {
-                Method m = Phase01Bad.class.getDeclaredMethod(methodName);
-                m.setAccessible(true);
-                m.invoke(null);
-            } catch (Exception e) {
-                exArray[0] = e;
-            }
-        });
-    }
-
-    private Thread threadFor(String methodName) {
-        return new Thread(() -> {
-            try {
-                Method m = Phase01Bad.class.getDeclaredMethod(methodName);
-                m.setAccessible(true);
-                m.invoke(null);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 }

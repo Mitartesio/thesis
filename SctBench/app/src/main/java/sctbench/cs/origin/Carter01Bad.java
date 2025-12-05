@@ -1,6 +1,8 @@
 package sctbench.cs.origin;
 //Deadlock program - tolh
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 // Translated from: https://github.com/mc-imperial/sctbench/blob/d59ab26ddaedcd575ffb6a1f5e9711f7d6d2d9f2/benchmarks/concurrent-software-benchmarks/carter01_bad.c
 
 import java.util.concurrent.locks.Lock;
@@ -14,6 +16,8 @@ public class Carter01Bad {
     static boolean mLockedBy2 = false;
     static boolean lLockedBy1 = false;
     static boolean lLockedBy2 = false;
+
+    static AtomicBoolean bug = new AtomicBoolean(false);
 
     static void t1() {
         try {
@@ -29,6 +33,7 @@ public class Carter01Bad {
 
             do {
                 if (mLockedBy2 && lLockedBy1) {
+                    bug.set(true);
                     System.out.println("Deadlock detected");
                     throw new RuntimeException();
                 }
@@ -65,6 +70,7 @@ public class Carter01Bad {
 
             do {
                 if (mLockedBy1 && lLockedBy2) {
+                    bug.set(true);
                     System.out.println("Deadlock detected");
                     throw new RuntimeException();
                 }
@@ -94,7 +100,7 @@ public class Carter01Bad {
     static void t4() {
     }
 
-    public static void main(String[] args) {
+    public static boolean run() {
         m = new ReentrantLock();
         l = new ReentrantLock();
         A = 0;
@@ -103,6 +109,7 @@ public class Carter01Bad {
         mLockedBy2 = false;
         lLockedBy1 = false;
         lLockedBy2 = false;
+        bug = new AtomicBoolean(false);
         Thread a1 = new Thread(() -> t1());
         Thread b1 = new Thread(() -> t2());
         Thread a2 = new Thread(() -> t3());
@@ -119,5 +126,10 @@ public class Carter01Bad {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        return bug.get();
+    }
+
+    public static void main(String[] args) {
+        run();
     }
 }

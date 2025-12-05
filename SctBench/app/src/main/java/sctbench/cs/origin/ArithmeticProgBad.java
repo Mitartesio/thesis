@@ -16,7 +16,7 @@ public class ArithmeticProgBad {
   private static Condition empty = m.newCondition();
   private static Condition full = m.newCondition();
 
-  private static AtomicBoolean bug = new AtomicBoolean(false);
+  private static AtomicBoolean bug;
 
   private static void thread1() {
     int i = 0;
@@ -66,10 +66,6 @@ public class ArithmeticProgBad {
     flag = true;
   }
 
-  public static void setBoolean(boolean b) {
-    bug.set(b);
-  }
-
   public static boolean run() {
     int n = N;
     flag = false;
@@ -78,6 +74,7 @@ public class ArithmeticProgBad {
     full = m.newCondition();
     num = 0;
     total = 0l;
+    bug = new AtomicBoolean(false);
 
     Thread t1 = new Thread(() -> thread1());
     Thread t2 = new Thread(() -> thread2());

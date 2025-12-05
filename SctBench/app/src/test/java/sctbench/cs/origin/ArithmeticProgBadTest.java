@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 public class ArithmeticProgBadTest extends TestJPF{
     ArithmeticProgBad test;
     public static String classPath;
-    public static final int N = 3;
 
     @BeforeAll
     public static void init() {
@@ -25,7 +24,6 @@ public class ArithmeticProgBadTest extends TestJPF{
     public void setup() throws Exception {
         test = new ArithmeticProgBad();
         //ArithmeticProgBad.setBoolean(false);
-        
     }
 
     @RepeatedTest(10000)
