@@ -2,6 +2,7 @@ package sctbench.cs.origin;
 
 // Translated from: https://github.com/mc-imperial/sctbench/blob/d59ab26ddaedcd575ffb6a1f5e9711f7d6d2d9f2/benchmarks/concurrent-software-benchmarks/stack_bad.c
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -12,10 +13,15 @@ public class StackBad {
     private static final int OVERFLOW = -1;
     private static final int UNDERFLOW = -2;
 
-    private static int top = 0;
-    private static int[] arr = new int[SIZE];
-    private static Lock m = new ReentrantLock();
-    private static boolean flag = false;
+    private static int top;
+    private static int[] arr;
+    private static Lock m;
+    private static boolean flag;
+
+    private static boolean ok1;
+    private static boolean ok2;
+
+    private static AtomicBoolean bug;
 
     private static void incTop() {
         top++;
@@ -54,12 +60,23 @@ public class StackBad {
         }
     }
 
-    public static void main(String[] args) {
+    public static boolean runOnce() {
+        top = 0;
+        arr = new int[SIZE];
+        m = new ReentrantLock();
+        flag = false;
+        bug = new AtomicBoolean(false);
+        ok1 = false;
+        ok2 = false;
+
+
         Thread t1 = new Thread(() -> {
             for (int i = 0; i < SIZE; i++) {
                 m.lock();
                 try {
-                    assert push(arr, i) != OVERFLOW;
+                    ok2 = (push(arr, i) != OVERFLOW);
+                    if (!ok2) bug.set(true);
+                    assert ok2;
                     flag = true;
                 } finally {
                     m.unlock();
@@ -71,8 +88,12 @@ public class StackBad {
             for (int i = 0; i < SIZE; i++) {
                 m.lock();
                 try {
-                    if (flag)
-                        assert pop(arr) != UNDERFLOW; /* BAD */
+                    if (flag) {
+                        ok1 = (pop(arr) != UNDERFLOW);
+                        if (!ok1) bug.set(true);
+                        assert ok1; /* BAD */
+                    }
+
                 } finally {
                     m.unlock();
                 }
@@ -88,5 +109,11 @@ public class StackBad {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        return bug.get();
+    }
+
+    public static void main(String[] args) {
+        runOnce();
     }
 }
