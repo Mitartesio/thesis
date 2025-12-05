@@ -48,7 +48,7 @@ def setup():
             sys.exit(f"[error] JAR generation failed: {e}")
 
 
-    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the gralde build"""
+    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the gradle build"""
 
     try:
         print("Compiling with Gradle...")
