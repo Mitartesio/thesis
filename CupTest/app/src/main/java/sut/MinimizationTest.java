@@ -1,17 +1,20 @@
 package sut;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MinimizationTest {
     public int x, y, z; // , w = 0;
     private boolean conditionMet;
+    private AtomicBoolean bug;
 
     public MinimizationTest() {
         x = 0;
         y = 0;
         z = 0;
         conditionMet = false;
+        bug = new AtomicBoolean(false);
 
     }
 
@@ -50,7 +53,9 @@ public class MinimizationTest {
             conditionMet = true;
             w.signal();
             lock.unlock();
-            assert (z < 5) : "I found the error where !(z < 5)";
+            boolean ok = (z < 5);
+            if (!ok) bug.set(true);
+            assert ok : "I found the error where !(z < 5)";
         }, "t1");
 
         Ta.start();
@@ -59,7 +64,7 @@ public class MinimizationTest {
         Ta.join();
         Tb.join();
 
-        return z < 5;
+        return bug.get();
         // Only interleaving sequence in which the assert fails is B1, A1, B2, B3, A2,
         // A3, B4, B5, B6, A4
     }

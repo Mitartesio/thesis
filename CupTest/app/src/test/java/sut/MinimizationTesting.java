@@ -24,12 +24,11 @@ public class MinimizationTesting extends TestJPF {
     public void setup() {
         test = new MinimizationTest();
         testWithNoise = new MinimizationTestWithNoise();
-
     }
 
-    @RepeatedTest(10000)
+    @RepeatedTest(100000)
     public void runTest() throws InterruptedException {
-        Assertions.assertTrue(test.run());
+        Assertions.assertFalse(test.run());
         System.out.println("RESULT:" + test.run());
     }
 
@@ -68,20 +67,21 @@ public class MinimizationTesting extends TestJPF {
 //                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
                 "+classpath=" + classPath,
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea",
-                "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
-                "+search.class = gov.nasa.jpf.search.Reset_Search",
-//                "+search_with_reset.k = 500",
-                "+search_with_reset.probabilities = 0.99999 0.00001",
-                "+search_with_reset.eps = 0.05",
-                "+numberOfThreads = 6",
-                "+search.multiple_errors = false",
-                "+jpf.report.console.property_violation = error",
-                "+report.console.finished = result,statistics,error",
-                "+report.unique_errors = true"
+                "+vm.args=-ea"
+//                "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+//                "+search.class = gov.nasa.jpf.search.Reset_Search",
+////                "+search_with_reset.k = 500",
+//                "+search_with_reset.probabilities = 0.99999 0.00001",
+//                "+search_with_reset.eps = 0.05",
+//                "+numberOfThreads = 6",
+//                "+search.multiple_errors = false",
+//                "+jpf.report.console.property_violation = error",
+//                "+report.console.finished = result,statistics,error",
+//                "+report.unique_errors = true"
 
         )) {  // specifies the test goal, "jpfOptions" are optional
-            test.run();
+            testWithNoise = new MinimizationTestWithNoise();
+            testWithNoise.run();
 
             //gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
         }
