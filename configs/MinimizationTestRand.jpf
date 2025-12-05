@@ -1,6 +1,6 @@
 target = sut.MinimizationTest
 classpath = CupTest/app/build/classes/java/main
-# native_classpath = out
+native_classpath = out
 
 vm.args = -ea
 listener = Listeners.Listener_Uniform_Adapts,Listeners.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty

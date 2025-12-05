@@ -50,7 +50,7 @@ def setup():
             sys.exit(f"[error] JAR generation failed: {e}")
 
 
-    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the grald build"""
+    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the gradle build"""
 
     try:
         print("Compiling with Gradle...")
@@ -94,21 +94,6 @@ def populate_csv(csv_name: str, answers: List[int]):
             writer.writerow([problem, k, viol])
 
     print(f" answers -> {out_file.stem}.csv")
-
-
-def combine_and_convert_csv(
-    csv1: str, csv2: str, combinedname: str):
-    csv1_path = ROOT / "reports" / f"{csv1}.csv"
-    csv2_path = ROOT / "reports" / f"{csv2}.csv"
-
-    output_path = ROOT / "reports" / f"{combinedname}.csv"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    csv1 = pd.read_csv(csv1_path)
-    csv2 = pd.read_csv(csv2_path)
-    csv1_df = pd.DataFrame(csv1)
-    csv2_df = pd.DataFrame(csv2)
-    combined_csv = pd.concat([csv1_df, csv2_df], ignore_index=True)
-    return combined_csv.to_csv(output_path, index=False, float_format="%.0f")
 
 
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
@@ -206,7 +191,7 @@ def run_jpf(test_name: str, config_path: str, runs: int):
                     val = int(parts[1])
                 except ValueError:
                     pass
-        if line.startswith("violated"):
+        if line.startswith("violated") or line.startswith("Deadlock"):
             vio_value = line.split()[1].strip()
             if vio_value == "true":
                 violated = True

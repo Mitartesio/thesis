@@ -21,6 +21,7 @@ public class Reset_Search extends Search {
     private RestorableVMState initState;
     private boolean searching;
     private int originalk;
+    private boolean violationFound;
 
     /*
      * @param Config is supposed to hold a value "search_With_Reset.k" that is the
@@ -31,12 +32,11 @@ public class Reset_Search extends Search {
      */
     public Reset_Search(Config config, VM vm) {
         super(config, vm);
-        //The user can give a specific k value
-        try {
+        
+        if(config.hasValue("search_with_reset.k")){
+            //The user can give a specific k value
             trials = Integer.parseInt(config.getString("search_with_reset.k"));
-            originalk = trials;
-            //If they do not provide trial they will have to provide epsilon of double and probabilities
-        } catch (Exception e) {
+        }else if(config.hasValue("search_with_reset.probabilities") && config.hasValue("search_with_reset.eps")){
             Ccp calc = new Ccp();
 
             //Get the string[] of probabilies from the file and convert to a double array
@@ -47,8 +47,12 @@ public class Reset_Search extends Search {
             }
             double eps = config.getDouble("search_with_reset.eps");
             this.trials = calc.calcCcp(probabilitiesDoubles.length, probabilitiesDoubles, eps);
-            originalk = this.trials;
+        }else{
+            throw new IllegalArgumentException("please specify k");
         }
+
+        originalk = this.trials;
+
         System.out.println("k: " + originalk);
         initState = null; // This will be initialized in the beginning of search.
         searching = false;
@@ -65,6 +69,7 @@ public class Reset_Search extends Search {
     @Override
     public void search() {
 
+        violationFound = false;
         notifySearchStarted();
 
         while (!done) {
@@ -84,6 +89,7 @@ public class Reset_Search extends Search {
                 // If an error has occured
                 if (currentError != null) {
                     notifyPropertyViolated();
+                    violationFound = true;
                     System.out.println(currentError.getDetails());
 
                     if (hasPropertyTermination()) {
@@ -153,6 +159,7 @@ public class Reset_Search extends Search {
             }
 
         }
+        System.out.println("violated " + violationFound);
 
     }
 
