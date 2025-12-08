@@ -3,7 +3,7 @@ import os, pathlib, sys, subprocess
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Tuple
-import pandas as pd
+# import pandas as pd
 import tempfile
 
 numberOfRuns = 1000
@@ -13,16 +13,17 @@ numberOfRuns = 1000
 # Find the right paths:
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-CUPTEST = ROOT / "CupTest"
+CUPTEST = ROOT / sys.argv[1]
 BUILD_CLASSES = CUPTEST / "app" / "build" / "classes" / "java" / "main"
 BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
 JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
+JPF_RUN_JAR = ROOT / "jpf-core" / "build" / "RunJPF.jar" 
 JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 
 CONFIGS_DIR = ROOT / "configs"
 
-list_of_probs = [0.999,0.99,0.95,0.9,0.8,0.7,0.5,0.3]
+list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
 
 def setup():
     """ Check whether script is run with correct version of java (only checks if its java 11)"""
@@ -56,30 +57,31 @@ def setup():
 
     try:
         print("Compiling with Gradle...")
-        subprocess.run(["./CupTest/gradlew","-p","./CupTest","build","-x","test"],check=True, cwd=ROOT)
+        subprocess.run([f"./{sys.argv[1]}/gradlew","-p",f"./{sys.argv[1]}","build","-x","test"],check=True, cwd=ROOT)
         print("Finished Gradle compilation")
     except subprocess.CalledProcessError as e:
         sys.exit(f"[error] Gradle build failed: {e}")
 
 
 # Not sure if we need this:
-def resolve_config(arg: str | None) -> pathlib.Path:
-    if arg:
-        p = pathlib.Path(arg)
-        if not p.is_absolute():
-            p = ROOT / p
-        return p
-    # Default config
-    return CONFIGS_DIR / "SimpleTest2.jpf"
+# def resolve_config(arg: str | None) -> pathlib.Path:
+#     if arg:
+#         p = pathlib.Path(arg)
+#         if not p.is_absolute():
+#             p = ROOT / p
+#         return p
+#     # Default config
+#     return CONFIGS_DIR / "SimpleTest2.jpf"
 
-def writeToCsv(tests: Dict):
+def writeToCsv(tests):
     with open("results.csv",mode="w", newline="") as file:
         writer = csv.writer(file)
+    
+        writer.writerow(["test","P", "number of successes"])
 
-        writer.writerow(["test","number of successes"])
-
-        for test, result in tests.items():
-            writer.writerow([test, result])
+        for result in tests:
+            # print(f"{result[0]} with this many p as {result[1]} has: result: {result[2]}")
+            writer.writerow([result[0], result[1],result[2]])
     
 
 
@@ -110,30 +112,9 @@ def populate_csv(csv_name: str, answers: List[int]):
     print(f" answers -> {out_file.stem}.csv")
 
 
-# def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
-#     # sys.arg[0] python file to run, sys.arg[1] jpf.config, sys.arg[2] amount runs
-
-#     if len(sys.argv) > 1:
-#         config_file = sys.argv[1] #but needs to be sliced or similar, otherwise we get the entire path as the key..
-#         runs = int(sys.argv[2]) if len(sys.argv) > 2 else 1
-#         csv_name = pathlib.Path(sys.argv[1]).stem
-#         for i in range(0, runs):
-#             print(f"THIS IS THE {i}'TH RUN!!!!")
-#             results, rc, k = run_jpf(csv_name, config_file, runs)
-#             populate_csv(csv_name, results)
-#         print(f'jpf exited with code {rc}')
-#         sys.exit(rc)
-
-#     else:
-#         # if algo_key is None:
-#         for key, config_path in algo_to_jpf.items():
-#             print(f'Running {key} via {config_path}')
-#             populate_csv(key, run_jpf(key, config_path))
-#         return
-
 def read_input():
     tests_to_run = {}
-    for x in range (1,len(sys.argv)):
+    for x in range (2,len(sys.argv)):
         test = sys.argv[x][:-1]
         number_of_threads = int(sys.argv[x][-1])
 
@@ -144,13 +125,13 @@ def read_input():
 #We generate a dictionary with the of the test as key and list of .jpf instructions as value
 def convert_to_jpf():
     tests = read_input()
-    jpf_files = []
+    jpf_files = {}
     for test, threads in tests.items():
         for p in list_of_probs:
             jpf_conf = [
                 "target = sut." + test,
-                "classpath = CupTest/app/build/classes/java/main",
-                "native_classpath = CupTest/app/build/resources/main",
+                f"classpath = {BUILD_CLASSES}",
+                f"native_classpath = {BUILD_RES}",
                 # "native_classpath = out",
                 "vm.args = -ea",
                 "listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
@@ -164,65 +145,70 @@ def convert_to_jpf():
                 "report.console.finished = result,statistics,error",
                 "report.unique_errors = true"
             ]
-            name = test + str(p)
-            jpf_files[name] = jpf_conf
+            if test not in jpf_files:
+                jpf_files[test] = []
+            jpf_files[test].append((jpf_conf, p))
     return jpf_files
 
 def run_jpf():
 
     map_of_tests = convert_to_jpf()
 
-    results = {}
-    jpf_jar = "jpf-core/build/RunJPF.jar"
+    results = []
+    jpf_jar = str(JPF_RUN_JAR)
+
+    
 
     
     for name, test in map_of_tests.items():
         print(f"Running {name}")
-        results[name] = 0
-        for x in range(0,numberOfRuns):
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
-                jpf_path = f.name
-                f.write("\n".join(test))
-        
-            cmd = [
-                "java",
-                "-Xmx4g",
-                "-ea",
-                "-jar",
-                jpf_jar,
-                jpf_path
-                ]
+
+        fullyDoneFlag = False
+        for tup in test:
+            result = 0
+            for x in range(0,numberOfRuns):
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
+                    jpf_path = f.name
+                    f.write("\n".join(tup[0]))
             
-            process = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True
-                )
+                cmd = [
+                    "java",
+                    "-Xmx4g",
+                    "-ea",
+                    "-jar",
+                    jpf_jar,
+                    jpf_path
+                    ]
+                
+                process = subprocess.Popen(
+                        cmd,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True
+                    )
 
-            
+                
 
-            stdout, stderr = process.communicate()
+                stdout, stderr = process.communicate()
 
-            if "violated true" in stdout:
-                results[name] += 1
+                output = stdout + stderr
+
+                if "violated true" in output:
+                    result += 1
+            results.append((name, str(tup[1]), result))
+            if result >= numberOfRuns and fullyDoneFlag == True:
+                break
+            elif result >= numberOfRuns:
+                fullyDoneFlag = True
+            else:
+                fullyDoneFlag = False
 
                 
                 
-    for test, successes in results.items():
-        print(f"This test: {test} had this many sucesses: {successes}")
+    for test in results:
+        # print(f"This test: {test[0]} with p as {test[1]} had this many sucesses: {test[2]}")
+        print(f"{test[0]},{test[1]},{test[2]}")
     return results
-
-#I assume we already have a method for this but basically we just need to run all tests in the map and write to csv
-def run_all(map: Dict):
-    for test_name, spec in map.items():
-        print(f"Running test: {test_name}")
-        # subprocess.run(spec)
-
-
-# def main():
-#     gradle_compile()
-#     handle_jpf()
 
 
 if __name__ == "__main__":

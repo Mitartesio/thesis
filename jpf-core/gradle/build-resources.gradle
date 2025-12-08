@@ -2,10 +2,11 @@ tasks.register('generateVersion') {
     group = "JPF Build Resources"
     description = "Generates the .version file with the current revision hash"
     doLast {
-        def revision = "git rev-parse HEAD".execute().text
-        new File(".version").withWriter("utf-8") { writer ->
-            writer.writeLine revision
-        }
+        def revision = "UNKNOWN"
+        // "git rev-parse HEAD".execute().text
+        // new File(".version").withWriter("utf-8") { writer ->
+        //     writer.writeLine revision
+        // }
     }
 }
 
@@ -16,10 +17,14 @@ tasks.register('generateBuildInfo') {
 
         Properties info = new Properties()
 
-        def status = "git status --short".execute().text.trim()
-        def revision = "git rev-parse --short HEAD".execute().text.trim()
-        def userName = ["git", "log", "-1", "--format=%an <%ae>"].execute().text.trim()
-        def date = "git log -1 --format=%ci".execute().text.trim()
+        def status = "UNKNOWN"
+        // "git status --short".execute().text.trim()
+        def revision = "UNKNOWN"
+        // "git rev-parse --short HEAD".execute().text.trim()
+        def userName = "UNKNOWN"
+        // ["git", "log", "-1", "--format=%an <%ae>"].execute().text.trim()
+        def date = "UNKNOW"
+        // "git log -1 --format=%ci".execute().text.trim()
 
         info.setProperty("revision", revision)
         info.setProperty("date", date)
