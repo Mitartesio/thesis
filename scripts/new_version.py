@@ -111,14 +111,27 @@ def populate_csv(csv_name: str, answers: List[int]):
 
     print(f" answers -> {out_file.stem}.csv")
 
+def split_alpha_numeric(s: str):
+    i = len(s)
+    while i > 0 and s[i-1].isdigit():
+        i -= 1
+    return s[:i], s[i:]
 
 def read_input():
     tests_to_run = {}
     for x in range (2,len(sys.argv)):
-        test = sys.argv[x][:-1]
-        number_of_threads = int(sys.argv[x][-1])
+        test_str = sys.argv[x]
+        test_name, threads_str = split_alpha_numeric(test_str)
+
+        if not threads_str:
+            raise ValueError(f"No thread count found in '{test_str}'")
+
+        test = test_name
+        number_of_threads = int(threads_str)
 
         tests_to_run[test] = number_of_threads
+
+        print(f"this is hte name: {test}, this is the number: {number_of_threads}")
     
     return tests_to_run
 

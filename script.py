@@ -11,8 +11,8 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect('hpc.itu.dk', username="anmv", password=password)
 
 # Upload the .job file
-local_job_file = "BaselineScript.sh"
-remote_job_file = 'BaselineScript.sh'
+local_job_file = "SCT_bench_script2.sh"
+remote_job_file = 'SCT_bench_script2.sh'
 with SCPClient(ssh.get_transport()) as scp:
     scp.put(local_job_file, remote_job_file)
 

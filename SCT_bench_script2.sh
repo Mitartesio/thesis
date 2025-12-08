@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=BaseLine
 #SBATCH --output=job.%j.out
-#SBATCH --nodes=6
-#SBATCH --time=06:30:00
+#SBATCH --nodes=5
+#SBATCH --time=09:30:00
 #SBATCH --partition=scavenge
 #SBATCH --export=ALL
 
@@ -32,37 +32,35 @@ nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 srun --nodelist=${nodes[0]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench AccountBad3 
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Wronglock1Bad4 
 ' &
 
 srun --nodelist=${nodes[1]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Carter01Bad4 
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Wronglock3Bad2 
 ' &
 srun --nodelist=${nodes[2]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench FsbenchBad27 
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WronglockBad8 
 ' &
 
 srun --nodelist=${nodes[3]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Phase01Bad 
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench TwostageBad2 
 ' &
 srun --nodelist=${nodes[4]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench StackBad2 
-' &
-
-srun --nodelist=${nodes[5]} bash -c '
-    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
-    mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench TokenRingBad4 
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Twostage100Bad100 
 ' &
 
 wait
 
-#AccountBad3 Carter01Bad4 FsbenchBad27 Phase01Bad StackBad2 TokenRingBad4
+#Twostage100Bad100
+#TwostageBad2
+#WronglockBad8
+#Wronglock3Bad2
+#Wronglock1Bad4
