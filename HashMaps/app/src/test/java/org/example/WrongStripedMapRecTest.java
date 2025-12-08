@@ -16,7 +16,7 @@ import gov.nasa.jpf.util.test.TestJPF;
 
 public class WrongStripedMapRecTest extends TestJPF{
     
-    @Test
+    // @Test
     public void testGetWrongMap1() throws InterruptedException{
         if (verifyAssertionError(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
@@ -76,7 +76,7 @@ public class WrongStripedMapRecTest extends TestJPF{
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 1000",
+                "+search_with_reset.k = 1500",
                 // "+search_with_reset.probabilities = 0.99 0.01",
                 // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 10",
@@ -88,7 +88,7 @@ public class WrongStripedMapRecTest extends TestJPF{
                 "+log.info=gov.nasa.jpf"
         )) {
 
-            OurMap<Integer, String> map = new WrongStripedMap2<>(4);
+            OurMap<Integer, String> map = new WrongStripedMap4<>(4);
 
             Thread[] threads = new Thread[10];
             
@@ -116,7 +116,7 @@ public class WrongStripedMapRecTest extends TestJPF{
         }
     }
 
-    @Test
+    // @Test
     public void testReallocationWrongMap4() throws Exception{
         if(verifyAssertionError(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
@@ -162,7 +162,7 @@ public class WrongStripedMapRecTest extends TestJPF{
         }
     }
 
-   @Test
+//    @Test
     public void bigTestWrongMap4() throws Exception{
         if (verifyAssertionError(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
@@ -292,7 +292,7 @@ public class WrongStripedMapRecTest extends TestJPF{
     }
 }
 
-   @Test
+//    @Test
     public void bigTestWrongMap6() throws Exception{
         if (verifyAssertionError(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",

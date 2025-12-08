@@ -1,4 +1,7 @@
-package org.example.WrongMaps;// Thread-safe synchronized hash map using lock striping
+package sut;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
 // sestoft@itu.dk * 2025-05-22
 
 // Based on 2014 TestHashMapSolution.java
@@ -7,11 +10,9 @@ package org.example.WrongMaps;// Thread-safe synchronized hash map using lock st
 
 //This class is only intended for bug injection and is not correctly implemented. 
 
-//The bug in question for this class is found in the reallocation() method where the hashing happens outside of sync.
+//The bug in question for this class is found in the field ItemNode that should be volatile.
 
 import java.util.function.BiConsumer;
-
-import org.example.OurMap;
 
 // A hash map that permits thread-safe concurrent operations, using
 // lock striping (intrinsic locks on Objects created for the purpose).
@@ -23,16 +24,19 @@ import org.example.OurMap;
 // locking a stripe, only to have the relevant entry moved to a
 // different stripe by an intervening call to reallocateBuckets.
 
-public class WrongStripedMap4<K, V> implements OurMap<K, V> {
+public class WrongStripedMap6<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
-    private volatile ItemNode<K, V>[] buckets;
+
+    //!!!This is intentionally wrong!!!
+    //the field ItemNode should be volatile
+    private ItemNode<K, V>[] buckets;
     private final int lockCount;
     private final Object[] locks;
     private final int[] sizes;
 
-    public WrongStripedMap4(int lockCount) {
+    public WrongStripedMap6(int lockCount) {
         int bucketCount = lockCount; // Must be a multiple of lockCount
         this.lockCount = lockCount;
         this.buckets = makeBuckets(bucketCount);
@@ -107,7 +111,7 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
             }
         }
         if (afterSize * lockCount > buckets.length)
-            reallocateBuckets(buckets);
+            reallocateBuckets();
         return old;
     }
 
@@ -153,6 +157,10 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
                 }
             }
     }
+    public void reallocateBuckets(){
+        lockAllAndThen();
+    }
+    
 
     // First lock all stripes.  Then double bucket table size, rehash,
     // and redistribute entries.  Since the number of stripes does not
@@ -164,16 +172,10 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     // In any case, do not reallocate if the buckets field was updated
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
-    public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
-        lockAllAndThen(new Runnable() {
-            public void run() {
-                final ItemNode<K, V>[] bs = buckets;
+    private void reallocateHelper(final ItemNode<K,V>[] oldBuckets){
+        final ItemNode<K, V>[] bs = buckets;
                 // if (oldBuckets == bs){
-
-                //!!!This is intentionally wrong!!!
-                //It is possible for two threads to execute a reallocation in parallel and for both oldBuckets and bs to have
-                //same length without being the same map
-                 if(oldBuckets.length == bs.length){
+                 if(oldBuckets == bs){
                     // System.out.printf("Reallocating from %d buckets%n", buckets.length);
                     final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
                     for (int hash = 0; hash < bs.length; hash++) {
@@ -188,21 +190,19 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
                     }
                     buckets = newBuckets;
                 }
-            }
-        });
     }
 
     // Lock all stripes, perform the action, then unlock all stripes
-    private void lockAllAndThen(Runnable action) {
-        lockAllAndThen(0, action);
+    private void lockAllAndThen() {
+        lockAllAndThen(0);
     }
 
-    private void lockAllAndThen(int nextStripe, Runnable action) {
-        if (nextStripe >= lockCount)
-            action.run();
-        else
+    private void lockAllAndThen(int nextStripe) {
+        if (nextStripe >= lockCount){
+            reallocateHelper(buckets);
+    }else
             synchronized (locks[nextStripe]) {
-                lockAllAndThen(nextStripe + 1, action);
+                lockAllAndThen(nextStripe + 1);
             }
     }
 
@@ -225,17 +225,28 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        OurMap<Integer, String> map = new WrongStripedMap4<>(4);
+     public static void main(String[] args) throws InterruptedException {
 
-            Thread[] threads = new Thread[10];
-            
+        final WrongStripedMap6<Integer, String> map =
+            new WrongStripedMap6<>(2);   // small lockCount → high contention
+
+            AtomicInteger counter = new AtomicInteger(0);
+
+            Thread[] threads = new Thread[5];
 
             for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
+                int mul = i*50;
                 threads[i] = new Thread(() -> {
-                    for(int k = 0; k<50; k++){
-                        map.put(k+mul, k + "");
+                    for(int j = 0; j<50; j++){
+                        map.put(j+ mul, j + "");
+
+                        counter.addAndGet(1);
+
+                        assert counter.get() == map.size(): "Damn";
+
+                        if(j % 30 == 0){
+                            map.reallocateBuckets();
+                        }
                     }
                 });
             }
@@ -243,13 +254,6 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
             for(int i = 0; i<threads.length; i++)threads[i].start();
 
             for(int i = 0; i<threads.length; i++)threads[i].join();
-
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-
-                for(int k = 0; k<50; k++){
-                    assert map.containsKey(k+mul);
-                }
-            }
     }
 }
+

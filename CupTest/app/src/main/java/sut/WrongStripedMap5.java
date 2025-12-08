@@ -1,4 +1,5 @@
-package org.example.WrongMaps;// Thread-safe synchronized hash map using lock striping
+package sut;
+
 // sestoft@itu.dk * 2025-05-22
 
 // Based on 2014 TestHashMapSolution.java
@@ -7,11 +8,9 @@ package org.example.WrongMaps;// Thread-safe synchronized hash map using lock st
 
 //This class is only intended for bug injection and is not correctly implemented. 
 
-//The bug in question for this class is found in the reallocation() method where the hashing happens outside of sync.
+//The bug in question for this class is found in the contains() method where the hashing happens outside of sync.
 
 import java.util.function.BiConsumer;
-
-import org.example.OurMap;
 
 // A hash map that permits thread-safe concurrent operations, using
 // lock striping (intrinsic locks on Objects created for the purpose).
@@ -23,7 +22,7 @@ import org.example.OurMap;
 // locking a stripe, only to have the relevant entry moved to a
 // different stripe by an intervening call to reallocateBuckets.
 
-public class WrongStripedMap4<K, V> implements OurMap<K, V> {
+public class WrongStripedMap5<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
@@ -32,7 +31,7 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     private final Object[] locks;
     private final int[] sizes;
 
-    public WrongStripedMap4(int lockCount) {
+    public WrongStripedMap5(int lockCount) {
         int bucketCount = lockCount; // Must be a multiple of lockCount
         this.lockCount = lockCount;
         this.buckets = makeBuckets(bucketCount);
@@ -58,7 +57,9 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     public boolean containsKey(K k) {
         final int h = getHash(k), s = h % lockCount;
         synchronized (locks[s]) {
-            final int hash = h % buckets.length;
+            //!!!This is intentionally wrong
+            //This will fail only insofar buckets.length is 2^n 
+            final int hash = h & buckets.length-1;
             return ItemNode.search(buckets[hash], k) != null;
         }
     }
@@ -168,12 +169,7 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
         lockAllAndThen(new Runnable() {
             public void run() {
                 final ItemNode<K, V>[] bs = buckets;
-                // if (oldBuckets == bs){
-
-                //!!!This is intentionally wrong!!!
-                //It is possible for two threads to execute a reallocation in parallel and for both oldBuckets and bs to have
-                //same length without being the same map
-                 if(oldBuckets.length == bs.length){
+                if (oldBuckets == bs){
                     // System.out.printf("Reallocating from %d buckets%n", buckets.length);
                     final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
                     for (int hash = 0; hash < bs.length; hash++) {
@@ -226,30 +222,25 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        OurMap<Integer, String> map = new WrongStripedMap4<>(4);
+        WrongStripedMap5<Integer, Integer> map = new WrongStripedMap5<>(5);
+        Thread[] threads = new Thread[10];
 
-            Thread[] threads = new Thread[10];
-            
-
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-                threads[i] = new Thread(() -> {
-                    for(int k = 0; k<50; k++){
-                        map.put(k+mul, k + "");
-                    }
-                });
-            }
-
-            for(int i = 0; i<threads.length; i++)threads[i].start();
-
-            for(int i = 0; i<threads.length; i++)threads[i].join();
-
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-
-                for(int k = 0; k<50; k++){
-                    assert map.containsKey(k+mul);
+        for(int i = 0; i<threads.length; i++){
+            final int mul = i * 100;
+            threads[i] = new Thread(() -> {
+                for(int j = 0; j<25; j++){
+                    map.put(j+mul, j);
                 }
-            }
+
+                for(int j = 0; j<25; j++){
+                    assert map.containsKey(j);
+                }
+            });
+        }
+
+        for(int i = 0; i<threads.length; i++)threads[i].start();
+
+        for(int i = 0; i<threads.length; i++)threads[i].join();
     }
 }
+
