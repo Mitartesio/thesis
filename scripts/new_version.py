@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 # import pandas as pd
 import tempfile
+from utilities import setup
 
 numberOfRuns = 10
 
@@ -87,33 +88,6 @@ def writeToCsv(tests):
             writer.writerow([result[0], result[1],result[2]])
     
 
-
-
-
-# Populate csv, can be useful. Not sure if better to continue the root structure or convert to just finding it normally.
-def populate_csv(csv_name: str, answers: List[int]):
-    if csv_name is None:
-        csv_name = "results"
-
-    out_file = ROOT / "reports" / f"{csv_name}.csv"
-    out_file.parent.mkdir(exist_ok=True)
-
-    if not out_file.exists():
-        with out_file.open("w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["problem", "k", "violated"])  # <-- header
-            problem = csv_name
-            k, viol = answers[0]
-            writer.writerow([problem, k, viol])
-    else:
-        with out_file.open("a", newline="") as f:
-            writer = csv.writer(f)
-            problem = csv_name
-            k, viol = answers[0]
-            writer.writerow([problem, k, viol])
-
-    print(f" answers -> {out_file.stem}.csv")
-
 def split_alpha_numeric(s: str):
     i = len(s)
     while i > 0 and s[i-1].isdigit():
@@ -168,16 +142,13 @@ def convert_to_jpf():
             jpf_files[test].append((jpf_conf, p))
     return jpf_files
 
-def run_jpf():
+def run_jpf_files():
 
     map_of_tests = convert_to_jpf()
 
     results = []
     jpf_jar = str(JPF_RUN_JAR)
 
-    
-
-    
     for name, test in map_of_tests.items():
         print(f"Running {name}")
 
@@ -205,8 +176,6 @@ def run_jpf():
                         universal_newlines=True
                     )
 
-                
-
                 stdout, stderr = process.communicate()
 
                 output = stdout + stderr
@@ -221,8 +190,6 @@ def run_jpf():
             else:
                 fullyDoneFlag = False
 
-                
-                
     for test in results:
         # print(f"This test: {test[0]} with p as {test[1]} had this many sucesses: {test[2]}")
         print(f"{test[0]},{test[1]},{test[2]}")
@@ -235,7 +202,7 @@ if __name__ == "__main__":
     # if no args provided, utilizes the algo_to_jpf dictionary
     setup()
 
-    writeToCsv(run_jpf())
+    writeToCsv(run_jpf_files())
 
     # log_file = run_gradle_tests("MinimizationTesting")
     # outputcsv = ROOT / "reports" / "MinimizationTesting.csv"

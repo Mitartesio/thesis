@@ -13,13 +13,14 @@ public class DeadlockTesting extends TestJPF {
     DeadlockExample test;
 
     public static String classPath;
-    public static DeadlockExample d;
+    public static DeadlockExampleJVM d;
     boolean bug;
 
 
     @BeforeAll
     public static void init() {
-        d = new DeadlockExample();
+
+        d = new DeadlockExampleJVM();
     }
 
     @BeforeEach
@@ -28,7 +29,7 @@ public class DeadlockTesting extends TestJPF {
 
     }
 
-    @RepeatedTest(10)
+    @RepeatedTest(5000)
     public void runTest() throws InterruptedException {
         bug = d.runForDeadlock();
         System.out.println("RESULT:" + bug);
@@ -39,9 +40,8 @@ public class DeadlockTesting extends TestJPF {
 //    @Test
 //    public void testDeadlockExampleJpf() throws InterruptedException {
 //        if (verifyNoPropertyViolation(
-//                //target = sut.DeadlockExample
-
-    /// /                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
+//                "target = sut.DeadlockExample",
+//                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
 //                "+classpath =" + classPath,
 //                //# native_classpath = out
 //
@@ -58,9 +58,10 @@ public class DeadlockTesting extends TestJPF {
 //                "+report.unique_errors = true"
 //        )) {
 //            test = new DeadlockExample();
-//            test.runDemo();
+//            test.runForDeadlock();
 //        }
 //    }
+
     public static String getClassPath() {
         String userDir = System.getProperty("user.dir");   //
 //        System.out.println(userDir);
