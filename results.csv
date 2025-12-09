@@ -1,5 +1,5 @@
 test,P,number of successes
-AccountBad,0.5,0
-AccountBad,0.8,0
-Carter01Bad,0.5,0
-Carter01Bad,0.8,0
+AccountBad,0.5,10
+AccountBad,0.8,10
+Carter01Bad,0.5,10
+Carter01Bad,0.8,10

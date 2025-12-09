@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 // locking a stripe, only to have the relevant entry moved to a
 // different stripe by an intervening call to reallocateBuckets.
 
-public class WrongStripedMap7<K, V> implements OurMap<K, V> {
+public class WrongStripedMap7Bad<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
@@ -32,7 +32,7 @@ public class WrongStripedMap7<K, V> implements OurMap<K, V> {
     private final Object[] locks;
     private final int[] sizes;
 
-    public WrongStripedMap7(int lockCount) {
+    public WrongStripedMap7Bad(int lockCount) {
         int bucketCount = lockCount; // Must be a multiple of lockCount
         this.lockCount = lockCount;
         this.buckets = makeBuckets(bucketCount);
@@ -239,7 +239,7 @@ public class WrongStripedMap7<K, V> implements OurMap<K, V> {
 
         public static void main(String[] args) throws InterruptedException {
         Thread[] threads = new Thread[5];
-        WrongStripedMap1<Integer, String> map = new WrongStripedMap1<>(4);
+        WrongStripedMap1Bad<Integer, String> map = new WrongStripedMap1Bad<>(4);
 
         for(int i = 0; i<threads.length; i++){
             final int mul = i * 100;

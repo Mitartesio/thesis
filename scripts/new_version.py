@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 # import pandas as pd
 import tempfile
 
-numberOfRuns = 1000
+numberOfRuns = 10
 
 # Fixed path
 
@@ -23,11 +23,14 @@ JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 CONFIGS_DIR = ROOT / "configs"
 
-list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
+# list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
+
+list_of_probs = [0.5, 0.8]
+
 
 def setup():
     """ Check whether script is run with correct version of java (only checks if its java 11)"""
-    result = subprocess.run(["java","-version"], stderr=subprocess.PIPE, text=True)
+    result = subprocess.run(["java","-version"], stderr=subprocess.PIPE, universal_newlines=True)
 
     output = result.stderr
     # print(output)
@@ -142,9 +145,11 @@ def convert_to_jpf():
     for test, threads in tests.items():
         for p in list_of_probs:
             jpf_conf = [
-                "target = sut." + test,
+                "target = sctbench.cs.origin." + test,
+                # "target = cs." + test,
                 f"classpath = {BUILD_CLASSES}",
-                f"native_classpath = {BUILD_RES}",
+                "native_classpath = SctBench/app/build/classes/java/main",
+                # f"native_classpath = {BUILD_RES}",
                 # "native_classpath = out",
                 "vm.args = -ea",
                 "listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
@@ -197,7 +202,7 @@ def run_jpf():
                         cmd,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
-                        text=True
+                        universal_newlines=True
                     )
 
                 

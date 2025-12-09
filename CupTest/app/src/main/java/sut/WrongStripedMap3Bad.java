@@ -1,14 +1,17 @@
 package sut;
 
+// sestoft@itu.dk * 2025-05-22
+
 // Based on 2014 TestHashMapSolution.java
 
 //!!! NOT THREADSAFE!!!
 
-//This class is only intended for bug injection and is not correctly implemented.
+//This class is only intended for bug injection and is not correctly implemented. 
 
-//The bug in question for this class is found in reallocate buckets
+//The bug in question for this class is found in the forEach() method where the hashing happens outside of sync.
 
 import java.util.function.BiConsumer;
+
 
 // A hash map that permits thread-safe concurrent operations, using
 // lock striping (intrinsic locks on Objects created for the purpose).
@@ -20,17 +23,16 @@ import java.util.function.BiConsumer;
 // locking a stripe, only to have the relevant entry moved to a
 // different stripe by an intervening call to reallocateBuckets.
 
-public class WrongStripedMap4<K, V> implements OurMap<K, V> {
+public class WrongStripedMap3Bad<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
-
     private volatile ItemNode<K, V>[] buckets;
     private final int lockCount;
     private final Object[] locks;
     private final int[] sizes;
 
-    public WrongStripedMap4(int lockCount) {
+    public WrongStripedMap3Bad(int lockCount) {
         int bucketCount = lockCount; // Must be a multiple of lockCount
         this.lockCount = lockCount;
         this.buckets = makeBuckets(bucketCount);
@@ -64,6 +66,7 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     // Return value v associated with key k, or null
     public V get(K k) {
         final int h = getHash(k), s = h % lockCount;
+        
         synchronized (locks[s]) {
             final int hash = h % buckets.length;
             ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
@@ -93,8 +96,12 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
         final int h = getHash(k), s = h % lockCount;
         int afterSize = 0;
         V old = null;
+
+        //This is intentionally wrong. The correct implementation has the hash inside the synchronized block
+        final int hash = h % buckets.length;
+
         synchronized (locks[s]) {
-            final int hash = h % buckets.length;
+            // final int hash = h % buckets.length;
             final ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
             if (node != null) {
                 old = node.v;
@@ -105,7 +112,7 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
             }
         }
         if (afterSize * lockCount > buckets.length)
-            reallocateBuckets(buckets);
+            reallocateBuckets();
         return old;
     }
 
@@ -141,7 +148,10 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     public void forEach(BiConsumer<K, V> consumer) {
         final ItemNode<K, V>[] bs = buckets;
         for (int s = 0; s < lockCount; s++)
-            synchronized (locks[s]) {
+
+            //This is intentionally wrong. The for loop below should be wrapped in a synchronized block
+
+            // synchronized (locks[s]) {
                 for (int hash = s; hash < bs.length; hash += lockCount) {
                     ItemNode<K, V> node = bs[hash];
                     while (node != null) {
@@ -149,8 +159,13 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
                         node = node.next;
                     }
                 }
-            }
+            // }
     }
+
+    public void reallocateBuckets(){
+        lockAllAndThen();
+    }
+    
 
     // First lock all stripes.  Then double bucket table size, rehash,
     // and redistribute entries.  Since the number of stripes does not
@@ -162,43 +177,37 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     // In any case, do not reallocate if the buckets field was updated
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
-    public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
-
-        //!!!This is intentionally wrong!!!
-        // Buckets are instantiated before the locking of the stripes
+    private void reallocateHelper(final ItemNode<K,V>[] oldBuckets){
         final ItemNode<K, V>[] bs = buckets;
-
-        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets, bs));
+                // if (oldBuckets == bs){
+                 if(oldBuckets == bs){
+                    // System.out.printf("Reallocating from %d buckets%n", buckets.length);
+                    final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
+                    for (int hash = 0; hash < bs.length; hash++) {
+                        ItemNode<K, V> node = bs[hash];
+                        while (node != null) {
+                            final int newHash = getHash(node.k) % newBuckets.length;
+                            ItemNode<K, V> next = node.next;
+                            node.next = newBuckets[newHash];
+                            newBuckets[newHash] = node;
+                            node = next;
+                        }
+                    }
+                    buckets = newBuckets;
+                }
     }
-
-    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets, ItemNode<K, V>[] bs) {
-    if (oldBuckets == bs) {
-        final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
-        for (int hash = 0; hash < bs.length; hash++) {
-            ItemNode<K, V> node = bs[hash];
-            while (node != null) {
-                final int newHash = getHash(node.k) % newBuckets.length;
-                ItemNode<K, V> next = node.next;
-                node.next = newBuckets[newHash];
-                newBuckets[newHash] = node;
-                node = next;
-            }
-        }
-        buckets = newBuckets;
-    }
-}
 
     // Lock all stripes, perform the action, then unlock all stripes
-    private void lockAllAndThen(Runnable action) {
-        lockAllAndThen(0, action);
+    private void lockAllAndThen() {
+        lockAllAndThen(0);
     }
 
-    private void lockAllAndThen(int nextStripe, Runnable action) {
-        if (nextStripe >= lockCount)
-            action.run();
-        else
+    private void lockAllAndThen(int nextStripe) {
+        if (nextStripe >= lockCount){
+            reallocateHelper(buckets);
+    }else
             synchronized (locks[nextStripe]) {
-                lockAllAndThen(nextStripe + 1, action);
+                lockAllAndThen(nextStripe + 1);
             }
     }
 
@@ -222,32 +231,32 @@ public class WrongStripedMap4<K, V> implements OurMap<K, V> {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        // OurMap<Integer, String> map = new WrongStripedMap4<>(4);
+        int[] arr = new int[1];
+        for(int count = 0; count < 100; count++){
+        WrongStripedMap3Bad<Integer, Integer> map = new WrongStripedMap3Bad<>(4);
 
-            StripedMap<Integer, String> map = new StripedMap<>(4);
+        for(int i = 0; i<50; i++){
+            map.put(i, i);
+        }
 
-            Thread[] threads = new Thread[10];
-            
+        Thread[] threads = new Thread[5];
 
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-                threads[i] = new Thread(() -> {
-                    for(int k = 0; k<50; k++){
-                        map.put(k+mul, k + "");
-                    }
-                });
-            }
-
-            for(int i = 0; i<threads.length; i++)threads[i].start();
-
-            for(int i = 0; i<threads.length; i++)threads[i].join();
-
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-
-                for(int k = 0; k<50; k++){
-                    assert map.containsKey(k+mul);
+        for(int i = 0; i<threads.length; i++){
+            threads[i] = new Thread(() -> {
+                for(int j = 0; j<10; j++){
+                    map.forEach((k,v) -> v = v + 1);
                 }
-            }
+            });
+        }
+
+        for(int i = 0; i<threads.length; i++)threads[i].start();
+
+        for(int i = 0; i<threads.length; i++)threads[i].join();
+        map.forEach((k,v) -> {
+            assert k + (50) == v;
+        });
     }
+
 }
+}
+

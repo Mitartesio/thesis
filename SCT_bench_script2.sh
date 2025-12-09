@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=BaseLine
 #SBATCH --output=job.%j.out
-#SBATCH --nodes=5
+#SBATCH --nodes=4
 #SBATCH --time=09:30:00
 #SBATCH --partition=scavenge
 #SBATCH --export=ALL
@@ -10,8 +10,8 @@ mkdir -p /home/anmv/SOFT/java
 mkdir -p /home/anmv/tmp
 export TMPDIR=/home/anmv/tmp
 
-export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_NODEID"
-mkdir -p "$GRADLE_USER_HOME"
+# export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_NODEID"
+# mkdir -p "$GRADLE_USER_HOME"
 
 cd /home/anmv/SOFT/java
 
@@ -29,33 +29,37 @@ module load Python/3.11.3-GCCcore-12.3.0
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 
 
-srun --nodelist=${nodes[0]} bash -c '
-    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
-    mkdir -p "$GRADLE_USER_HOME";
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Wronglock1Bad4 
 ' &
 
-srun --nodelist=${nodes[1]} bash -c '
-    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
-    mkdir -p "$GRADLE_USER_HOME";
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[1]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Wronglock3Bad2 
 ' &
-srun --nodelist=${nodes[2]} bash -c '
-    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
-    mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WronglockBad8 
-' &
-
-srun --nodelist=${nodes[3]} bash -c '
-    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
-    mkdir -p "$GRADLE_USER_HOME";
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[2]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench TwostageBad2 
 ' &
-srun --nodelist=${nodes[4]} bash -c '
-    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
-    mkdir -p "$GRADLE_USER_HOME";
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Twostage100Bad100 
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[3]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Phase01Bad2 
 ' &
+# srun --nodes=1 --ntasks=1 --nodelist=${nodes[4]} bash -c '
+#     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+#     mkdir -p "$GRADLE_USER_HOME"
+#     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Twostage100Bad100 
+# ' &
+# srun --nodes=1 --ntasks=1 --nodelist=${nodes[5]} bash -c '
+#     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+#     mkdir -p "$GRADLE_USER_HOME"
+#     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WronglockBad8 
+# ' &
 
 wait
 
@@ -64,3 +68,4 @@ wait
 #WronglockBad8
 #Wronglock3Bad2
 #Wronglock1Bad4
+# Phase01Bad2

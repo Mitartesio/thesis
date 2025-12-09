@@ -29,35 +29,35 @@ module load Python/3.11.3-GCCcore-12.3.0
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 
 
-srun --nodelist=${nodes[0]} bash -c '
+srun --ntasks=1 --nodelist=${nodes[0]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench AccountBad3 
 ' &
 
-srun --nodelist=${nodes[1]} bash -c '
+srun --ntasks=1 --nodelist=${nodes[1]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Carter01Bad4 
 ' &
-srun --nodelist=${nodes[2]} bash -c '
+srun --ntasks=1 --nodelist=${nodes[2]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench FsbenchBad27 
 ' &
 
-srun --nodelist=${nodes[3]} bash -c '
+srun --ntasks=1 --nodelist=${nodes[3]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Phase01Bad 
 ' &
-srun --nodelist=${nodes[4]} bash -c '
+srun --ntasks=1 --nodelist=${nodes[4]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench StackBad2 
 ' &
 
-srun --nodelist=${nodes[5]} bash -c '
+srun --ntasks=1 --nodelist=${nodes[5]} bash -c '
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_PROCID";
     mkdir -p "$GRADLE_USER_HOME";
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench TokenRingBad4 
@@ -65,4 +65,4 @@ srun --nodelist=${nodes[5]} bash -c '
 
 wait
 
-#AccountBad3 Carter01Bad4 FsbenchBad27 Phase01Bad StackBad2 TokenRingBad4
+#AccountBad3 Carter01Bad4 FsbenchBad27 StackBad2 TokenRingBad4
