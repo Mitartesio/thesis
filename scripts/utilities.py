@@ -1,8 +1,8 @@
+from typing import List
 import pandas as pd
-import os, pathlib, sys, subprocess
+import os, pathlib, sys, subprocess, csv
 from pathlib import Path
-from dynamic_run_jpf import ROOT
-from pathlib import Path
+from path_setup import*
 
 def combine_and_convert_csv(csv1: str, csv2: str, combinedname: str):
     csv1_path = ROOT / "reports" / f"{csv1}.csv"
