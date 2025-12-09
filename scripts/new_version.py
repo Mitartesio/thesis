@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 # import pandas as pd
 import tempfile
+from utilities import setup
 
 numberOfRuns = 1000
 
@@ -25,54 +26,6 @@ CONFIGS_DIR = ROOT / "configs"
 
 list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
 
-def setup():
-    """ Check whether script is run with correct version of java (only checks if its java 11)"""
-    result = subprocess.run(["java","-version"], stderr=subprocess.PIPE, text=True)
-
-    output = result.stderr
-    # print(output)
-    if 'version' in output:
-        versionLine = output.splitlines()[0]
-        java_version = versionLine.split('"')[1]
-        if java_version.split(".")[0] == '11':
-            print("Correctly using java 11.xx.xx")
-        else:
-            print("WARNING: Using wrong version of java. please use java 11")
-            sys.exit(1)
-
-    """Here we're building the jars needed for jpf _ NOT CONFIRMED WORKING YET"""
-
-    if JPF_JAR.exists():
-        print("JPF JARs already exist, skipping JAR generation")
-    else:
-        try:
-            print("generating JPF jars...")
-            subprocess.run(["./jpf-core/gradlew","-p","./jpf-core","buildJars"],check=True, cwd=ROOT)
-            print("Finished JPF JAR building")
-        except subprocess.CalledProcessError as e:
-            sys.exit(f"[error] JAR generation failed: {e}")
-
-
-    """ here we compile with gradle, which should ensure we've compiled with java 11, as its a demand in the gradle build"""
-
-    try:
-        print("Compiling with Gradle...")
-        subprocess.run([f"./{sys.argv[1]}/gradlew","-p",f"./{sys.argv[1]}","build","-x","test"],check=True, cwd=ROOT)
-        print("Finished Gradle compilation")
-    except subprocess.CalledProcessError as e:
-        sys.exit(f"[error] Gradle build failed: {e}")
-
-
-# Not sure if we need this:
-# def resolve_config(arg: str | None) -> pathlib.Path:
-#     if arg:
-#         p = pathlib.Path(arg)
-#         if not p.is_absolute():
-#             p = ROOT / p
-#         return p
-#     # Default config
-#     return CONFIGS_DIR / "SimpleTest2.jpf"
-
 def writeToCsv(tests):
     with open("results.csv",mode="w", newline="") as file:
         writer = csv.writer(file)
@@ -83,33 +36,6 @@ def writeToCsv(tests):
             # print(f"{result[0]} with this many p as {result[1]} has: result: {result[2]}")
             writer.writerow([result[0], result[1],result[2]])
     
-
-
-
-
-# Populate csv, can be useful. Not sure if better to continue the root structure or convert to just finding it normally.
-def populate_csv(csv_name: str, answers: List[int]):
-    if csv_name is None:
-        csv_name = "results"
-
-    out_file = ROOT / "reports" / f"{csv_name}.csv"
-    out_file.parent.mkdir(exist_ok=True)
-
-    if not out_file.exists():
-        with out_file.open("w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(["problem", "k", "violated"])  # <-- header
-            problem = csv_name
-            k, viol = answers[0]
-            writer.writerow([problem, k, viol])
-    else:
-        with out_file.open("a", newline="") as f:
-            writer = csv.writer(f)
-            problem = csv_name
-            k, viol = answers[0]
-            writer.writerow([problem, k, viol])
-
-    print(f" answers -> {out_file.stem}.csv")
 
 def split_alpha_numeric(s: str):
     i = len(s)
@@ -163,16 +89,13 @@ def convert_to_jpf():
             jpf_files[test].append((jpf_conf, p))
     return jpf_files
 
-def run_jpf():
+def run_jpf_files():
 
     map_of_tests = convert_to_jpf()
 
     results = []
     jpf_jar = str(JPF_RUN_JAR)
 
-    
-
-    
     for name, test in map_of_tests.items():
         print(f"Running {name}")
 
@@ -200,8 +123,6 @@ def run_jpf():
                         text=True
                     )
 
-                
-
                 stdout, stderr = process.communicate()
 
                 output = stdout + stderr
@@ -216,8 +137,6 @@ def run_jpf():
             else:
                 fullyDoneFlag = False
 
-                
-                
     for test in results:
         # print(f"This test: {test[0]} with p as {test[1]} had this many sucesses: {test[2]}")
         print(f"{test[0]},{test[1]},{test[2]}")
@@ -230,7 +149,7 @@ if __name__ == "__main__":
     # if no args provided, utilizes the algo_to_jpf dictionary
     setup()
 
-    writeToCsv(run_jpf())
+    writeToCsv(run_jpf_files())
 
     # log_file = run_gradle_tests("MinimizationTesting")
     # outputcsv = ROOT / "reports" / "MinimizationTesting.csv"

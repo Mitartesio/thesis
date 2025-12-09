@@ -43,7 +43,7 @@ def write_latex_tabulars(results: dict, tablename: str):
 
     df = pd.DataFrame(results)
     df.rename(index={"k_mean": "k", "violated_mean": "violated"}, inplace=True)
-    df_to_write = df.loc[['k', 'violated']].astype(int)
+    df_to_write = df.loc[['k', 'violated']].round(2)
 
     df_to_write = df_to_write.T
 
@@ -58,9 +58,9 @@ def write_latex_tabulars(results: dict, tablename: str):
 
 
 if __name__ == '__main__':
-    raw_res = read_results('reports/test123.csv')
-    med_mea = get_mean_median('reports/test123.csv')
+    # raw_res = read_results('reports/test123.csv')
+    # med_mea = get_mean_median('reports/test123.csv')
     med_mea2 = get_mean_median("reports/combinedUniRand.csv")
     combined = get_mean_median('reports/base_total.csv')
     #write_latex_tabulars(med_mea, 'plots/test_table.tex')
-    write_latex_tabulars(combined, "plots/combined_table.tex")
+    write_latex_tabulars(combined, "plots/combined_table2.tex")
