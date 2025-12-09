@@ -47,18 +47,19 @@ public class StringNumbererTest extends TestJPF {
             }
         }, "reader");
 
+        try {
         writer.start();
         reader.start();
         writer.join();
         reader.join();
 
-
-        // propagate failure in junit, otherwise it doesnt see it as failed.
         if (failure.get() != null) {
             throw new AssertionError("Worker thread failed", failure.get());
+        }} 
+        finally {
+        // ensure we don’t leave a stale barrier running. 
+        StringNumberer.setStartBarrier(null);
         }
-
-        StringNumberer.setStartBarrier(null); // reset barrier for furthjer tests.
 
     }
 

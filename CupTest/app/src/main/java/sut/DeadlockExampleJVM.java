@@ -64,7 +64,7 @@ public class DeadlockExampleJVM {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        DeadlockExample example = new DeadlockExample();
+        DeadlockExampleJVM example = new DeadlockExampleJVM();
         boolean deadlocked = example.runForDeadlock();
         System.out.println("Deadlock detected? " + deadlocked);
     }

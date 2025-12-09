@@ -13,13 +13,14 @@ public class DeadlockTesting extends TestJPF {
     DeadlockExample test;
 
     public static String classPath;
-    public static DeadlockExample d;
+    public static DeadlockExampleJVM d;
     boolean bug;
 
 
     @BeforeAll
     public static void init() {
-        d = new DeadlockExample();
+
+        d = new DeadlockExampleJVM();
     }
 
     @BeforeEach
