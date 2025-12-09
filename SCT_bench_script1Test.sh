@@ -1,68 +1,66 @@
 #!/bin/bash
 #SBATCH --job-name=BaseLine
 #SBATCH --output=job.%j.out
-#SBATCH --partition=scavenge
 #SBATCH --nodes=6
-#SBATCH --time=06:30:00
+#SBATCH --time=09:30:00
+#SBATCH --partition=scavenge
 #SBATCH --export=ALL
 
-
-### -------------------------------
-### PREPARE JAVA + TEMP DIRECTORIES
-### -------------------------------
 mkdir -p /home/anmv/SOFT/java
 mkdir -p /home/anmv/tmp
 export TMPDIR=/home/anmv/tmp
 
+# export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_NODEID"
+# mkdir -p "$GRADLE_USER_HOME"
+
 cd /home/anmv/SOFT/java
 
-# Download Java if not already present
-if [ ! -d "jdk-11.0.20+8" ]; then
-    wget -q https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.20+8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.20_8.tar.gz
-    tar -xzf OpenJDK11U-jdk_x64_linux_hotspot_11.0.20_8.tar.gz
-fi
+wget https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.20+8/OpenJDK11U-jdk_x64_linux_hotspot_11.0.20_8.tar.gz
+
+tar -xzf OpenJDK11U-jdk_x64_linux_hotspot_11.0.20_8.tar.gz
 
 export JAVA_HOME=/home/anmv/SOFT/java/jdk-11.0.20+8
 export PATH=$JAVA_HOME/bin:$PATH
-java -version
 
-### -------------------------------
-### LIST OF EXPERIMENTS
-### -------------------------------
-EXPERIMENTS=(
-    "AccountBad3"
-    "Carter01Bad4"
-    "FsbenchBad27"
-    "Phase01Bad2"
-    "StackBad2"
-    "TokenRingBad4"
-)
 
-### -------------------------------
-### GET NODE LIST
-### -------------------------------
+module purge
+module load Python/3.11.3-GCCcore-12.3.0
+
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 
-for i in "${!EXPERIMENTS[@]}"; do
-    EXP=${EXPERIMENTS[$i]}
-    NODE=${nodes[$i]}
 
-    srun --exclusive -N1 --nodelist=$NODE bash -c "
-    
-    module purge
-    module load Python/3.11.3-GCCcore-12.3.0
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench TokenRingBad4 
+' &
 
-    # Set Java environment
-    export JAVA_HOME=/home/anmv/SOFT/java/jdk-11.0.20+8
-    export PATH=\$JAVA_HOME/bin:\$PATH
-
-    export GRADLE_USER_HOME=\"\$TMP_BUILD_DIR/gradle_cache\"
-    mkdir -p \"\$GRADLE_USER_HOME\"
-
-    echo \"Running experiment: $EXP on node \$(hostname)\"
-    python scripts/new_version.py SctBench $EXP
-    " &
-done
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[1]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench StackBad2 
+' &
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[2]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Phase01Bad2 
+' &
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[3]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench FsbenchBad27 
+' &
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[4]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench Carter01Bad4 
+' &
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[5]} bash -c '
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURM_NODEID}_${SLURM_PROCID}"
+    mkdir -p "$GRADLE_USER_HOME"
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench AccountBad3 
+' &
 
 wait
-echo "All experiments completed."
+
+

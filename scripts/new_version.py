@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 import tempfile
 from utilities import setup
 
-numberOfRuns = 10
+numberOfRuns = 1000
 
 # Fixed path
 
@@ -24,9 +24,8 @@ JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 CONFIGS_DIR = ROOT / "configs"
 
-# list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
+list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
 
-list_of_probs = [0.5, 0.8]
 
 
 def setup():
