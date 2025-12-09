@@ -16,6 +16,9 @@ LEGACY/utils/CcpTest.py
 #png
 *.png
 
+#csv
+*.csv
+
 #pycache
 scripts/__pycache__
 
