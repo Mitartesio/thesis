@@ -14,8 +14,31 @@ def combine_and_convert_csv(csv1: str, csv2: str, combinedname: str):
     csv2 = pd.read_csv(csv2_path)
     csv1_df = pd.DataFrame(csv1)
     csv2_df = pd.DataFrame(csv2)
+
+    def comb_to_k(df):
+        if 'k_combined' in df.columns:
+            df.rename(columns={"k_combined": "k"}, inplace=True)
+        return df
+    
+    csv1_df = comb_to_k(csv1_df)
+    print(csv1_df.head())
+    csv2_df = comb_to_k(csv2_df)
+    print(csv2_df.head())
+
     combined_csv = pd.concat([csv1_df, csv2_df], ignore_index=True)
-    return combined_csv.to_csv(output_path, index=False, float_format="%.0f")
+    # added lambda'ish function
+    def get_k_combined(row):
+        if "Testing" in str(row.get("test", "")):
+            return row.get("k_max", 0)
+        return row.get("k", 0)
+    if (
+    "k_combined" not in combined_csv.columns
+    and not combined_csv["test"].astype(str).str.contains("Testing").any()):
+        combined_csv["k_combined"] = combined_csv.apply(get_k_combined, axis=1)
+        combined_csv = combined_csv.drop(
+            columns=[col for col in ["k", "k_max"] if col in combined_csv.columns]
+        )
+    return combined_csv.to_csv(output_path, index=False)
 
 
 def populate_csv(csv_name: str, answers: List[int]):
@@ -177,8 +200,5 @@ def parse_console_log(
 
 
 if __name__ == '__main__':
-    #combine_and_convert_csv("MinimizationTest", "DeadlockExample", "test123")
-    #combine_and_convert_csv("MinimizationTestRand", "DeadlockExampleRand", "test123rand")
-    #combine_and_convert_csv("test123", "test123rand", "combinedUniRand")
-    combine_and_convert_csv("MinimizationTesting", "DeadlockTesting", "base_tests_jvm")
-    combine_and_convert_csv('combinedUniRand', 'base_tests_jvm', "base_total")
+    #lol
+    pass
