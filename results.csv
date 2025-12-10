@@ -1,5 +1,5 @@
-test,P,number of successes
-AccountBad,0.5,10
-AccountBad,0.8,10
-Carter01Bad,0.5,10
-Carter01Bad,0.8,10
+test,P,violated
+WrongStripedMap1Bad,0.5,3
+WrongStripedMap1Bad,0.8,3
+WrongStripedMap2Bad,0.5,1
+WrongStripedMap2Bad,0.8,1
