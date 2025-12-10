@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 # import pandas as pd
 import tempfile
-from utilities import setup
 
 numberOfRuns = 1000
 

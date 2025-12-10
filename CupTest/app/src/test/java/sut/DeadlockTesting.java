@@ -15,25 +15,18 @@ public class DeadlockTesting extends TestJPF {
     public static String classPath;
     public static DeadlockExampleJVM d;
     boolean bug;
+    DeadlockExampleJVM ex;
 
-
-    @BeforeAll
-    public static void init() {
-
-        d = new DeadlockExampleJVM();
-    }
 
     @BeforeEach
     public void beforeEach() {
-        bug = false;
-
+        ex = new DeadlockExampleJVM();
     }
 
-    @RepeatedTest(5000)
+    @RepeatedTest(100000)
     public void runTest() throws InterruptedException {
-        bug = d.runForDeadlock();
-        System.out.println("RESULT:" + bug);
-        Assertions.assertFalse(bug);
+        ex = new DeadlockExampleJVM();
+        assertFalse(ex.runForDeadlock());
     }
 
 

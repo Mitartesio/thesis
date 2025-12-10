@@ -72,8 +72,12 @@ public class InterleavingCollector extends PropertyListenerAdapter {
         System.out.println("Total distinct schedules (interleavings): " + allSchedules.size());
         System.out.println("Schedules that hit a property violation: " + buggySchedules.size());
 
+        for (String s : allSchedules) {
+            System.out.println("SCHEDULE: " + s);
+        }
         for (String s : buggySchedules) {
             System.out.println("BUGGY SCHEDULE: " + s);
         }
+
     }
 }

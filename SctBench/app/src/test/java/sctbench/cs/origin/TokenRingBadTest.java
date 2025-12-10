@@ -5,7 +5,7 @@ import org.junit.jupiter.api.RepeatedTest;
 
 public class TokenRingBadTest {
 
-    @RepeatedTest(10000)
+    @RepeatedTest(100000)
     public void TokenRingBadTestRun() {
         Assertions.assertFalse(TokenRingBad.runOnce());
     }

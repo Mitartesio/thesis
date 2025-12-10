@@ -19,7 +19,7 @@ def combine_and_convert_csv(csv1: str, csv2: str, combinedname: str):
         if 'k_combined' in df.columns:
             df.rename(columns={"k_combined": "k"}, inplace=True)
         return df
-    
+
     csv1_df = comb_to_k(csv1_df)
     print(csv1_df.head())
     csv2_df = comb_to_k(csv2_df)
@@ -115,26 +115,45 @@ def setup():
             check=True,
             cwd=ROOT,
         )
+        subprocess.run(
+            ["./HashMaps/gradlew", "-p", "./HashMaps", "build", "-x", "test"],
+            check=True,
+            cwd=ROOT,
+        )
+        subprocess.run(
+            ["./SctBench/gradlew", "-p", "./SctBench", "build", "-x", "test"],
+            check=True,
+            cwd=ROOT,
+        )
+        subprocess.run(
+            ["./soot/gradlew", "-p", "./soot", "build", "-x", "test"],
+            check=True,
+            cwd=ROOT,
+        )
         print("Finished Gradle compilation")
     except subprocess.CalledProcessError as e:
         sys.exit(f"[error] Gradle build failed: {e}")
 
 
-def run_gradle_tests(gradletestfile: str):  # making it more modular
+def run_gradle_tests(gradletestfile: str, package: str, cwd: Path):
     log_file = ROOT / "reports" / f"{gradletestfile}.log"
     log_file.parent.mkdir(parents=True, exist_ok=True)
 
-    gradle_cmd = ["./gradlew", "test", "--tests", f"sut.{gradletestfile}"]
+    gradle_cmd = [
+        "./gradlew",
+        "test",
+        "--tests",
+        f"{package}.{gradletestfile}",
+    ]
 
-    print("Running Gradle tests...")
+    print(f"Running Gradle tests for {package}.{gradletestfile} in {cwd}...")
     with open(log_file, "w") as f:
         result = subprocess.run(
             gradle_cmd,
-            cwd=str(CUPTEST),
+            cwd=str(cwd),
             stdout=f,
             stderr=subprocess.STDOUT,
             text=True,
-            # check=True makes it so it doesn't create the csv if the build fails
         )
 
     print(f"Gradle test finished with return code {result.returncode}")
@@ -158,24 +177,24 @@ def parse_console_log(
         for line in f:
             line = line.strip()
             #   "MinimizationTesting > repetition 123 of 10000"
-            if "repetition" in line and "of" in line:
-                try:
-                    parts = line.split()
-                    rep_index = parts.index("repetition") + 1
-                    current_rep = int(parts[rep_index])
-                    # rep_number = int(parts[3]) # x of n
-                except Exception:
-                    current_rep = None
+            # if "repetition" in line and "of" in line:
+            #     try:
+            #         parts = line.split()
+            #         rep_index = parts.index("repetition") + 1
+            #         current_rep = int(parts[rep_index])
+            #         # rep_number = int(parts[3]) # x of n
+            #     except Exception:
+            #         current_rep = None
 
             # Repeated tests
-            elif line.startswith("RESULT"):
-                current_result = (
-                    0 if line.split(":", 1)[1].strip().lower() == "true" else 1
-                )
+            # if line.startswith("RESULT"):
+            #     current_result = (
+            #         0 if line.split(":", 1)[1].strip().lower() == "true" else 1
+            #     )
                 # current_result = line.split(":", 1)[1].strip()
 
             # for singular test run
-            if "repetition" not in line:
+            if "repetition" in line:
                 if line.endswith("PASSED"):
                     repetition_count += 1
                     rows.append(
@@ -193,12 +212,65 @@ def parse_console_log(
 
     with open(output_csv, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["problem", "k", "violated"])
+        writer.writerow(["test", "k", "violated"])
         writer.writerows(rows)
 
     print(f"Parsing done. output -> {output_csv}")
 
+dict_of_groups = {
+    "Baseline": {
+        "package": "sut",  # example
+        "cwd": CUPTEST,
+        "tests": {"MinimizationTesting", "DeadlockTesting"},
+    },
+    "SctBench": {
+        "package": "sctbench.cs.origin",
+        "cwd": SCTBENCH,
+        "tests": {
+            "AccountBadTest",
+            "Carter01BadTest",
+            "FsbenchBadTest",
+            "Phase01BadTest",
+            "StackBadTest",
+            "TokenRingBadTest",
+            "Twostage100BadTest",
+            "TwostageBadTest",
+            "WronglockBadTest",
+            "Wronglock1BadTest",
+            "Wronglock3BadTest",
+        },
+    },
+    "soot": {
+        "package": "org.example",
+        "cwd": SOOT,
+        "tests": {
+            "StringNumbererTest"
+        }
+    }
+}
+
+
+
+def run_all_gradle_tests ():
+    for group_name, cfg in dict_of_groups.items():
+        package = cfg["package"]
+        cwd = cfg["cwd"]
+
+        for test_name in cfg["tests"]:
+            log_file = run_gradle_tests(test_name, package=package, cwd=cwd)
+            outputcsv = ROOT / "reports" / f"{group_name}_{test_name}.csv"
+            parse_console_log(log_file, outputcsv)
+
 
 if __name__ == '__main__':
-    #lol
-    pass
+    setup()
+    run_all_gradle_tests()
+    #combine_and_convert_csv("MinimizationTest", "DeadlockExample", "test123")
+    #combine_and_convert_csv("MinimizationTestRand", "DeadlockExampleRand", "test123rand")
+    #combine_and_convert_csv("test123", "test123rand", "combinedUniRand")
+    # combine_and_convert_csv("MinimizationTesting", "DeadlockTesting", "base_tests_jvm")
+    # combine_and_convert_csv('combinedUniRand', 'base_tests_jvm', "base_total")
+
+
+
+

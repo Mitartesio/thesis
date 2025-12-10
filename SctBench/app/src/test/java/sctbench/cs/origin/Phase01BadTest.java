@@ -24,19 +24,19 @@ public class Phase01BadTest {
         classPath = getClassPath();
     }
 
-    @BeforeEach
-    public void setup() throws Exception {
-        test = new Lazy01Bad();
-    }
+//    @BeforeEach
+//    public void setup() throws Exception {
+//        test = new Lazy01Bad();
+//    }
 
     //Passes everytime due to these: if (lockStatus == 1) {
     //System.out.println("Deadlock detected");
     //throw new RuntimeException();
 
 
-    @RepeatedTest(1000)
+    @RepeatedTest(100000)
     public void testboolean() {
-        Assertions.assertFalse(Phase01Bad.run());
+        Assertions.assertFalse(Phase01Bad.run(100));
     }
 
 
@@ -44,8 +44,8 @@ public class Phase01BadTest {
         String userDir = System.getProperty("user.dir"); //
         // System.out.println(userDir);
         String fs = File.separator; // For / or \ for win/osx, neet help which works, as \ escapes space in
-                                    // absolutep aths on osx. This is where our problem is if we have problem on
-                                    // windows.
+        // absolutep aths on osx. This is where our problem is if we have problem on
+        // windows.
         String ps = File.pathSeparator;
 
         String testClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "test";

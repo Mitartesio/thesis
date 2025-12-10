@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 public class StackBadTest {
 
-    @RepeatedTest(10000)
+    @RepeatedTest(100000)
     public void test() {
         Assertions.assertFalse(StackBad.runOnce());
     }

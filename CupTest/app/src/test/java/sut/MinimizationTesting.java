@@ -33,7 +33,7 @@ public class MinimizationTesting extends TestJPF {
     public void runTest() throws InterruptedException {
         bug = test.run();
         Assertions.assertFalse(bug);
-        System.out.println("RESULT:" + bug);
+//        System.out.println("RESULT:" + bug);
     }
 
 

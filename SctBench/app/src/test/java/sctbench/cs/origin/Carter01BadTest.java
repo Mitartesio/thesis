@@ -37,7 +37,7 @@ public class Carter01BadTest {
         test = new Carter01Bad();
     }
 
-    @RepeatedTest(1000)
+    @RepeatedTest(100000)
     public void testboolean() {
         // failing the assertion means it finds the bug. Expecting false, but gets true.
         Assertions.assertFalse(Carter01Bad.run());
@@ -48,8 +48,8 @@ public class Carter01BadTest {
         String userDir = System.getProperty("user.dir"); //
         // System.out.println(userDir);
         String fs = File.separator; // For / or \ for win/osx, neet help which works, as \ escapes space in
-                                    // absolutep aths on osx. This is where our problem is if we have problem on
-                                    // windows.
+        // absolutep aths on osx. This is where our problem is if we have problem on
+        // windows.
         String ps = File.pathSeparator;
 
         String testClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "test";

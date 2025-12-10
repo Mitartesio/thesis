@@ -110,11 +110,5 @@ if __name__ == "__main__":
     setup()
 
     # Give epsilon and p probability
-    handle_jpf()
+    # handle_jpf()
 
-    # log_file = run_gradle_tests("MinimizationTesting")
-    # outputcsv = ROOT / "reports" / "MinimizationTesting.csv"
-    # parse_console_log(log_file, outputcsv)
-    # logfile = run_gradle_tests("DeadlockTesting")
-    # output_csv = ROOT / "reports" / "DeadlockTesting.csv"
-    # parse_console_log(logfile, output_csv)

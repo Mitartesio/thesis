@@ -27,19 +27,18 @@ public class FsbenchBadTest {
         test = new FsbenchBad();
     }
 
-    @RepeatedTest(1000)
+    @RepeatedTest(100000)
     public void testboolean() {
         Assertions.assertFalse(FsbenchBad.run());
     }
-
 
 
     public static String getClassPath() {
         String userDir = System.getProperty("user.dir"); //
         // System.out.println(userDir);
         String fs = File.separator; // For / or \ for win/osx, neet help which works, as \ escapes space in
-                                    // absolutep aths on osx. This is where our problem is if we have problem on
-                                    // windows.
+        // absolutep aths on osx. This is where our problem is if we have problem on
+        // windows.
         String ps = File.pathSeparator;
 
         String testClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "test";

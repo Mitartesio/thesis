@@ -8,11 +8,11 @@ password = getpass.getpass('Enter your password: ')
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect('hpc.itu.dk', username="anmv", password=password)
+ssh.connect('hpc.itu.dk', username="frek", password=password)
 
 # Upload the .job file
-local_job_file = "SCT_bench_script2.sh"
-remote_job_file = 'SCT_bench_script2.sh'
+local_job_file = "SCT_bench_scrip1.sh"
+remote_job_file = 'SCT_bench_scrip1.sh'
 with SCPClient(ssh.get_transport()) as scp:
     scp.put(local_job_file, remote_job_file)
 
@@ -34,8 +34,6 @@ while not job_finished:
         elif 'RUNNING' in line:
             print(f'Job {job_id} is still running...')
             break
-
-
 
 job_output_filename = f'job.{job_id}.out'
 

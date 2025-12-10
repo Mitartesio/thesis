@@ -22,33 +22,35 @@ public class FsbenchBad {
     private static AtomicBoolean bug = new AtomicBoolean();
 
     private static void threadRoutine(int tid) {
-        assert tid >= 0 && tid < NUM_THREADS;
+        try {
+            assert tid >= 0 && tid < NUM_THREADS;
 
-        int i = tid % NUMINODE;
-        assert i >= 0 && i < NUMBLOCKS;
-        locki[i].lock();
-        if (inode[i] == 0) {
-            int b = (i * 2) % NUMBLOCKS;
-            for (int j = 0; j < NUMBLOCKS / 2; j++) {
-                lockb[b].lock();
-                if (busy[b] == 0) {
-                    busy[b] = 1;
-                    inode[i] = b + 1;
-                    System.out.print("  ");
+            int i = tid % NUMINODE;
+            assert i >= 0 && i < NUMBLOCKS;
+            locki[i].lock();
+            if (inode[i] == 0) {
+                int b = (i * 2) % NUMBLOCKS;
+                for (int j = 0; j < NUMBLOCKS / 2; j++) {
+                    lockb[b].lock();
+                    if (busy[b] == 0) {
+                        busy[b] = 1;
+                        inode[i] = b + 1;
+                        System.out.print("  ");
+                        lockb[b].unlock();
+                        break;
+                    }
                     lockb[b].unlock();
-                    break;
+                    b = (b + 1) % NUMBLOCKS;
                 }
-                lockb[b].unlock();
-                b = (b + 1) % NUMBLOCKS;
             }
+
+            assert i >= 0 && i < NUMBLOCKS : "Assert failed - Bug found!";
+            locki[i].unlock(); // BAD: array locki upper bound
+        } catch (Throwable t) {
+            // catch exception for the assertion and set bug to true.
+            bug.set(true);
+            // t.printStackTrace();
         }
-        boolean okay = (i >= 0 && i < NUMBLOCKS);
-        //assert i >= 0 && i < NUMBLOCKS : "Assert failed - Bug found!";
-        if (!okay) {
-            bug.set(true); 
-            return;
-            }
-        locki[i].unlock(); // BAD: array locki upper bound
     }
 
     public static boolean run() {
@@ -59,7 +61,7 @@ public class FsbenchBad {
 
         threads = new Thread[NUM_THREADS];
 
-        bug = new AtomicBoolean();
+        bug = new AtomicBoolean(false);
 
         for (int i = 0; i < NUMBLOCKS; i++) {
             locki[i] = new ReentrantLock();
@@ -79,7 +81,7 @@ public class FsbenchBad {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }  
+        }
         return bug.get();
     }
 

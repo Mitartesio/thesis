@@ -11,5 +11,9 @@ JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 JACONTEBE_ROOT = ROOT / "JaConTeBe"
 
+SCTBENCH = ROOT / "SctBench"
+
+SOOT = ROOT / "soot"
+
 
 CONFIGS_DIR = ROOT / "configs"

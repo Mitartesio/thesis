@@ -27,7 +27,7 @@ public class AccountBadTest extends TestJPF {
         test = new AccountBad();
     }
 
-    @RepeatedTest(10000)
+    @RepeatedTest(100000)
     public void booleantest() {
         //bug is found if test fails
         Assertions.assertFalse(AccountBad.runOnce());
