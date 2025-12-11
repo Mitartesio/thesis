@@ -1,3 +1,5 @@
+import time
+import timeit
 from typing import List
 import pandas as pd
 import os, pathlib, sys, subprocess, csv
@@ -80,11 +82,26 @@ def populate_csv(csv_name: str, answers: List[int]):
 
     out_file = ROOT / "reports" / f"{csv_name}.csv"
     out_file.parent.mkdir(exist_ok=True)
-
+    if "_time" in csv_name:
+        if not out_file.exists():
+            with out_file.open("w", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(["test", "time"])  # <-- header
+                test = csv_name
+                time = answers[0]
+                writer.writerow([test, time])
+                return
+        else:
+            with out_file.open("a", newline="") as f:
+                writer = csv.writer(f)
+                test = csv_name
+                time = answers[0]
+                writer.writerow([test, time])
+                return
     if not out_file.exists():
         with out_file.open("w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["problem", "k", "violated"])  # <-- header
+            writer.writerow(["test", "k", "violated"])  # <-- header
             problem = csv_name
             k, viol = answers[0]
             writer.writerow([problem, k, viol])
@@ -98,7 +115,11 @@ def populate_csv(csv_name: str, answers: List[int]):
     print(f" answers -> {out_file.stem}.csv")
 
 
-def resolve_config(arg: str | None) -> pathlib.Path:
+def resolve_config(arg=None) -> pathlib.Path:
+    '''
+        if arg not not, it needs to be a str
+    '''
+    
     if arg:
         p = pathlib.Path(arg)
         if not p.is_absolute():
@@ -292,6 +313,11 @@ def run_all_gradle_tests ():
             outputcsv = ROOT / "reports" / f"{group_name}_{test_name}.csv"
             parse_console_log(log_file, outputcsv)
 
+def time_endrun():
+    time.time()
+
+def time_startrun():
+    time.time()
 
 if __name__ == '__main__':
     #setup()

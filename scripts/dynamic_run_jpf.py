@@ -2,13 +2,16 @@ import csv
 import os, pathlib, sys, subprocess
 from pathlib import Path
 from datetime import datetime
+import time
 from typing import List, Tuple
 import pandas as pd
 from utilities import resolve_config, setup, populate_csv, parse_console_log, run_gradle_tests
+from new_version import convert_to_jpf
 from path_setup import*
 
-# Fixed path
+jpf_tests = convert_to_jpf()
 
+# Fixed path
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
     # sys.arg[0] python file to run, sys.arg[1] jpf.config, sys.arg[2] amount runs
 
@@ -18,8 +21,14 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
         csv_name = pathlib.Path(sys.argv[1]).stem
         for i in range(0, runs):
             print(f"THIS IS THE {i}'TH RUN!!!!")
-            results, rc, k = run_jpf(csv_name, config_file, runs)
+            start = time.time()
+            results, rc, k = run_jpf(f"{csv_name}", config_file, runs)
+            end = time.time()
+            timelist = []
+            timelist.append(end - start)
             populate_csv(csv_name, results)
+            populate_csv(f"{csv_name}_time", timelist)
+
         print(f'jpf exited with code {rc}')
         sys.exit(rc)
 
@@ -110,5 +119,5 @@ if __name__ == "__main__":
     setup()
 
     # Give epsilon and p probability
-    # handle_jpf()
+    handle_jpf()
 
