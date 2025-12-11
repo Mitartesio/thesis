@@ -4,12 +4,21 @@ import os, pathlib, sys, subprocess, csv
 from pathlib import Path
 from path_setup import*
 
-def combine_and_convert_csv(csv1: str, csv2: str, combinedname: str):
-    csv1_path = ROOT / "reports" / f"{csv1}.csv"
-    csv2_path = ROOT / "reports" / f"{csv2}.csv"
+def combine_and_convert_csv(csv1: Path, csv2: Path, combinedname: str):
+    csv1_path = csv1
+    if not csv1_path.exists():
+        csv1_path = ROOT / "reports" / "experiments" / csv1.name
 
-    output_path = ROOT / "reports" / f"{combinedname}.csv"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    csv2_path = csv2
+    if not csv2_path.exists():
+        csv2_path = ROOT / "reports" / "experiments" / csv2.name
+
+    # determine proper output path
+    if "experiments" in str(csv1_path) or "experiments" in str(csv2_path):
+        output_path = ROOT / "reports" / "experiments" / f"{combinedname}.csv"
+    else:
+        output_path = ROOT / "reports" / f"{combinedname}.csv"
+
     csv1 = pd.read_csv(csv1_path)
     csv2 = pd.read_csv(csv2_path)
     csv1_df = pd.DataFrame(csv1)
@@ -28,17 +37,41 @@ def combine_and_convert_csv(csv1: str, csv2: str, combinedname: str):
     combined_csv = pd.concat([csv1_df, csv2_df], ignore_index=True)
     # added lambda'ish function
     def get_k_combined(row):
-        if "Testing" in str(row.get("test", "")):
+        if "Testing" in str(row.get("test", "")) or "Test" in str(
+            row.get("test", "")
+        ):  # sprang over hvor gærdet var lavest.
             return row.get("k_max", 0)
         return row.get("k", 0)
     if (
     "k_combined" not in combined_csv.columns
-    and not combined_csv["test"].astype(str).str.contains("Testing").any()):
+    and not combined_csv["test"].astype(str).str.contains("Testing").any()): 
         combined_csv["k_combined"] = combined_csv.apply(get_k_combined, axis=1)
         combined_csv = combined_csv.drop(
             columns=[col for col in ["k", "k_max"] if col in combined_csv.columns]
         )
-    return combined_csv.to_csv(output_path, index=False)
+    combined_csv.to_csv(output_path, index=False)
+
+    return output_path
+
+
+def separate_combine(csv1: str, csv2: str, combined_name: str):
+    csv1_path = ROOT / "reports" / f"{csv1}.csv"
+    csv2_path = ROOT / "reports" / f"{csv2}.csv"
+    output_path = ROOT / "reports"/ f"{combined_name}.csv"
+    df1 = pd.read_csv(csv1_path)
+    df2 = pd.read_csv(csv2_path)
+    combined_df = pd.concat([df1, df2], ignore_index=True)
+    combined_df = combined_df.fillna(0)
+    combined_df.to_csv(output_path, index=False)
+    return output_path.stem
+
+
+def combine_all_csvs(paths: list[Path]) -> pd.DataFrame:
+    """Combine all CSVs into one DataFrame."""
+    dfs = [pd.read_csv(p) for p in paths]
+    combined_df = pd.concat(dfs, ignore_index=True)
+    combined_df.to_csv()
+    return combined_df
 
 
 def populate_csv(csv_name: str, answers: List[int]):
@@ -249,8 +282,6 @@ dict_of_groups = {
     }
 }
 
-
-
 def run_all_gradle_tests ():
     for group_name, cfg in dict_of_groups.items():
         package = cfg["package"]
@@ -263,14 +294,6 @@ def run_all_gradle_tests ():
 
 
 if __name__ == '__main__':
-    setup()
-    run_all_gradle_tests()
-    #combine_and_convert_csv("MinimizationTest", "DeadlockExample", "test123")
-    #combine_and_convert_csv("MinimizationTestRand", "DeadlockExampleRand", "test123rand")
-    #combine_and_convert_csv("test123", "test123rand", "combinedUniRand")
-    # combine_and_convert_csv("MinimizationTesting", "DeadlockTesting", "base_tests_jvm")
-    # combine_and_convert_csv('combinedUniRand', 'base_tests_jvm', "base_total")
-
-
-
-
+    #setup()
+    #run_all_gradle_tests()
+    separate_combine("MinimizationTesting2_mean", "DeadlockTesting2_mean", "randomcsv")
