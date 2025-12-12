@@ -6,10 +6,8 @@ import time
 from typing import List, Tuple
 import pandas as pd
 from utilities import resolve_config, setup, populate_csv, parse_console_log, run_gradle_tests
-from new_version import convert_to_jpf
+from new_version import convert_to_jpf, run_jpf_files, time
 from path_setup import*
-
-jpf_tests = convert_to_jpf()
 
 # Fixed path
 def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo to jpf
@@ -38,6 +36,12 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
             print(f'Running {key} via {config_path}')
             populate_csv(key, run_jpf(key, config_path))
         return
+
+
+# def time_jpf():
+#     results, timelist = run_jpf_files()
+#     populate_csv(f"{results[0]}_time", timelist)
+
 
 def run_jpf(test_name: str, config_path: str, runs: int):
     config = resolve_config(config_path)
@@ -96,21 +100,29 @@ def run_jpf(test_name: str, config_path: str, runs: int):
     results.append((k_value, int(violated)))
     return results, rc, k_value
 
-# Something like this:
-# INSTANCES_preSorted_Adaptive: List[Tuple[str, str]] = {
-#     ("levelSort Presort INTEGERS Adaptive", "SortingVariations/app/build/libs/app.jar"),
-#     ("binomialSort Presort INTEGERS Adaptive", "SortingVariations/app/build/libs/app.jar"),
-#     ("levelSort Presort INTEGERS NonAdaptive", "SortingVariations/app/build/libs/app.jar"),
-#     ("binomialSort Presort INTEGERS NonAdaptive", "SortingVariations/app/build/libs/app.jar")
-# }
-# Mapping of nickname keys for csv names -> to their respective .jpf setup files.
-algo_to_jpf = {
-    "SimpleTest2Rand": "configs/SimpleTest.jpf",  # resolve_config()?
-    "SimpleTest2Uni": "configs/SimpleTest2.jpf",
-    "MiniRand": "configs/MinimizationTest.jpf",
-    "MiniUni": "configs/MinUniformTest.jpf",
-}
 
+def time_jpf():
+    results, timelist = run_jpf_files(dict_of_experiments)
+    for (name, p, result), t in zip(results, timelist):
+        populate_csv(f"{name}_time", p, [t])
+
+
+dict_of_experiments = {
+    "MinimizationTest": {"package": "sut", "cwd": CUPTEST, "threads": 2},
+    # "MinimizationTestWithNoise": {"package": "sut", "cwd": CUPTEST, "threads": 2},
+    # "DeadlockExample": {"package": "sut", "cwd": CUPTEST, "threads": 2},
+    # "AccountBadTest":      {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "Carter01BadTest":     {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # #"FsbenchBadTest":      {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "Phase01BadTest":      {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "StackBadTest":        {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "TokenRingBadTest":    {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "Twostage100BadTest":  {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "TwostageBadTest":     {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "WronglockBadTest":    {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "Wronglock1BadTest":   {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "Wronglock3BadTest":   {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+}
 
 if __name__ == "__main__":
 
@@ -119,5 +131,5 @@ if __name__ == "__main__":
     setup()
 
     # Give epsilon and p probability
-    handle_jpf()
-
+    #handle_jpf()
+    time_jpf()

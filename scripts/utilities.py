@@ -313,13 +313,7 @@ def run_all_gradle_tests ():
             outputcsv = ROOT / "reports" / f"{group_name}_{test_name}.csv"
             parse_console_log(log_file, outputcsv)
 
-def time_endrun():
-    time.time()
-
-def time_startrun():
-    time.time()
-
 if __name__ == '__main__':
     #setup()
     #run_all_gradle_tests()
-    separate_combine("MinimizationTesting2_mean", "DeadlockTesting2_mean", "randomcsv")
+    pass

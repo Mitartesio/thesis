@@ -2,30 +2,38 @@ import csv
 import os, pathlib, sys, subprocess
 from pathlib import Path
 from datetime import datetime
+import time
 from typing import Dict, List, Tuple
 # import pandas as pd
 import tempfile
+# from utilities import populate_csv
+from path_setup import*
 
 numberOfRuns = 1000
 
 # Fixed path
 
-# Find the right paths:
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+# # Find the right paths:
+# ROOT = pathlib.Path(__file__).resolve().parents[1]
 
-CUPTEST = ROOT / sys.argv[1]
-BUILD_CLASSES = CUPTEST / "app" / "build" / "classes" / "java" / "main"
-BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
-JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
-JPF_RUN_JAR = ROOT / "jpf-core" / "build" / "RunJPF.jar" 
-JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
-
-
-CONFIGS_DIR = ROOT / "configs"
-
-list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
+# CUPTEST = ROOT / sys.argv[1]
+# BUILD_CLASSES = CUPTEST / "app" / "build" / "classes" / "java" / "main"
+# BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
+# JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
+# JPF_RUN_JAR = ROOT / "jpf-core" / "build" / "RunJPF.jar"
+# JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 
+# CONFIGS_DIR = ROOT / "configs"
+
+# list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
+list_of_probs = [0.9, 0.999]
+
+
+# def time_jpf():
+#     results, timelist = run_jpf_files()
+#     for (name, p, result), t in zip(results, timelist):
+#         populate_csv(f"{name}_time", timelist)
 
 def setup():
     """ Check whether script is run with correct version of java (only checks if its java 11)"""
@@ -84,7 +92,7 @@ def writeToCsv(tests):
         for result in tests:
             # print(f"{result[0]} with this many p as {result[1]} has: result: {result[2]}")
             writer.writerow([result[0], result[1],result[2]])
-    
+
 
 def split_alpha_numeric(s: str):
     i = len(s)
@@ -110,40 +118,76 @@ def read_input():
     
     return tests_to_run
 
-#We generate a dictionary with the of the test as key and list of .jpf instructions as value
-def convert_to_jpf():
-    tests = read_input()
+# We generate a dictionary with the of the test as key and list of .jpf instructions as value
+def convert_to_jpf(testdict=None):
     jpf_files = {}
-    for test, threads in tests.items():
-        for p in list_of_probs:
-            jpf_conf = [
-                "target = sctbench.cs.origin." + test,
-                # "target = cs." + test,
-                f"classpath = {BUILD_CLASSES}",
-                "native_classpath = SctBench/app/build/classes/java/main",
-                # f"native_classpath = {BUILD_RES}",
-                # "native_classpath = out",
-                "vm.args = -ea",
-                "listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
-                # "search.class = SearchAlgorithms.Reset_Search",
-                "search.class = gov.nasa.jpf.search.Reset_Search",
-                f"+search_with_reset.probabilities = {str(p)} {str(1.0-p)}",
-                "+search_with_reset.eps = 0.1", #We should do some logic here with inserting eps and probabilities
-                "+numberOfThreads = " + str(threads),
-                "search.multiple_errors = false",
-                "jpf.report.console.property_violation = error",
-                "report.console.finished = result,statistics,error",
-                "report.unique_errors = true"
-            ]
-            if test not in jpf_files:
-                jpf_files[test] = []
-            jpf_files[test].append((jpf_conf, p))
+    if testdict == None:
+        tests = read_input()
+        for test, threads in tests.items():
+            for p in list_of_probs:
+                jpf_conf = [
+                    "target = sctbench.cs.origin." + test,
+                    # "target = cs." + test,
+                    f"classpath = {BUILD_CLASSES}",
+                    "native_classpath = SctBench/app/build/classes/java/main",
+                    # f"native_classpath = {BUILD_RES}",
+                    # "native_classpath = out",
+                    "vm.args = -ea",
+                    "listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+                    # "search.class = SearchAlgorithms.Reset_Search",
+                    "search.class = gov.nasa.jpf.search.Reset_Search",
+                    f"+search_with_reset.probabilities = {str(p)} {str(1.0-p)}",
+                    "+search_with_reset.eps = 0.1", #We should do some logic here with inserting eps and probabilities
+                    "+numberOfThreads = " + str(threads),
+                    "search.multiple_errors = false",
+                    "jpf.report.console.property_violation = error",
+                    "report.console.finished = result,statistics,error",
+                    "report.unique_errors = true"
+                ]
+                if test not in jpf_files:
+                    jpf_files[test] = []
+                jpf_files[test].append((jpf_conf, p))
+    else:
+        tests = testdict
+        for test_name, info in tests.items():
+            pack = info["package"]
+            threads = info["threads"]
+            cwd = info["cwd"] # cuptest or one of the others
+
+            for p in list_of_probs:
+                jpf_conf = [
+                    f"target = {pack}.{test_name}",
+                    # "target = cs." + test,
+                    f"classpath = {cwd}/app/build/classes/java/main",
+                    #f"native_classpath = {cwd}/app/build/classes/java/main",
+                    # f"native_classpath = {BUILD_RES}",
+                    # "native_classpath = out",
+                    "vm.args = -ea",
+                    "listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+                    # "search.class = SearchAlgorithms.Reset_Search",
+                    "search.class = gov.nasa.jpf.search.Reset_Search",
+                    f"+search_with_reset.probabilities = {str(p)} {str(1.0-p)}",
+                    "+search_with_reset.eps = 0.1",  # We should do some logic here with inserting eps and probabilities
+                    "+numberOfThreads = " + str(threads),
+                    "search.multiple_errors = false",
+                    "jpf.report.console.property_violation = error",
+                    "report.console.finished = result,statistics,error",
+                    "report.unique_errors = true",
+                ]
+                if test_name not in jpf_files: # what is the purpose of this one?
+                    jpf_files[test_name] = []
+
+                jpf_files[test_name].append((jpf_conf, p))
+
     return jpf_files
 
-def run_jpf_files():
+def run_jpf_files(dict=None):
+    if dict == None:
+        map_of_tests = convert_to_jpf()
+    else:
+        map_of_tests = convert_to_jpf(dict)
 
-    map_of_tests = convert_to_jpf()
-
+    timelist = []
     results = []
     jpf_jar = str(JPF_RUN_JAR)
 
@@ -157,7 +201,7 @@ def run_jpf_files():
                 with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
                     jpf_path = f.name
                     f.write("\n".join(tup[0]))
-            
+
                 cmd = [
                     "java",
                     "-Xmx4g",
@@ -166,13 +210,15 @@ def run_jpf_files():
                     jpf_jar,
                     jpf_path
                     ]
-                
+                start = time.time()
                 process = subprocess.Popen(
                         cmd,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE,
                         universal_newlines=True
                     )
+                end = time.time()
+                timelist.append(end-start)
 
                 stdout, stderr = process.communicate()
 
@@ -191,7 +237,7 @@ def run_jpf_files():
     for test in results:
         # print(f"This test: {test[0]} with p as {test[1]} had this many sucesses: {test[2]}")
         print(f"{test[0]},{test[1]},{test[2]}")
-    return results
+    return results, timelist
 
 
 if __name__ == "__main__":
@@ -200,11 +246,5 @@ if __name__ == "__main__":
     # if no args provided, utilizes the algo_to_jpf dictionary
     setup()
 
-    writeToCsv(run_jpf_files())
-
-    # log_file = run_gradle_tests("MinimizationTesting")
-    # outputcsv = ROOT / "reports" / "MinimizationTesting.csv"
-    # parse_console_log(log_file, outputcsv)
-    # logfile = run_gradle_tests("DeadlockTesting")
-    # output_csv = ROOT / "reports" / "DeadlockTesting.csv"
-    # parse_console_log(logfile, output_csv)
+    #writeToCsv(run_jpf_files())
+    #time_jpf()

@@ -7,6 +7,7 @@ CUPTEST = ROOT / "CupTest"
 BUILD_CLASSES = CUPTEST / "app" / "build" / "classes" / "java" / "main"
 BUILD_RES = CUPTEST / "app" / "build" / "resources" / "main"
 JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
+JPF_RUN_JAR = ROOT / "jpf-core" / "build" / "RunJPF.jar"
 JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 
 JACONTEBE_ROOT = ROOT / "JaConTeBe"
