@@ -32,22 +32,38 @@ nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
     export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
+
+    PROJECT_COPY="/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/SctBench "$PROJECT_COPY"
+
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench AccountBad3 
 ' &
 
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[1]} bash -c '
     export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
+    
+    PROJECT_COPY="/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/SctBench "$PROJECT_COPY"
+    
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench TokenRingBad4 
 ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[2]} bash -c '
     export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
+    
+    PROJECT_COPY="/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/SctBench "$PROJECT_COPY"
+    
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench StackBad2 
 ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[3]} bash -c '
     export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
+    
+    PROJECT_COPY="/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/SctBench "$PROJECT_COPY"
+    
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench FsbenchBad27 
 ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[4]} bash -c '

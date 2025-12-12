@@ -8,11 +8,11 @@ password = getpass.getpass('Enter your password: ')
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect('hpc.itu.dk', username="frek", password=password)
+ssh.connect('hpc.itu.dk', username="anmv", password=password)
 
 # Upload the .job file
-local_job_file = "SCT_bench_scrip1.sh"
-remote_job_file = 'SCT_bench_scrip1.sh'
+local_job_file = "TimeExperiment.sh"
+remote_job_file = 'TimeExperiment.sh'
 with SCPClient(ssh.get_transport()) as scp:
     scp.put(local_job_file, remote_job_file)
 

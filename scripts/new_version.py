@@ -9,7 +9,7 @@ import tempfile
 # from utilities import populate_csv
 from path_setup import*
 
-numberOfRuns = 1000
+numberOfRuns = 100
 
 # Fixed path
 
@@ -27,7 +27,7 @@ numberOfRuns = 1000
 # CONFIGS_DIR = ROOT / "configs"
 
 # list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
-list_of_probs = [0.9, 0.999]
+list_of_probs = [0.999]
 
 
 # def time_jpf():
@@ -218,6 +218,8 @@ def run_jpf_files(dict=None):
                         universal_newlines=True
                     )
                 end = time.time()
+                time = end-start
+                print(f"{test[0]}, {test[1]}, {test[2]}, {time}")
                 timelist.append(end-start)
 
                 stdout, stderr = process.communicate()

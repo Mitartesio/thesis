@@ -222,9 +222,9 @@ public class WrongStripedMap4Bad<K, V> implements OurMap<K, V> {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        // OurMap<Integer, String> map = new WrongStripedMap4<>(4);
+        OurMap<Integer, String> map = new WrongStripedMap4Bad<>(4);
 
-            StripedMap<Integer, String> map = new StripedMap<>(4);
+            // StripedMap<Integer, String> map = new StripedMap<>(4);
 
             Thread[] threads = new Thread[10];
             

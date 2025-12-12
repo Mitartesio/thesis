@@ -2,7 +2,7 @@
 #SBATCH --job-name=BaseLine
 #SBATCH --output=job.%j.out
 #SBATCH --nodes=5
-#SBATCH --time=15:30:00
+#SBATCH --time=11:30:00
 #SBATCH --partition=scavenge
 #SBATCH --export=ALL
 
@@ -30,30 +30,45 @@ nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 
 
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
-    export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/CupTest /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    cd /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    ./gradlew build -x test
     python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py CupTest WrongStripedMap1Bad5 
 ' &
 
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[1]} bash -c '
-    export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WrongStripedMap2Bad5 
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/CupTest /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    cd /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    ./gradlew build -x test
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py CupTest WrongStripedMap2Bad5
 ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[2]} bash -c '
-    export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WrongStripedMap3Bad5 
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/CupTest /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    cd /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    ./gradlew build -x test
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py CupTest WrongStripedMap3Bad5
 ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[3]} bash -c '
-    export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WrongStripedMap4Bad5 
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/CupTest /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    cd /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    ./gradlew build -x test
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py CupTest WrongStripedMap4Bad5
 ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[4]} bash -c '
-    export GRADLE_USER_HOME="/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
     mkdir -p "$GRADLE_USER_HOME"
-    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py SctBench WrongStripedMap5Bad5 
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/CupTest /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    cd /home/anmv/tmp/CupTest_${SLURMD_NODENAME}
+    ./gradlew build -x test
+    python3 /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis/scripts/new_version.py CupTest WrongStripedMap5Bad5 
 ' &
 
 wait
@@ -63,4 +78,5 @@ wait
 #WronglockBad8
 #Wronglock3Bad2
 #Wronglock1Bad4
-#Phase01Bad2
+# Phase01Bad2
+
