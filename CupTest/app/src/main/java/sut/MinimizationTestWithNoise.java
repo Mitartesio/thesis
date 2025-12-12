@@ -22,7 +22,7 @@ public class MinimizationTestWithNoise {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        MinimizationTest test = new MinimizationTest();
+        MinimizationTestWithNoise test = new MinimizationTestWithNoise();
         test.run();
     }
 
@@ -62,7 +62,7 @@ public class MinimizationTestWithNoise {
         }, "t1");
 
 
-        // Noise threads: increase branching, but don't change correctness
+        // Added noise threads: We do tnis to increase noise and computation and not affect correctness at all
         final int NOISE_THREADS = 4;
         Thread[] noise = new Thread[NOISE_THREADS];
 
@@ -72,7 +72,7 @@ public class MinimizationTestWithNoise {
                 for (int k = 0; k < 5; k++) {
                     lock.lock();
                     try {
-                        // touch shared vars a bit to defeat POR
+                        // Stupid operations to mess with shared variables a bit. Maybe it makes the POR harder
                         o++;
                         p ^= id;
                     } finally {

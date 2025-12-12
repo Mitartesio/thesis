@@ -12,7 +12,7 @@ public class TwostageBadTest {
     }
 
     @RepeatedTest(100000)
-    public void twostage100BadTest() {
+    public void twostageBadTest() {
         Assertions.assertFalse(TwostageBad.runOnce());
     }
 
