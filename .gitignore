@@ -5,7 +5,6 @@ LEGACY/out/SimpleTest.class
 .vscode/settings.json
 /.vscode/
 /plots/
-/reports/
 LEGACY/utils/CcpTest.py
 
 *.iml
