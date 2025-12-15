@@ -1,4 +1,5 @@
 import csv
+import statistics
 import os, pathlib, sys, subprocess
 from pathlib import Path
 from datetime import datetime
@@ -32,15 +33,10 @@ def handle_jpf(): #uses cmd line args, otherwise utilizes the dictionary of algo
 
     else:
         # if algo_key is None:
-        for key, config_path in algo_to_jpf.items():
+        for key, config_path in dict_of_experiments.items():
             print(f'Running {key} via {config_path}')
             populate_csv(key, run_jpf(key, config_path))
         return
-
-
-# def time_jpf():
-#     results, timelist = run_jpf_files()
-#     populate_csv(f"{results[0]}_time", timelist)
 
 
 def run_jpf(test_name: str, config_path: str, runs: int):
@@ -103,25 +99,28 @@ def run_jpf(test_name: str, config_path: str, runs: int):
 
 def time_jpf():
     results, timelist = run_jpf_files(dict_of_experiments)
-    for (name, p, result), t in zip(results, timelist):
-        populate_csv(f"{name}_time", p, [t])
+    print("results sample:", results[:5])
+    print("time keys:", list(times.keys())[:10])
+    for (name, p, result) in results:
+        times = timelist[(name, p)]
+        median_time = statistics.median(times)
+        populate_csv(f"{name}_time", [p, median_time])
 
 
 dict_of_experiments = {
-    "MinimizationTest": {"package": "sut", "cwd": CUPTEST, "threads": 2},
-    # "MinimizationTestWithNoise": {"package": "sut", "cwd": CUPTEST, "threads": 2},
-    # "DeadlockExample": {"package": "sut", "cwd": CUPTEST, "threads": 2},
-    # "AccountBadTest":      {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "Carter01BadTest":     {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # #"FsbenchBadTest":      {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "Phase01BadTest":      {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "StackBadTest":        {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "TokenRingBadTest":    {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "Twostage100BadTest":  {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "TwostageBadTest":     {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "WronglockBadTest":    {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "Wronglock1BadTest":   {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
-    # "Wronglock3BadTest":   {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "MinimizationTest": {"package": "sut", "cwd": CUPTEST, "threads": 2},
+    # "MinimizationTestWithNoise": {"package": "sut", "cwd": CUPTEST, "threads": 6},
+    "DeadlockExample": {"package": "sut", "cwd": CUPTEST, "threads": 2},
+    # "AccountBad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 3},
+    # "Carter01Bad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 4},
+    # "Phase01Bad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "StackBad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "TokenRingBad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 4},
+    # "Twostage100Bad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads":100},
+    # "TwostageBad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "WronglockBad":{"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 8},
+    # "Wronglock1Bad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 2},
+    # "Wronglock3Bad": {"package": "sctbench.cs.origin", "cwd": SCTBENCH, "threads": 4},
 }
 
 if __name__ == "__main__":

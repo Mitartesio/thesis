@@ -86,17 +86,19 @@ def populate_csv(csv_name: str, answers: List[int]):
         if not out_file.exists():
             with out_file.open("w", newline="") as f:
                 writer = csv.writer(f)
-                writer.writerow(["test", "time"])  # <-- header
+                writer.writerow(["test", "P", "time"])  # <-- header
                 test = csv_name
-                time = answers[0]
-                writer.writerow([test, time])
+                P = answers[0]
+                time = answers[1]
+                writer.writerow([test,P, time])
                 return
         else:
             with out_file.open("a", newline="") as f:
                 writer = csv.writer(f)
                 test = csv_name
-                time = answers[0]
-                writer.writerow([test, time])
+                P = answers[0]
+                time = answers[1]
+                writer.writerow([test, P, time])
                 return
     if not out_file.exists():
         with out_file.open("w", newline="") as f:
@@ -117,9 +119,8 @@ def populate_csv(csv_name: str, answers: List[int]):
 
 def resolve_config(arg=None) -> pathlib.Path:
     '''
-        if arg not not, it needs to be a str
+        args parameter needs to be a str
     '''
-    
     if arg:
         p = pathlib.Path(arg)
         if not p.is_absolute():

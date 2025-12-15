@@ -90,11 +90,11 @@ def iter_csvs(experiment_name=None , folder_name=None):
     else:
         csv_file = ROOT / "reports" / f"{experiment_name}.csv"
         not_experi_df = pd.read_csv(csv_file)
-        if "P" in not_experi_df.columns:
-            not_experi_df = check_format(not_experi_df)
-            final_path = ROOT / "reports" / f"{experiment_name}.csv"
-            not_experi_df.to_csv(final_path, index=False)
-            return
+        not_experi_df = compute_mean_median(not_experi_df)
+        not_experi_df = check_format(not_experi_df)
+        final_path = ROOT / "reports" / f"{experiment_name}.csv"
+        not_experi_df.to_csv(final_path, index=False)
+        return
     final_df = compute_mean_median(combined_df)
     final_df = check_format(final_df)
     final_path = ROOT / "reports" / f"{experiment_name}.csv"
@@ -110,7 +110,11 @@ def write_latex_tabulars(experi_csv: str, tablename: str):
     df = df.fillna(0)
     df["k"] = df["k"].astype(int)
 
-    #df_to_write = df[["k", "P", "violated"]]
+    total = 1000
+    # utilizing masking to check str
+    mask = ~df["test"].str.contains("Test", case=False, na=False)
+    df.loc[mask, "violated"] = df.loc[mask, "violated"] / total
+
     df_to_write = df.set_index("test")[["k", "P", "violated"]].copy()
     df_to_write["P"] = df_to_write["P"].round(3)
     df_to_write["violated"] = df_to_write["violated"].apply(
@@ -137,10 +141,9 @@ def write_latex_tabulars(experi_csv: str, tablename: str):
 
 
 if __name__ == '__main__':
-    #format_csv("DeadlockTesting")
-    #format_csv("MinimizationTesting")
-    #format_csv("Baseline")
-    #write_latex_tabulars("Baseline_experiments", "Baseline_experiments")
-    #iter_csvs("jvm_experiments", "experiments")
-    #iter_csvs()
-    write_latex_tabulars(separate_combine("jvm_experiments", "SCT_bench_results", "mainline_experiments"), "mainline_experiments")
+
+    # write_latex_tabulars("Baseline_experiments", "Baseline_experiments")
+    # iter_csvs("jvm_experiments", "experiments")
+    # iter_csvs("baseline_jvm")
+    # write_latex_tabulars(separate_combine("jvm_experiments", "SCT_bench_results", "mainline_experiments"), "mainline_experiments")
+    write_latex_tabulars("baseline_experiments2", "baseline_experiments")

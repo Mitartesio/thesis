@@ -72,17 +72,6 @@ def setup():
     except subprocess.CalledProcessError as e:
         sys.exit(f"[error] Gradle build failed: {e}")
 
-
-# Not sure if we need this:
-# def resolve_config(arg: str | None) -> pathlib.Path:
-#     if arg:
-#         p = pathlib.Path(arg)
-#         if not p.is_absolute():
-#             p = ROOT / p
-#         return p
-#     # Default config
-#     return CONFIGS_DIR / "SimpleTest2.jpf"
-
 def writeToCsv(tests):
     with open("results.csv",mode="w", newline="") as file:
         writer = csv.writer(file)
@@ -187,7 +176,7 @@ def run_jpf_files(dict=None):
     else:
         map_of_tests = convert_to_jpf(dict)
 
-    timelist = []
+    times = {}
     results = []
     jpf_jar = str(JPF_RUN_JAR)
 
@@ -195,6 +184,7 @@ def run_jpf_files(dict=None):
         print(f"Running {name}")
 
         fullyDoneFlag = False
+        timelist = []
         for tup in test:
             result = 0
             for x in range(0,numberOfRuns):
@@ -235,11 +225,12 @@ def run_jpf_files(dict=None):
                 fullyDoneFlag = True
             else:
                 fullyDoneFlag = False
+        times[(name, str(tup[1]))] = timelist
 
     for test in results:
         # print(f"This test: {test[0]} with p as {test[1]} had this many sucesses: {test[2]}")
         print(f"{test[0]},{test[1]},{test[2]}")
-    return results, timelist
+    return results, times
 
 
 if __name__ == "__main__":
