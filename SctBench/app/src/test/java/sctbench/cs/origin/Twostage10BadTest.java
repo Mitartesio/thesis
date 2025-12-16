@@ -5,7 +5,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.File;
 
-public class Twostage100BadTest extends TestJPF {
+public class Twostage10BadTest extends TestJPF {
 
     public static String classPath;
 
@@ -23,11 +23,11 @@ public class Twostage100BadTest extends TestJPF {
 
     @RepeatedTest(100000)
     public void test() {
-        Assertions.assertFalse(Twostage100Bad.runOnce());
+        Assertions.assertFalse(Twostage10Bad.runOnce());
     }
 
     @Test
-    public void twoStage100BadWithJpf() throws InterruptedException {
+    public void twoStage10BadWithJpf() throws InterruptedException {
         if (verifyNoPropertyViolation(
                 "+classpath=" + classPath,
                 "+vm.args=-ea"
@@ -40,7 +40,7 @@ public class Twostage100BadTest extends TestJPF {
     }
 
     @Test
-    public void twoStage100BadWithWeightedRandomWalk() throws InterruptedException {
+    public void twoStage10BadWithWeightedRandomWalk() throws InterruptedException {
         if (verifyNoPropertyViolation(
                 "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/SctBench/app/build/classes/java/test:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/SctBench/app/build/classes/java/main",
                 "+classpath=" + classPath,
@@ -49,14 +49,14 @@ public class Twostage100BadTest extends TestJPF {
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
                 "+search_with_reset.probabilities = 0.99999 0.00001",
                 "+search_with_reset.eps = 0.1",
-                "+numberOfThreads = 100",
+                "+numberOfThreads = 10",
                 "+search.multiple_errors = false",
                 "+jpf.report.console.property_violation = error",
                 "+report.console.finished = result,statistics,error",
                 "+report.unique_errors = true"
 
         )) {  // specifies the test goal, "jpfOptions" are optional
-            Twostage100Bad.runOnce();
+            Twostage10Bad.runOnce();
 
 
         }

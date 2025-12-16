@@ -37,62 +37,51 @@ public class MinimizationTesting extends TestJPF {
     }
 
 
-//    @Ignore
-//    @Test
-//    public void testMinimizationWithJpf() throws InterruptedException {
-//
-//        if (verifyNoPropertyViolation(
-////                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
-//                "+classpath=" + classPath,
-////                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-//                "+vm.args=-ea",
-//                "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
-//                "+search.class = gov.nasa.jpf.search.Reset_Search",
-////                "+search_with_reset.k = 500",
-//                "+search_with_reset.probabilities = 0.999 0.001",
-//                "+search_with_reset.eps = 0.05",
-//                "+numberOfThreads = 2",
-//                "+search.multiple_errors = false",
-//                "+jpf.report.console.property_violation = error",
-//                "+report.console.finished = result,statistics,error",
-//                "+report.unique_errors = true"
-//
-//        )) {  // specifies the test goal, "jpfOptions" are optional
-//            test = new MinimizationTest();
-//            test.run();
-//
-//            //gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
-//        }
-//    }
+    @Ignore
+    @Test
+    public void testMinimizationWithJpf() throws InterruptedException {
 
-//    @Ignore
-//    @Test
-//    public void testMinimizationWithNoise() throws InterruptedException {
-//
-//        if (verifyNoPropertyViolation(
-////                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
-//                "+classpath=" + classPath,
-////                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-//                "+vm.args=-ea", "vm.por=true"
+        if (verifyNoPropertyViolation(
+//                "+classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/test;/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/CupTest/app/build/classes/java/main",
+                "+classpath=" + classPath,
+//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
+                "+vm.args=-ea"
 
-    /// /                "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
-    /// /                "+search.class = gov.nasa.jpf.search.Reset_Search",
-    /// ///                "+search_with_reset.k = 500",
-    /// /                "+search_with_reset.probabilities = 0.99999 0.00001",
-    /// /                "+search_with_reset.eps = 0.05",
-    /// /                "+numberOfThreads = 6",
-    /// /                "+search.multiple_errors = false",
-    /// /                "+jpf.report.console.property_violation = error",
-    /// /                "+report.console.finished = result,statistics,error",
-    /// /                "+report.unique_errors = true"
-//
-//        )) {  // specifies the test goal, "jpfOptions" are optional
-//            testWithNoise = new MinimizationTestWithNoise();
-//            testWithNoise.run();
-//
-//            //gov.nasa.jpf.JPF.main(new String[]{"../../configs/MinimizationTest.jpf"});
-//        }
-//    }
+
+        )) {  // specifies the test goal, "jpfOptions" are optional
+            test = new MinimizationTest();
+            test.run();
+
+
+        }
+    }
+
+    // WARNING: This test is intended to run until it runs out of memory. Run separately.
+    @Ignore
+    @Test
+    public void testMinimizationWithNoise() throws InterruptedException {
+
+        if (verifyNoPropertyViolation(
+                "+classpath=" + classPath, "+vm.args=-ea",
+                "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
+                "+search.class = gov.nasa.jpf.search.Reset_Search",
+//                "+search_with_reset.k = 500",
+                "+search_with_reset.probabilities = 0.99999 0.00001",
+                "+search_with_reset.eps = 0.1",
+                "+numberOfThreads = 6",
+                "+search.multiple_errors = false",
+                "+jpf.report.console.property_violation = error",
+                "+report.console.finished = result,statistics,error",
+                "+report.unique_errors = true"
+
+        )) {
+            testWithNoise = new MinimizationTestWithNoise();
+            testWithNoise.run();
+
+        }
+    }
+
+
     public static String getClassPath() {
         String userDir = System.getProperty("user.dir");   //
 //        System.out.println(userDir);
