@@ -27,7 +27,7 @@ public class WrongStripedMap1Bad<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
-    private volatile ItemNode<K, V>[] buckets;  
+    private volatile ItemNode<K, V>[] buckets;
     private final int lockCount;
     private final Object[] locks;
     private final int[] sizes;
@@ -69,7 +69,7 @@ public class WrongStripedMap1Bad<K, V> implements OurMap<K, V> {
 
         //This is intentionally wrong!!! See commented out code below for correct version
         final int hash = h % buckets.length;
-        
+
         synchronized (locks[s]) {
             // final int hash = h % buckets.length;
             ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
@@ -168,10 +168,10 @@ public class WrongStripedMap1Bad<K, V> implements OurMap<K, V> {
     // In any case, do not reallocate if the buckets field was updated
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
-    public void reallocateBuckets(){
+    public void reallocateBuckets() {
         lockAllAndThen();
     }
-    
+
 
     // First lock all stripes.  Then double bucket table size, rehash,
     // and redistribute entries.  Since the number of stripes does not
@@ -183,24 +183,24 @@ public class WrongStripedMap1Bad<K, V> implements OurMap<K, V> {
     // In any case, do not reallocate if the buckets field was updated
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
-    private void reallocateHelper(final ItemNode<K,V>[] oldBuckets){
+    private void reallocateHelper(final ItemNode<K, V>[] oldBuckets) {
         final ItemNode<K, V>[] bs = buckets;
-                // if (oldBuckets == bs){
-                 if(oldBuckets == bs){
-                    // System.out.printf("Reallocating from %d buckets%n", buckets.length);
-                    final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
-                    for (int hash = 0; hash < bs.length; hash++) {
-                        ItemNode<K, V> node = bs[hash];
-                        while (node != null) {
-                            final int newHash = getHash(node.k) % newBuckets.length;
-                            ItemNode<K, V> next = node.next;
-                            node.next = newBuckets[newHash];
-                            newBuckets[newHash] = node;
-                            node = next;
-                        }
-                    }
-                    buckets = newBuckets;
+        // if (oldBuckets == bs){
+        if (oldBuckets == bs) {
+            // System.out.printf("Reallocating from %d buckets%n", buckets.length);
+            final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
+            for (int hash = 0; hash < bs.length; hash++) {
+                ItemNode<K, V> node = bs[hash];
+                while (node != null) {
+                    final int newHash = getHash(node.k) % newBuckets.length;
+                    ItemNode<K, V> next = node.next;
+                    node.next = newBuckets[newHash];
+                    newBuckets[newHash] = node;
+                    node = next;
                 }
+            }
+            buckets = newBuckets;
+        }
     }
 
     // Lock all stripes, perform the action, then unlock all stripes
@@ -209,9 +209,9 @@ public class WrongStripedMap1Bad<K, V> implements OurMap<K, V> {
     }
 
     private void lockAllAndThen(int nextStripe) {
-        if (nextStripe >= lockCount){
+        if (nextStripe >= lockCount) {
             reallocateHelper(buckets);
-    }else
+        } else
             synchronized (locks[nextStripe]) {
                 lockAllAndThen(nextStripe + 1);
             }
@@ -240,21 +240,22 @@ public class WrongStripedMap1Bad<K, V> implements OurMap<K, V> {
         Thread[] threads = new Thread[5];
         WrongStripedMap1Bad<Integer, String> map = new WrongStripedMap1Bad<>(4);
 
-        for(int i = 0; i<threads.length; i++){
+        for (int i = 0; i < threads.length; i++) {
             final int mul = i * 100;
             final int indicator = i;
             threads[i] = new Thread(() -> {
-            
-            for(int j = 0; j<100; j++){
-                map.put(j+mul, "Thread" + indicator);
-                assert map.get(j+mul) != null : "The value is null";
-                assert map.get(j+mul).equals("Thread" + indicator) : "Wrong value";
-            }
+
+                for (int j = 0; j < 100; j++) {
+                    map.put(j + mul, "Thread" + indicator);
+                    String v = map.get(j + mul);
+                    assert v != null : "The value is null";
+                    assert v.equals("Thread" + indicator) : "Wrong value";
+                }
             });
         }
 
-        for(int i = 0; i<threads.length; i++)threads[i].start();
-        for(int i = 0; i<threads.length; i++)threads[i].join();
+        for (int i = 0; i < threads.length; i++) threads[i].start();
+        for (int i = 0; i < threads.length; i++) threads[i].join();
     }
 }
 

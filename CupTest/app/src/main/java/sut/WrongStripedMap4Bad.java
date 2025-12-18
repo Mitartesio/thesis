@@ -239,7 +239,7 @@ public class WrongStripedMap4Bad<K, V> implements OurMap<K, V> {
 
     public static void main(String[] args) throws InterruptedException {
         Thread[] threads = new Thread[5];
-        WrongStripedMap1Bad<Integer, String> map = new WrongStripedMap1Bad<>(4);
+        WrongStripedMap4Bad<Integer, String> map = new WrongStripedMap4Bad<>(4);
 
         for (int i = 0; i < threads.length; i++) {
             final int mul = i * 100;
@@ -248,12 +248,14 @@ public class WrongStripedMap4Bad<K, V> implements OurMap<K, V> {
 
                 for (int j = 0; j < 100; j++) {
                     map.put(j + mul, "Thread" + indicator);
-                    if (map.get(j + mul) == null || !(map.get(j + mul).equals("Thread" + indicator))) {
-                        System.out.println("Wrong");
-                        continue;
-                    }
-                    assert map.get(j + mul) != null : "The value is null";
-                    assert map.get(j + mul).equals("Thread" + indicator) : "Wrong value";
+                    String v = map.get(j + mul);
+
+//                    if (v == null || !v.equals("Thread" + indicator)) {
+//                        System.out.println("Wrong");
+//                        continue;
+//                    }
+                    assert v != null : "The value is null";
+                    assert v.equals("Thread" + indicator) : "Wrong value";
                 }
             });
         }

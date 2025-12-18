@@ -234,6 +234,7 @@ public class WrongStripedMap3Bad<K, V> implements OurMap<K, V> {
             threads[i] = new Thread(() -> {
                 for (int k = 0; k < 50; k++) {
                     map.put(k + mul, k + "");
+                    assert map.containsKey(k + mul);
                 }
             });
         }
