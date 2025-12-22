@@ -111,7 +111,7 @@ public class WrongStripedMap2Bad<K, V> implements OurMap<K, V> {
             }
         }
         if (afterSize * lockCount > buckets.length)
-            reallocateBuckets();
+            reallocateBuckets(buckets);
         return old;
     }
 
@@ -158,11 +158,6 @@ public class WrongStripedMap2Bad<K, V> implements OurMap<K, V> {
             }
     }
 
-    public void reallocateBuckets() {
-        lockAllAndThen();
-    }
-
-
     // First lock all stripes.  Then double bucket table size, rehash,
     // and redistribute entries.  Since the number of stripes does not
     // change, and since buckets.length is a multiple of lockCount, a
@@ -173,12 +168,17 @@ public class WrongStripedMap2Bad<K, V> implements OurMap<K, V> {
     // In any case, do not reallocate if the buckets field was updated
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
-    private void reallocateHelper(final ItemNode<K, V>[] oldBuckets) {
-        final ItemNode<K, V>[] bs = buckets;
-        // if (oldBuckets == bs){
+    public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
 
+        //!!!This is intentionally wrong!!!
+        // Buckets are instantiated before the locking of the stripes
+        final ItemNode<K, V>[] bs = buckets;
+
+        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets, bs));
+    }
+
+    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets, ItemNode<K, V>[] bs) {
         if (oldBuckets == bs) {
-            // System.out.printf("Reallocating from %d buckets%n", buckets.length);
             final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
             for (int hash = 0; hash < bs.length; hash++) {
                 ItemNode<K, V> node = bs[hash];
@@ -195,16 +195,16 @@ public class WrongStripedMap2Bad<K, V> implements OurMap<K, V> {
     }
 
     // Lock all stripes, perform the action, then unlock all stripes
-    private void lockAllAndThen() {
-        lockAllAndThen(0);
+    private void lockAllAndThen(Runnable action) {
+        lockAllAndThen(0, action);
     }
 
-    private void lockAllAndThen(int nextStripe) {
-        if (nextStripe >= lockCount) {
-            reallocateHelper(buckets);
-        } else
+    private void lockAllAndThen(int nextStripe, Runnable action) {
+        if (nextStripe >= lockCount)
+            action.run();
+        else
             synchronized (locks[nextStripe]) {
-                lockAllAndThen(nextStripe + 1);
+                lockAllAndThen(nextStripe + 1, action);
             }
     }
 
