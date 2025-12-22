@@ -156,26 +156,29 @@ public class StripedMap<K, V> implements OurMap<K, V> {
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
     public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
-        lockAllAndThen(new Runnable() {
-            public void run() {
-                final ItemNode<K, V>[] bs = buckets;
-                if (oldBuckets == bs) {
-                    // System.out.printf("Reallocating from %d buckets%n", buckets.length);
-                    final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
-                    for (int hash = 0; hash < bs.length; hash++) {
-                        ItemNode<K, V> node = bs[hash];
-                        while (node != null) {
-                            final int newHash = getHash(node.k) % newBuckets.length;
-                            ItemNode<K, V> next = node.next;
-                            node.next = newBuckets[newHash];
-                            newBuckets[newHash] = node;
-                            node = next;
-                        }
-                    }
-                    buckets = newBuckets;
+
+        //!!!This is intentionally wrong!!!
+        // Buckets are instantiated before the locking of the stripes
+        final ItemNode<K, V>[] bs = buckets;
+
+        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets, bs));
+    }
+
+    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets, ItemNode<K, V>[] bs) {
+        if (oldBuckets == bs) {
+            final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
+            for (int hash = 0; hash < bs.length; hash++) {
+                ItemNode<K, V> node = bs[hash];
+                while (node != null) {
+                    final int newHash = getHash(node.k) % newBuckets.length;
+                    ItemNode<K, V> next = node.next;
+                    node.next = newBuckets[newHash];
+                    newBuckets[newHash] = node;
+                    node = next;
                 }
             }
-        });
+            buckets = newBuckets;
+        }
     }
 
     // Lock all stripes, perform the action, then unlock all stripes
