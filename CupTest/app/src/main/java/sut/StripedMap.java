@@ -157,11 +157,7 @@ public class StripedMap<K, V> implements OurMap<K, V> {
 
     public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
 
-        //!!!This is intentionally wrong!!!
-        // Buckets are instantiated before the locking of the stripes
-        final ItemNode<K, V>[] bs = buckets;
-
-        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets, bs));
+        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets, buckets));
     }
 
     private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets, ItemNode<K, V>[] bs) {
@@ -213,5 +209,28 @@ public class StripedMap<K, V> implements OurMap<K, V> {
             return node;
         }
     }
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread[] threads = new Thread[5];
+        StripedMap<Integer, String> map = new StripedMap<>(4);
+
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+            final int indicator = i;
+            threads[i] = new Thread(() -> {
+
+                for (int j = 0; j < 100; j++) {
+                    map.put(j + mul, "Thread" + indicator);
+                    String v = map.get(j + mul);
+                    assert v != null : "The value is null";
+                    assert v.equals("Thread" + indicator) : "Wrong value";
+                }
+            });
+        }
+
+        for (int i = 0; i < threads.length; i++) threads[i].start();
+        for (int i = 0; i < threads.length; i++) threads[i].join();
+    }
+    
 }
 

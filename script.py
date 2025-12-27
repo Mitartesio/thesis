@@ -11,8 +11,8 @@ ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 ssh.connect('hpc.itu.dk', username="anmv", password=password)
 
 # Upload the .job file
-local_job_file = "TimeExperiment.sh"
-remote_job_file = 'TimeExperiment.sh'
+local_job_file = "Exp_hashmap.sh"
+remote_job_file = 'Exp_hashmap.sh'
 with SCPClient(ssh.get_transport()) as scp:
     scp.put(local_job_file, remote_job_file)
 

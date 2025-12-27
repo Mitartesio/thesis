@@ -41,7 +41,7 @@ srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
 
     # Move to the project copy and run Python
     cd "$PROJECT_COPY"
-    python3 scripts/new_version.py CupTest WrongStripedMap2Bad5 
+    python3 scripts/new_version.py CupTest WrongStripedMap1Bad5 
 ' &
 
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[1]} bash -c '

@@ -171,14 +171,11 @@ public class WrongStripedMap4Bad<K, V> implements OurMap<K, V> {
 
     public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
 
-        //!!!This is intentionally wrong!!!
-        // Buckets are instantiated before the locking of the stripes
-        final ItemNode<K, V>[] bs = buckets;
-
-        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets, bs));
+        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets));
     }
 
-    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets, ItemNode<K, V>[] bs) {
+    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets) {
+        final ItemNode<K, V>[] bs = buckets;
         if (oldBuckets == bs) {
             final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
             for (int hash = 0; hash < bs.length; hash++) {

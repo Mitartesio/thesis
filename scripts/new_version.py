@@ -212,7 +212,7 @@ def run_jpf_files(dict=None):
                 print(f"{test[0]}, {test[1]}, {test[2]}, {time}")
                 timelist.append(end-start)
 
-                stdout, stderr = process.communicate()
+                stdout, stderr = process.communicate(timeout = 30)
 
                 output = stdout + stderr
 

@@ -6,7 +6,7 @@ from typing import Dict, List, Tuple
 # import pandas as pd
 import tempfile
 
-numberOfRuns = 2
+numberOfRuns = 1000
 
 # Fixed path
 
@@ -17,7 +17,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 CONFIGS_DIR = ROOT / "configs"
 
-list_of_probs = [0.99]
+list_of_probs = [0.5,0.8,0.9,0.95,0.99,0.999]
 
 
 
@@ -183,8 +183,6 @@ def run_jpf_files():
 
                 if "violated true" in output:
                     result += 1
-                # else:
-                #     print(output)
             results.append((name, str(tup[1]), result))
             if result >= numberOfRuns and fullyDoneFlag == True:
                 break

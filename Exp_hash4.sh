@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=Wrong4
+#SBATCH --job-name=Wrong4low
 #SBATCH --output=job.%j.out
 #SBATCH --nodes=1
 #SBATCH --time=72:00:00
@@ -55,6 +55,6 @@ srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
 
     # Move to the project copy and run Python
     cd "$PROJECT_COPY"
-    python3 scripts/new_version3.py CupTest WrongStripedMap4Bad5
+    python3 scripts/new_version2.py CupTest WrongStripedMap4Bad5
 ' &
 wait
