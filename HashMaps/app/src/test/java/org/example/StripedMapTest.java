@@ -27,8 +27,6 @@ public class StripedMapTest extends TestJPF {
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.Listener_For_Testing",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
                 "+search_with_reset.k = 100",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 2",
                 "+threads = t1 t2",
                 "+operations = 6 8",

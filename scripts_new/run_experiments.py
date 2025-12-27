@@ -271,5 +271,3 @@ if __name__ == "__main__":
             results = header + results
 
         write_to_csv(exp[2],results)
-        
-
