@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=BaseLine
 #SBATCH --output=job.%j.out
-#SBATCH --nodes=5
-#SBATCH --time=11:30:00
+#SBATCH --nodes=4
+#SBATCH --time=72:00:00
 #SBATCH --partition=scavenge
 #SBATCH --export=ALL
 

@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+from collections import defaultdict
+import csv
+import matplotlib.pyplot as plt
+
+import csv
+from collections import defaultdict
+import matplotlib.pyplot as plt
+
+# def makePlot(filename, include_tests=None, csv_name = "test"):
+#     """
+#     Plot P vs violated for each test in the CSV.
+
+#     Parameters:
+#     - filename: CSV file to read.
+#     - include_tests: Optional list of test names to include. 
+#                      If None or empty, include all tests.
+#     """
+#     # Dictionary: test_value → list of (P, violated)
+#     groups = defaultdict(lambda: {"P": [], "violated": [], "k": []})
+
+#     # Read CSV
+#     with open(filename, newline='') as f:
+#         reader = csv.DictReader(f)
+#         for row in reader:
+#             test_value = row["test"]
+#             groups[test_value]["P"].append(float(row["P"]))
+#             groups[test_value]["violated"].append(float(row["violated"]))
+#             groups[test_value]["k"].append(int(row["k"]))
+
+#     # Plot each test as its own line
+#     for test_value, data in groups.items():
+#         if include_tests and test_value not in include_tests:
+#             continue  # skip tests not in the include list
+#         P_sorted, violated_sorted = zip(*sorted(zip(data["P"], data["violated"])))
+#         k_sorted, violated_sorted = zip(*sorted(zip(data["k"], data["violated"])))
+#         # plt.plot(P_sorted, violated_sorted, label=f"test = {test_value}", linewidth=2)
+#         plt.plot(k_sorted, violated_sorted, label=f"test = {test_value}", linewidth=2)
+
+#     plt.xlabel("k")
+#     plt.ylabel("violated")
+#     plt.title("k vs violated for each test")
+#     plt.legend()
+#     plt.grid(True)
+
+#     # Save plot to file
+#     outpath = "plots" / f"{csv_name}.png"
+#     plt.savefig(outpath, dpi=300, bbox_inches="tight")
+#     print(f"Saved plot as f{outpath.stem}")
+
+#     plt.show()
+
+def makePlot(filename, include_tests=None, csv_name="test"):
+    """
+    Plot (P_min) vs violated with 0.5 on the left and 0.0 on the right.
+    """
+
+    groups = defaultdict(lambda: {"P_min": [], "violated": []})
+
+    # Read CSV
+    with open(filename, newline="") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            test_value = row["test"]
+            P = float(row["P"])
+
+            groups[test_value]["P_min"].append(1.0 - P)
+            groups[test_value]["violated"].append(float(row["violated"]))
+
+    for test_value, data in groups.items():
+        if include_tests and test_value not in include_tests:
+            continue
+
+        # Sort normally (ascending)
+        x_sorted, violated_sorted = zip(
+            *sorted(zip(data["P_min"], data["violated"]))
+        )
+
+        plt.plot(
+            x_sorted,
+            violated_sorted,
+            label=f"test = {test_value}",
+            linewidth=2,
+            marker="o"
+        )
+
+    plt.xlabel("P_min")
+    plt.ylabel("violated")
+    plt.title("p_min vs violated")
+    plt.legend()
+    plt.grid(True)
+
+    # 🔹 THIS is the key line
+    plt.gca().invert_xaxis()
+
+    plt.savefig(csv_name, dpi=300, bbox_inches="tight")
+
+    plt.show()
+
+def separate_combine(csv1: str, csv2: str, combined_name: str):
+    csv1_path = ROOT / "reports" / f"{csv1}.csv"
+    csv2_path = ROOT / "reports" / f"{csv2}.csv"
+    output_path = ROOT / "reports"/ f"{combined_name}.csv"
+    df1 = pd.read_csv(csv1_path)
+    df2 = pd.read_csv(csv2_path)
+    combined_df = pd.concat([df1, df2], ignore_index=True)
+    combined_df = combined_df.fillna(0)
+    combined_df.to_csv(output_path, index=False)
+    return output_path.stem
+
+if __name__ == "__main__":
+    # makePlot("Baseline.csv")
+    #makePlot(ROOT/"reports"/"experiments"/"SCT_bench_results.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "SCT_bench_res1")
+    makePlot("SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "SCT_bench_res2")

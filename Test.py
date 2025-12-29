@@ -16,7 +16,7 @@ with SCPClient(ssh.get_transport()) as scp:
 
     # job_id = 41532 #Important
 
-    job_id = 44307
+    job_id = 44415
     
     stdin, stdout, stderr = ssh.exec_command(f'sacct -j {job_id} --format=State --noheader')
     output = stdout.read().decode().strip().split('\n')

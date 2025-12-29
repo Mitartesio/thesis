@@ -1,4 +1,5 @@
-package org.example.WrongMaps;// Thread-safe synchronized hash map using lock striping
+package org.example;
+
 // sestoft@itu.dk * 2025-05-22
 
 // Based on 2014 TestHashMapSolution.java
@@ -7,11 +8,10 @@ package org.example.WrongMaps;// Thread-safe synchronized hash map using lock st
 
 //This class is only intended for bug injection and is not correctly implemented. 
 
-//The bug in question for this class is found in the field ItemNode that should be volatile.
+//The bug in question for this class is found in the get(), where the locking mechanism is removed.
 
 import java.util.function.BiConsumer;
 
-import org.example.OurMap;
 
 // A hash map that permits thread-safe concurrent operations, using
 // lock striping (intrinsic locks on Objects created for the purpose).
@@ -23,19 +23,16 @@ import org.example.OurMap;
 // locking a stripe, only to have the relevant entry moved to a
 // different stripe by an intervening call to reallocateBuckets.
 
-public class WrongStripedMap6<K, V> implements OurMap<K, V> {
+public class WrongStripedMap4Bad<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
-
-    //!!!This is intentionally wrong!!!
-    //the field ItemNode should be volatile
-    private ItemNode<K, V>[] buckets;
+    private volatile ItemNode<K, V>[] buckets;
     private final int lockCount;
     private final Object[] locks;
     private final int[] sizes;
 
-    public WrongStripedMap6(int lockCount) {
+    public WrongStripedMap4Bad(int lockCount) {
         int bucketCount = lockCount; // Must be a multiple of lockCount
         this.lockCount = lockCount;
         this.buckets = makeBuckets(bucketCount);
@@ -69,14 +66,18 @@ public class WrongStripedMap6<K, V> implements OurMap<K, V> {
     // Return value v associated with key k, or null
     public V get(K k) {
         final int h = getHash(k), s = h % lockCount;
-        synchronized (locks[s]) {
-            final int hash = h % buckets.length;
-            ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
-            if (node != null)
-                return node.v;
-            else
-                return null;
-        }
+
+        //This is intentionally wrong!!! See commented out code below for correct version
+        // final int hash = h % buckets.length;
+
+        // synchronized (locks[s]) {
+        final int hash = h % buckets.length;
+        ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
+        if (node != null)
+            return node.v;
+        else
+            return null;
+        // }
     }
 
     public int size() {
@@ -109,6 +110,7 @@ public class WrongStripedMap6<K, V> implements OurMap<K, V> {
                 afterSize = ++sizes[s];
             }
         }
+
         if (afterSize * lockCount > buckets.length)
             reallocateBuckets(buckets);
         return old;
@@ -168,26 +170,26 @@ public class WrongStripedMap6<K, V> implements OurMap<K, V> {
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
     public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
-        lockAllAndThen(new Runnable() {
-            public void run() {
-                final ItemNode<K, V>[] bs = buckets;
-                if (oldBuckets == bs){
-                    // System.out.printf("Reallocating from %d buckets%n", buckets.length);
-                    final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
-                    for (int hash = 0; hash < bs.length; hash++) {
-                        ItemNode<K, V> node = bs[hash];
-                        while (node != null) {
-                            final int newHash = getHash(node.k) % newBuckets.length;
-                            ItemNode<K, V> next = node.next;
-                            node.next = newBuckets[newHash];
-                            newBuckets[newHash] = node;
-                            node = next;
-                        }
-                    }
-                    buckets = newBuckets;
+
+        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets));
+    }
+
+    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets) {
+        final ItemNode<K, V>[] bs = buckets;
+        if (oldBuckets == bs) {
+            final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
+            for (int hash = 0; hash < bs.length; hash++) {
+                ItemNode<K, V> node = bs[hash];
+                while (node != null) {
+                    final int newHash = getHash(node.k) % newBuckets.length;
+                    ItemNode<K, V> next = node.next;
+                    node.next = newBuckets[newHash];
+                    newBuckets[newHash] = node;
+                    node = next;
                 }
             }
-        });
+            buckets = newBuckets;
+        }
     }
 
     // Lock all stripes, perform the action, then unlock all stripes
@@ -222,4 +224,31 @@ public class WrongStripedMap6<K, V> implements OurMap<K, V> {
             return node;
         }
     }
-}
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread[] threads = new Thread[5];
+        WrongStripedMap4Bad<Integer, String> map = new WrongStripedMap4Bad<>(4);
+
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+            final int indicator = i;
+            threads[i] = new Thread(() -> {
+
+                for (int j = 0; j < 25; j++) {
+                    map.put(j + mul, "Thread" + indicator);
+                    String v = map.get(j + mul);
+
+                    assert v != null : "The value is null";
+                    assert v.equals("Thread" + indicator) : "Wrong value";
+                }
+            });
+        }
+
+        for (int i = 0; i < threads.length; i++) threads[i].start();
+        for (int i = 0; i < threads.length; i++) threads[i].join();
+
+    }
+}       
+
+
+

@@ -9,6 +9,8 @@ LEGACY/utils/CcpTest.py
 
 *.iml
 
+*.sh
+
 #md
 *.md
 

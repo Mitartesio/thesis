@@ -19,322 +19,59 @@ public class StripedMapTest extends TestJPF {
     }
 
     @Test
-    public void smallTestJPF() throws Exception{
-        //We use the Listener_For_Testing here to check whether 
-        if(verifyNoPropertyViolation(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
-//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.Listener_For_Testing",
-                "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 100",
-                "+numberOfThreads = 2",
-                "+threads = t1 t2",
-                "+operations = 6 8",
-                "+search.multiple_errors = false",
-                "+jpf.report.console.property_violation = error",
-                "+report.console.finished = result,statistics,error",
-                "+report.unique_errors = true",
-                "+log.warning=gov.nasa.jpf",
-                "+log.info=gov.nasa.jpf",
-                "+vm.verbose=true",
-                "+report.console.property_violation=all",
-                "+log.info=gov.nasa.jpf",
-                "+log.warning=gov.nasa.jpf"
-        )) {
-            int[] arr = new int[]{0};
-
-            Thread t1 = new Thread(() -> {
-                arr[0]++;
-                arr[0]++;
-            },"t1");
-
-            Thread t2 = new Thread(() -> {
-                arr[0]++;
-                arr[0]++;
-                arr[0]++;
-            },"t2");
-
-            t1.start();
-            t2.start();
-
-            t1.join();
-            t2.join();
-        }
-    }
-
-    @Test
-    public void smallLoopTestJPF() throws Exception{
-        //We use the Listener_For_Testing here to check whether 
-        if(verifyNoPropertyViolation(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
-//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.Listener_For_Testing",
-                "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 100",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 3",
-                "+threads = t1 t2 t3",
-                "+operations = 13 5 21",
-                "+search.multiple_errors = false",
-                "+jpf.report.console.property_violation = error",
-                "+report.console.finished = result,statistics,error",
-                "+report.unique_errors = true",
-                "+log.warning=gov.nasa.jpf",
-                "+log.info=gov.nasa.jpf",
-                "+vm.verbose=true",
-                "+report.console.property_violation=all",
-                "+log.info=gov.nasa.jpf",
-                "+log.warning=gov.nasa.jpf"
-        )) {
-           Thread t1 = new Thread(()->{
-            for(int i = 0; i<6; i++){
-                //2 operations per increment
-                x++;
-            }
-        },"t1");
-        //total = 13
-
-        Thread t2 = new Thread(()->{
-            for(int i = 0; i<2; i++){
-                x++;
-            }
-        },"t2");
-        //total = 5
-
-        Thread t3 = new Thread(()->{
-            for(int i = 0; i<10; i++){
-                x++;
-            }
-        },"t3");
-        //total = 21
-
-        t1.start();
-        t2.start();
-        t3.start();
-
-        t1.join();
-        t2.join();
-        t3.join();
-        }
-    }
-
-    @Test
-    public void smallTest() throws InterruptedException{
-        //This test is very difficult to get right with a completely random scheduler due to the fact that that thread t1 needs to
-        //be called multiple time for x to be 10 and then execute thread t1
-        if(verifyAssertionError(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
-//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
-                "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 2500",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 2",
-                "+search.multiple_errors = false",
-                "+jpf.report.console.property_violation = error",
-                "+report.console.finished = result,statistics,error",
-                "+report.unique_errors = true",
-                "+log.warning=gov.nasa.jpf",
-                "+log.info=gov.nasa.jpf",
-                "+vm.verbose=true",
-                "+report.console.property_violation=all",
-                "+log.info=gov.nasa.jpf",
-                "+log.warning=gov.nasa.jpf"
-        )) {
-            int answer = 0;
-            Thread t1 = new Thread(() ->{
-                for(int i = 0; i<10; i++){
-                    x++;
-                } 
-            });
-
-            Thread t2 = new Thread(() -> {
-                assert x != 10;
-            });
-
-            t1.start();
-            t2.start();
-
-            t1.join();
-            t2.join();
-
-        }
-    }
-
-
-    @Test
-    public void MinimizationTest() throws Exception{
-        if(verifyAssertionError(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
-//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
-                "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 2500",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 2",
-                "+search.multiple_errors = false",
-                "+jpf.report.console.property_violation = error",
-                "+report.console.finished = result,statistics,error",
-                "+report.unique_errors = true",
-                "+log.warning=gov.nasa.jpf",
-                "+log.info=gov.nasa.jpf",
-                "+vm.verbose=true",
-                "+report.console.property_violation=all",
-                "+log.info=gov.nasa.jpf",
-                "+log.warning=gov.nasa.jpf"
-        )) {
-            MinimizationTest mzt = new MinimizationTest();
-
-            mzt.run();
-
-            assert false;
-        };
-
-    }
-
-
-
-
-    // @Test
-    public void testReallocationJPF() throws Exception{
-        if(verifyNoPropertyViolation(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
-//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
-                "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
-                "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 1500",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 10",
-                "+search.multiple_errors = false",
-                "+jpf.report.console.property_violation = error",
-                "+report.console.finished = result,statistics,error",
-                "+report.unique_errors = true",
-                "+log.warning=gov.nasa.jpf",
-                "+log.info=gov.nasa.jpf",
-                "+vm.verbose=true",
-                "+report.console.property_violation=all",
-                "+log.info=gov.nasa.jpf",
-                "+log.warning=gov.nasa.jpf"
-        )) {
-            map = new StripedMap<>(5);
-            // map = new StripedMap<>(5);
-            // testReallocation(map);
-
-            // map = new WrongStripedMap<>(4);
-
-            Thread[] threads = new Thread[10];
-            
-
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-                threads[i] = new Thread(() -> {
-                    for(int k = 0; k<50; k++){
-                        map.put(k+mul, k + "");
-                    }
-                });
-            }
-
-            for(int i = 0; i<threads.length; i++)threads[i].start();
-
-            for(int i = 0; i<threads.length; i++)threads[i].join();
-
-            for(int i = 0; i<threads.length; i++){
-                final int mul = i * 100;
-
-                for(int k = 0; k<50; k++){
-                    assert map.containsKey(k+mul) : "Found the bug big bro";
-                    // assert true;
-                }
-            }
-        }
-    }
-
-    // @Test
-    public void testOverwrite() throws InterruptedException{
+    public void testContains() throws InterruptedException{
         if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 10",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
-                "+numberOfThreads = 5",
+                // "+search_with_reset.k = 10",
+                "+search_with_reset.probabilities = 0.999 0.001",
+                "+search_with_reset.eps = 0.1",
+                "+numberOfThreads = 10",
                 "+search.multiple_errors = false",
                 "+jpf.report.console.property_violation = error",
                 "+report.console.finished = result,statistics,error",
                 "+report.unique_errors = true"
         )) {
-            final int range = 7;
+        OurMap<Integer, String> map = new StripedMap<>(4);
 
-            final int threadCount = 5;
-
-            final int operations = 50;
-
-            final int[] addedFinalBy = new int[threadCount];
-
-            final Thread[] threads = new Thread[threadCount];
-
-            // map = new StripedMap<>(5);
+        Thread[] threads = new Thread[10];
 
 
-            for(int i = 0; i<threads.length; i++){
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+            threads[i] = new Thread(() -> {
+                for (int k = 0; k < 50; k++) {
+                    map.put(k + mul, k + "");
+                    assert map.containsKey(k + mul);
+                }
+            });
+        }
 
-                String threadName = "thread " + i;
-                threads[i] = new Thread(() -> {
-                    final int[] addedBy = new int[threadCount];
-                    for(int j = 0; j<operations; j++){
-                        int key = j % range;
+        for (int i = 0; i < threads.length; i++) threads[i].start();
 
-                        String oldThread = map.put(key, threadName);   
+        for (int i = 0; i < threads.length; i++) threads[i].join();
 
-                        if(oldThread != null){
-                        addedBy[Integer.parseInt(oldThread.substring(oldThread.length()-1))]--;}
-                        
-                        addedBy[Integer.parseInt(threadName.substring(threadName.length()-1))]++;
-                    
-                    }
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
 
-                    synchronized(this){
-                        for(int j = 0; j<addedBy.length; j++){
-                            addedFinalBy[j] += addedBy[j];
-                        }
-                    }
-                });
+            for (int k = 0; k < 50; k++) {
+                assert map.containsKey(k + mul);
             }
-
-            for(int i = 0; i<threadCount; i++){
-                threads[i].start();
-            }
-
-            for(int i = 0; i<threadCount; i++){
-                threads[i].join();
-            }
-
-            int[] actualIncrements = new int[threadCount];
-            
-            map.forEach((key, value) -> actualIncrements[Integer.parseInt(value.substring(value.length()-1))]++);
-
-            for(int i = 0; i<threadCount; i++){
-                assert actualIncrements[i] == addedFinalBy[i];
-            }
+        }
         }
     }       
     
-    
-    public void testGet(){
+    @Test
+    public void testGet() throws InterruptedException{
         if (verifyNoPropertyViolation(
                 "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
 //                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
-                "+search_with_reset.k = 10",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
+                "+search_with_reset.probabilities = 0.999 0.001",
+                "+search_with_reset.eps = 0.1",
                 "+numberOfThreads = 10",
                 "+search.multiple_errors = false",
                 "+jpf.report.console.property_violation = error",
@@ -342,30 +79,25 @@ public class StripedMapTest extends TestJPF {
                 "+report.unique_errors = true"
         )) {
 
-            // map = new StripedMap<>(5);
+        Thread[] threads = new Thread[5];
+        StripedMap<Integer, String> map = new StripedMap<>(4);
 
-            for(int i = 0; i<1000; i++){
-                map.put(i, i+"");
-            }
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+            final int indicator = i;
+            threads[i] = new Thread(() -> {
 
-            Thread[] threads = new Thread[10];
+                for (int j = 0; j < 100; j++) {
+                    map.put(j + mul, "Thread" + indicator);
+                    String v = map.get(j + mul);
+                    assert v != null : "The value is null";
+                    assert v.equals("Thread" + indicator) : "Wrong value";
+                }
+            });
+        }
 
-            for(int j = 0; j<threads.length; j++){
-                int decision = j;
-                threads[j] = new Thread(() -> {
-                    if(decision % 2 == 0){
-                        final int mul = (decision + 1) * 1000;
-
-                        for(int k = mul; k<mul + 500; k++){
-                            map.put(k, k+"");
-                        }
-                    }else{
-                        for(int k = 0; k<1000; k++){
-                            assert map.containsKey(k);
-                        }
-                    }
-                });
-            }
+        for (int i = 0; i < threads.length; i++) threads[i].start();
+        for (int i = 0; i < threads.length; i++) threads[i].join();
         }
     
 }

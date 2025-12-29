@@ -210,26 +210,33 @@ public class StripedMap<K, V> implements OurMap<K, V> {
         }
     }
 
-    public static void main(String[] args) throws InterruptedException {
+        public static void main(String[] args) throws InterruptedException {
+        OurMap<Integer, String> map = new StripedMap<>(4);
+
         Thread[] threads = new Thread[5];
-        StripedMap<Integer, String> map = new StripedMap<>(4);
+
 
         for (int i = 0; i < threads.length; i++) {
             final int mul = i * 100;
-            final int indicator = i;
             threads[i] = new Thread(() -> {
-
-                for (int j = 0; j < 100; j++) {
-                    map.put(j + mul, "Thread" + indicator);
-                    String v = map.get(j + mul);
-                    assert v != null : "The value is null";
-                    assert v.equals("Thread" + indicator) : "Wrong value";
+                for (int k = 0; k < 25; k++) {
+                    map.put(k + mul, k + "");
+                    assert map.containsKey(k + mul);
                 }
             });
         }
 
         for (int i = 0; i < threads.length; i++) threads[i].start();
+
         for (int i = 0; i < threads.length; i++) threads[i].join();
+
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+
+            for (int k = 0; k < 25; k++) {
+                assert map.containsKey(k + mul);
+            }
+        }
     }
     
 }

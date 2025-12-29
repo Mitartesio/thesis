@@ -1,7 +1,14 @@
-package org.example;// Thread-safe synchronized hash map using lock striping
-// sestoft@itu.dk * 2025-06-26
+package org.example;
+
+// sestoft@itu.dk * 2025-05-22
 
 // Based on 2014 TestHashMapSolution.java
+
+//!!! NOT THREADSAFE!!!
+
+//This class is only intended for bug injection and is not correctly implemented. 
+
+//The bug in question for this class is found in the put() method where the hashing happens outside of sync.
 
 import java.util.function.BiConsumer;
 
@@ -15,12 +22,7 @@ import java.util.function.BiConsumer;
 // locking a stripe, only to have the relevant entry moved to a
 // different stripe by an intervening call to reallocateBuckets.
 
-// This implementation differs from StripedMap only by padding
-// the locks and sizes arrays (putting dummy elements between any two
-// useful elements) so as to avoid false sharing of cache lines.  This
-// simple trick improves performance for large thread counts.
-
-public class StripedMapPadded<K, V> implements OurMap<K, V> {
+public class WrongStripedMap2Bad<K, V> implements OurMap<K, V> {
     // Synchronization policy:
     //   buckets[hash] is guarded by locks[hash%lockCount]
     //   sizes[s]      is guarded by locks[s]
@@ -28,15 +30,14 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     private final int lockCount;
     private final Object[] locks;
     private final int[] sizes;
-    private final static int padding = 16;
 
-    public StripedMapPadded(int lockCount) {
+    public WrongStripedMap2Bad(int lockCount) {
         int bucketCount = lockCount; // Must be a multiple of lockCount
         this.lockCount = lockCount;
         this.buckets = makeBuckets(bucketCount);
-        this.locks = new Object[lockCount * padding];
-        this.sizes = new int[lockCount * padding];
-        for (int s = 0; s < lockCount * padding; s++)
+        this.locks = new Object[lockCount];
+        this.sizes = new int[lockCount];
+        for (int s = 0; s < lockCount; s++)
             this.locks[s] = new Object();
     }
 
@@ -55,7 +56,7 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     // Return true if key k is in map, else false
     public boolean containsKey(K k) {
         final int h = getHash(k), s = h % lockCount;
-        synchronized (locks[s * padding]) {
+        synchronized (locks[s]) {
             final int hash = h % buckets.length;
             return ItemNode.search(buckets[hash], k) != null;
         }
@@ -64,7 +65,8 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     // Return value v associated with key k, or null
     public V get(K k) {
         final int h = getHash(k), s = h % lockCount;
-        synchronized (locks[s * padding]) {
+
+        synchronized (locks[s]) {
             final int hash = h % buckets.length;
             ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
             if (node != null)
@@ -77,8 +79,8 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     public int size() {
         int result = 0;
         for (int s = 0; s < lockCount; s++)
-            synchronized (locks[s * padding]) {
-                result += sizes[s * padding];
+            synchronized (locks[s]) {
+                result += sizes[s];
             }
         return result;
     }
@@ -93,15 +95,19 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
         final int h = getHash(k), s = h % lockCount;
         int afterSize = 0;
         V old = null;
-        synchronized (locks[s * padding]) {
-            final int hash = h % buckets.length;
+
+        //This is intentionally wrong. The correct implementation has the hash inside the synchronized block
+        final int hash = h % buckets.length;
+
+        synchronized (locks[s]) {
+            // final int hash = h % buckets.length;
             final ItemNode<K, V> node = ItemNode.search(buckets[hash], k);
             if (node != null) {
                 old = node.v;
                 node.v = v;
             } else {
                 buckets[hash] = new ItemNode<K, V>(k, v, buckets[hash]);
-                afterSize = ++sizes[s * padding];
+                afterSize = ++sizes[s];
             }
         }
         if (afterSize * lockCount > buckets.length)
@@ -112,14 +118,14 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     // Remove and return the value at key k if any, else return null
     public V remove(K k) {
         final int h = getHash(k), s = h % lockCount;
-        synchronized (locks[s * padding]) {
+        synchronized (locks[s]) {
             final int hash = h % buckets.length;
             ItemNode<K, V> prev = buckets[hash];
             if (prev == null)
                 return null;
             else if (k.equals(prev.k)) {      // Delete first ItemNode
                 V old = prev.v;
-                sizes[s * padding]--;
+                sizes[s]--;
                 buckets[hash] = prev.next;
                 return old;
             } else {                          // Search later ItemNodes
@@ -128,7 +134,7 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
                 // Now prev.next == null || k.equals(prev.next.k)
                 if (prev.next != null) {        // Delete ItemNode prev.next
                     V old = prev.next.v;
-                    sizes[s * padding]--;
+                    sizes[s]--;
                     prev.next = prev.next.next;
                     return old;
                 } else
@@ -141,7 +147,7 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     public void forEach(BiConsumer<K, V> consumer) {
         final ItemNode<K, V>[] bs = buckets;
         for (int s = 0; s < lockCount; s++)
-            synchronized (locks[s * padding]) {
+            synchronized (locks[s]) {
                 for (int hash = s; hash < bs.length; hash += lockCount) {
                     ItemNode<K, V> node = bs[hash];
                     while (node != null) {
@@ -163,26 +169,26 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
     // since the need for reallocation was discovered. CAN THIS HAPPEN?
 
     public void reallocateBuckets(final ItemNode<K, V>[] oldBuckets) {
-        lockAllAndThen(new Runnable() {
-            public void run() {
-                final ItemNode<K, V>[] bs = buckets;
-                if (oldBuckets == bs) {
-                    // System.out.printf("Reallocating from %d buckets%n", buckets.length);
-                    final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
-                    for (int hash = 0; hash < bs.length; hash++) {
-                        ItemNode<K, V> node = bs[hash];
-                        while (node != null) {
-                            final int newHash = getHash(node.k) % newBuckets.length;
-                            ItemNode<K, V> next = node.next;
-                            node.next = newBuckets[newHash];
-                            newBuckets[newHash] = node;
-                            node = next;
-                        }
-                    }
-                    buckets = newBuckets;
+
+        lockAllAndThen(() -> reallocateBucketsLocked(oldBuckets));
+    }
+
+    private void reallocateBucketsLocked(ItemNode<K, V>[] oldBuckets) {
+        final ItemNode<K, V>[] bs = buckets;
+        if (oldBuckets == bs) {
+            final ItemNode<K, V>[] newBuckets = makeBuckets(2 * bs.length);
+            for (int hash = 0; hash < bs.length; hash++) {
+                ItemNode<K, V> node = bs[hash];
+                while (node != null) {
+                    final int newHash = getHash(node.k) % newBuckets.length;
+                    ItemNode<K, V> next = node.next;
+                    node.next = newBuckets[newHash];
+                    newBuckets[newHash] = node;
+                    node = next;
                 }
             }
-        });
+            buckets = newBuckets;
+        }
     }
 
     // Lock all stripes, perform the action, then unlock all stripes
@@ -194,7 +200,7 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
         if (nextStripe >= lockCount)
             action.run();
         else
-            synchronized (locks[nextStripe * padding]) {
+            synchronized (locks[nextStripe]) {
                 lockAllAndThen(nextStripe + 1, action);
             }
     }
@@ -217,4 +223,34 @@ public class StripedMapPadded<K, V> implements OurMap<K, V> {
             return node;
         }
     }
+
+    public static void main(String[] args) throws InterruptedException {
+        OurMap<Integer, String> map = new WrongStripedMap2Bad<>(4);
+
+        Thread[] threads = new Thread[10];
+
+
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+            threads[i] = new Thread(() -> {
+                for (int k = 0; k < 50; k++) {
+                    map.put(k + mul, k + "");
+                    assert map.containsKey(k + mul);
+                }
+            });
+        }
+
+        for (int i = 0; i < threads.length; i++) threads[i].start();
+
+        for (int i = 0; i < threads.length; i++) threads[i].join();
+
+        for (int i = 0; i < threads.length; i++) {
+            final int mul = i * 100;
+
+            for (int k = 0; k < 50; k++) {
+                assert map.containsKey(k + mul);
+            }
+        }
+    }
 }
+

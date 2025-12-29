@@ -234,14 +234,10 @@ public class WrongStripedMap4Bad<K, V> implements OurMap<K, V> {
             final int indicator = i;
             threads[i] = new Thread(() -> {
 
-                for (int j = 0; j < 100; j++) {
+                for (int j = 0; j < 25; j++) {
                     map.put(j + mul, "Thread" + indicator);
                     String v = map.get(j + mul);
 
-//                    if (v == null || !v.equals("Thread" + indicator)) {
-//                        System.out.println("Wrong");
-//                        continue;
-//                    }
                     assert v != null : "The value is null";
                     assert v.equals("Thread" + indicator) : "Wrong value";
                 }

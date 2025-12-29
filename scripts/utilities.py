@@ -6,54 +6,54 @@ import os, pathlib, sys, subprocess, csv
 from pathlib import Path
 from path_setup import*
 
-def combine_and_convert_csv(csv1: Path, csv2: Path, combinedname: str):
-    csv1_path = csv1
-    if not csv1_path.exists():
-        csv1_path = ROOT / "reports" / "experiments" / csv1.name
+# def combine_and_convert_csv(csv1: Path, csv2: Path, combinedname: str):
+#     csv1_path = csv1
+#     if not csv1_path.exists():
+#         csv1_path = ROOT / "reports" / "experiments" / csv1.name
 
-    csv2_path = csv2
-    if not csv2_path.exists():
-        csv2_path = ROOT / "reports" / "experiments" / csv2.name
+#     csv2_path = csv2
+#     if not csv2_path.exists():
+#         csv2_path = ROOT / "reports" / "experiments" / csv2.name
 
-    # determine proper output path
-    if "experiments" in str(csv1_path) or "experiments" in str(csv2_path):
-        output_path = ROOT / "reports" / "experiments" / f"{combinedname}.csv"
-    else:
-        output_path = ROOT / "reports" / f"{combinedname}.csv"
+#     # determine proper output path
+#     if "experiments" in str(csv1_path) or "experiments" in str(csv2_path):
+#         output_path = ROOT / "reports" / "experiments" / f"{combinedname}.csv"
+#     else:
+#         output_path = ROOT / "reports" / f"{combinedname}.csv"
 
-    csv1 = pd.read_csv(csv1_path)
-    csv2 = pd.read_csv(csv2_path)
-    csv1_df = pd.DataFrame(csv1)
-    csv2_df = pd.DataFrame(csv2)
+#     csv1 = pd.read_csv(csv1_path)
+#     csv2 = pd.read_csv(csv2_path)
+#     csv1_df = pd.DataFrame(csv1)
+#     csv2_df = pd.DataFrame(csv2)
 
-    def comb_to_k(df):
-        if 'k_combined' in df.columns:
-            df.rename(columns={"k_combined": "k"}, inplace=True)
-        return df
+#     def comb_to_k(df):
+#         if 'k_combined' in df.columns:
+#             df.rename(columns={"k_combined": "k"}, inplace=True)
+#         return df
 
-    csv1_df = comb_to_k(csv1_df)
-    print(csv1_df.head())
-    csv2_df = comb_to_k(csv2_df)
-    print(csv2_df.head())
+#     csv1_df = comb_to_k(csv1_df)
+#     print(csv1_df.head())
+#     csv2_df = comb_to_k(csv2_df)
+#     print(csv2_df.head())
 
-    combined_csv = pd.concat([csv1_df, csv2_df], ignore_index=True)
-    # added lambda'ish function
-    def get_k_combined(row):
-        if "Testing" in str(row.get("test", "")) or "Test" in str(
-            row.get("test", "")
-        ):  # sprang over hvor gærdet var lavest.
-            return row.get("k_max", 0)
-        return row.get("k", 0)
-    if (
-    "k_combined" not in combined_csv.columns
-    and not combined_csv["test"].astype(str).str.contains("Testing").any()): 
-        combined_csv["k_combined"] = combined_csv.apply(get_k_combined, axis=1)
-        combined_csv = combined_csv.drop(
-            columns=[col for col in ["k", "k_max"] if col in combined_csv.columns]
-        )
-    combined_csv.to_csv(output_path, index=False)
+#     combined_csv = pd.concat([csv1_df, csv2_df], ignore_index=True)
+#     # added lambda'ish function
+#     def get_k_combined(row):
+#         if "Testing" in str(row.get("test", "")) or "Test" in str(
+#             row.get("test", "")
+#         ):  # sprang over hvor gærdet var lavest.
+#             return row.get("k_max", 0)
+#         return row.get("k", 0)
+#     if (
+#     "k_combined" not in combined_csv.columns
+#     and not combined_csv["test"].astype(str).str.contains("Testing").any()): 
+#         combined_csv["k_combined"] = combined_csv.apply(get_k_combined, axis=1)
+#         combined_csv = combined_csv.drop(
+#             columns=[col for col in ["k", "k_max"] if col in combined_csv.columns]
+#         )
+#     combined_csv.to_csv(output_path, index=False)
 
-    return output_path
+#     return output_path
 
 
 def separate_combine(csv1: str, csv2: str, combined_name: str):
@@ -231,24 +231,6 @@ def parse_console_log(
     with open(log_file, "r") as f:
         for line in f:
             line = line.strip()
-            #   "MinimizationTesting > repetition 123 of 10000"
-            # if "repetition" in line and "of" in line:
-            #     try:
-            #         parts = line.split()
-            #         rep_index = parts.index("repetition") + 1
-            #         current_rep = int(parts[rep_index])
-            #         # rep_number = int(parts[3]) # x of n
-            #     except Exception:
-            #         current_rep = None
-
-            # Repeated tests
-            # if line.startswith("RESULT"):
-            #     current_result = (
-            #         0 if line.split(":", 1)[1].strip().lower() == "true" else 1
-            #     )
-                # current_result = line.split(":", 1)[1].strip()
-
-            # for singular test run
             if "repetition" in line:
                 if line.endswith("PASSED"):
                     repetition_count += 1

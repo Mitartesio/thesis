@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=Wrong4
+#SBATCH --job-name=Wrong4And1
 #SBATCH --output=job.%j.out
-#SBATCH --nodes=1
+#SBATCH --nodes=4
 #SBATCH --time=72:00:00
 #SBATCH --partition=cores_any
 #SBATCH --export=ALL
@@ -9,9 +9,6 @@
 mkdir -p /home/anmv/SOFT/java
 mkdir -p /home/anmv/tmp
 export TMPDIR=/home/anmv/tmp
-
-# export GRADLE_USER_HOME="/home/anmv/tmp/gradle_$SLURM_NODEID"
-# mkdir -p "$GRADLE_USER_HOME"
 
 cd /home/anmv/SOFT/java
 
@@ -29,20 +26,6 @@ module load Python/3.11.3-GCCcore-12.3.0
 nodes=($(scontrol show hostnames $SLURM_JOB_NODELIST))
 
 
-# srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
-#     # Set a unique Gradle home per node/step
-#     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
-#     mkdir -p "$GRADLE_USER_HOME"
-
-#     # Copy the whole project to a node-local folder
-#     PROJECT_COPY="/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
-#     rm -rf "/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
-#     cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis "$PROJECT_COPY"
-
-#     # Move to the project copy and run Python
-#     cd "$PROJECT_COPY"
-#     python3 scripts/new_version2.py CupTest WrongStripedMap1Bad5
-# ' &
 srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
     # Set a unique Gradle home per node/step
     export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
@@ -55,6 +38,20 @@ srun --nodes=1 --ntasks=1 --nodelist=${nodes[0]} bash -c '
 
     # Move to the project copy and run Python
     cd "$PROJECT_COPY"
-    python3 scripts/new_version3.py CupTest WrongStripedMap4Bad5
+    python3 scripts/new_version2_large.py CupTest WrongStripedMap4Bad5
+' &
+srun --nodes=1 --ntasks=1 --nodelist=${nodes[1]} bash -c '
+    # Set a unique Gradle home per node/step
+    export GRADLE_USER_HOME="/home/anmv/tmp/gradle_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    mkdir -p "$GRADLE_USER_HOME"
+
+    # Copy the whole project to a node-local folder
+    PROJECT_COPY="/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    rm -rf "/home/anmv/tmp/SctBench_${SLURMD_NODENAME}_${SLURM_STEP_ID}"
+    cp -r /home/anmv/thesis_code/thesis_code_print/Simple_Example_Thesis "$PROJECT_COPY"
+
+    # Move to the project copy and run Python
+    cd "$PROJECT_COPY"
+    python3 scripts/new_version2_small.py CupTest WrongStripedMap4Bad5
 ' &
 wait
