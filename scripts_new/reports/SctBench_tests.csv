@@ -1,6 +1,0 @@
-test,threads,package
-StackBad,2,SctBench
-TwostageBad,2,SctBench
-Wronglock1Bad,2,SctBench
-Wronglock3Bad,4,SctBench
-WronglockBad,8,SctBench

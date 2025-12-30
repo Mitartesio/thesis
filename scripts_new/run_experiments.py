@@ -10,7 +10,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1] #Do we need this???
 
-number_of_runs = 1 #How many times each experiment is run
+number_of_runs = 15 #How many times each experiment is run
 
 list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
 
@@ -39,9 +39,10 @@ def resolve_package(package, cwd = False):
     else:
         print("Hello hash")
         HASHMAPS = ROOT / "HashMaps"
+        # /home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/src/main/java/org/example
         if cwd:
             HASHMAPS
-        TARGET = "Missing:FIND"
+        TARGET = "org.example."
         BUILD_CLASSES = HASHMAPS / "app" / "build" / "classes" / "java" / "main"
         BUILD_RES = HASHMAPS / "app" / "build" / "resources" / "main"
     return BUILD_CLASSES, BUILD_RES, TARGET
@@ -57,7 +58,7 @@ def convert_to_jpf(tests, time_exp=False):
 
     for test, tup in tests.items():
         BUILD_CLASSES, BUILD_RES, TARGET = resolve_package(tup[0])
-        print(f"build classes: {BUILD_RES}")
+        # print(f"build classes: {BUILD_RES}")
         threads = tup[1]
         print(f"test: {test}, threads: {threads}")
         for p in list_of_probs:
@@ -112,9 +113,8 @@ def run_jpf_files_time(jpf_runs):
             result = 0
             success = 0
             for x in range(0,number_of_runs):
-                
-                
                 start = time.time()
+                print("Hello i am running!!!")
                 result = run_jpf(tup[0], True)
                 end = time.time()
                 res_time = end-start
@@ -122,33 +122,12 @@ def run_jpf_files_time(jpf_runs):
                 if result == 1:
                     times.append((name,res_time))
                 else:
-                    times.append((name,res_time))
+                    times.append((name,">30"))
 
     return times
 
-def run_jpf_files(map_of_tests):
-
-    results = []
-
-    for name, test in map_of_tests.items():
-        print(f"Running {name}")
-
-        fullyDoneFlag = False
-        for tup in test:
-            result = 0
-            for x in range(0,number_of_runs):
-                results += run_jpf(tup[0],False)
-            results.append((name, str(tup[1]), result))
-            if result >= number_of_runs and fullyDoneFlag == True:
-                break
-            elif result >= number_of_runs:
-                fullyDoneFlag = True
-            else:
-                fullyDoneFlag = False
-
-    return results
-
 def run_jpf(jpf_conf, time_exp):
+    print("I am here big bro")
     jpf_jar = str(JPF_RUN_JAR)
     with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
         jpf_path = f.name
@@ -177,61 +156,87 @@ def run_jpf(jpf_conf, time_exp):
     else:
         stdout, stderr = process.communicate()
     output = stdout + stderr
-
     if "violated true" in output or "search.class = gov.nasa.jpf.search.DFSearch" in jpf_conf:
         print("correct")
         return 1
     else:
+        print(output)
         return 0
+
+def run_jpf_files(map_of_tests):
     
-
-def run_jpf_files(jpf_runs):
-
     results = []
-    jpf_jar = str(JPF_RUN_JAR)
 
-    for name, test in jpf_runs.items():
-        print(f"Running {name}")
+    for name, test in map_of_tests.items():
 
         fullyDoneFlag = False
+        print("Going in Going in Going in Going in Going in Going in Going in Going in Going in Going in Going in")
         for tup in test:
-            result = 0
+            successes = 0
+            print(f"tup 0 is {tup[0]}")
             for x in range(0,number_of_runs):
-                with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
-                    jpf_path = f.name
-                    f.write("\n".join(tup[0]))
-            
-                cmd = [
-                    "java",
-                    "-Xmx8g",
-                    "-ea",
-                    "-jar",
-                    jpf_jar,
-                    jpf_path
-                    ]
-                
-                process = subprocess.Popen(
-                        cmd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        universal_newlines=True
-                    )
-
-                stdout, stderr = process.communicate()
-
-                output = stdout + stderr
-
-                if "violated true" in output:
-                    result += 1
-            results.append((name, str(tup[1]), result))
-            if result >= number_of_runs and fullyDoneFlag == True:
+                successes += run_jpf(tup[0],False)
+            results.append((name, str(tup[1]), successes))
+            if successes >= number_of_runs and fullyDoneFlag == True:
                 break
-            elif result >= number_of_runs:
+            elif successes >= number_of_runs:
                 fullyDoneFlag = True
             else:
                 fullyDoneFlag = False
-    
+
     return results
+
+    
+
+# def run_jpf_files(jpf_runs):
+
+#     results = []
+#     jpf_jar = str(JPF_RUN_JAR)
+
+#     for name, test in jpf_runs.items():
+#         print(f"Running {name}")
+
+#         fullyDoneFlag = False
+#         for tup in test:
+#             result = 0
+#             for x in range(0,number_of_runs):
+#                 with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
+#                     jpf_path = f.name
+#                     f.write("\n".join(tup[0]))
+            
+#                 cmd = [
+#                     "java",
+#                     "-Xmx8g",
+#                     "-ea",
+#                     "-jar",
+#                     jpf_jar,
+#                     jpf_path
+#                     ]
+                
+#                 process = subprocess.Popen(
+#                         cmd,
+#                         stdout=subprocess.PIPE,
+#                         stderr=subprocess.PIPE,
+#                         universal_newlines=True
+#                     )
+
+#                 stdout, stderr = process.communicate()
+
+#                 output = stdout + stderr
+
+#                 if "violated true" in output:
+#                     result += 1
+#                 else:
+#                     print(output)
+#             results.append((name, str(tup[1]), result))
+#             if result >= number_of_runs and fullyDoneFlag == True:
+#                 break
+#             elif result >= number_of_runs:
+#                 fullyDoneFlag = True
+#             else:
+#                 fullyDoneFlag = False
+    
+#     return results
 
 def write_to_csv(csv_name, results):
     with open(f"reports/{csv_name}", "w", newline="") as f:
@@ -282,49 +287,57 @@ def run_gradle_tests(gradletestfiles, log_name):
         print(f"Gradle test log saved to {log_name}")
         parse_console_log("JVM_tests.csv", log_name)
 
-def parse_console_log(
-    log_file: str, output_csv: str
-):  # need to make it so it takes str name instead
+# def parse_console_log(
+#     log_file: str, output_csv: str
+# ):  # need to make it so it takes str name instead
 
-    rows = []
-    current_rep = None
-    current_result = None
-    repetition_count = 0
-    problem_name = log_file
-    is_repetition_test = False
+#     count = {}
+#     reps = {}
+
+#     with open(f"reports/{log_file}", "r") as f:
+#         for line in f:
+#             line = line.strip()
+#             if "repetition" in line:
+#                 name = line.split()[0]
+#                 if name not in count:
+#                     count[name] = 0
+#                 if name not in reps:
+#                     reps[name] = 0
+#                 if line.endswith("FAILED"):
+#                     reps[name] += 1
+#                 count[name] += 1
+
+#     with open(f"reports/{output_csv}", "a", newline="") as f:
+#         writer = csv.writer(f)
+#         for name, violated in count.items():
+#             writer.writerow((name,0,violated,count[name]))
+
+def parse_console_log(log_file: str, output_csv: str):
+    count = {}
+    reps = {}
 
     with open(f"reports/{log_file}", "r") as f:
         for line in f:
             line = line.strip()
             if "repetition" in line:
-                if line.endswith("PASSED"):
-                    repetition_count += 1
-                    rows.append(
-                        [problem_name, repetition_count, 0]
-                    )  # didnt find for instance deadlock.
+                name = line.split()[0]
+                name = f"{name[:-4]}JVM"
+                count.setdefault(name, 0)
+                reps.setdefault(name, 0)
 
-                elif line.endswith("FAILED"):
-                    repetition_count += 1
-                    rows.append([problem_name, repetition_count, 1])
+                if line.endswith("FAILED"):
+                    reps[name] += 1
+                if line.endswith("FAILED") or line.endswith("PASSED"):
+                    count[name] += 1
 
-            if current_rep is not None and current_result is not None:
-                rows.append([problem_name, current_rep, current_result])
-                current_rep = None
-                current_result = None
-
-    with open("reports/{output_csv}.csv", "w", newline="") as f:
+    with open(f"reports/{output_csv}", "a", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["test", "k", "violated"])
-        writer.writerows(rows)
+        for name in count:
+            #test,P,violated,k
+            writer.writerow((name,0, reps[name], count[name]))
 
-    print(f"Parsing done. output -> {output_csv}")
 
-EXPERIMENTS = [
-    # ("SctBench_time_test.csv", True, "time_res2.csv"),
-    ("correctness_tests.csv",False, "SctBench_res2.csv"),
-    # ("baseline.csv",False, "baseline_experiments2.csv"),
-    ("HashMap_tests.csv",False,"HashMap_res_test.csv")
-]   
+    print(f"Parsing done. output -> {output_csv}")   
 
 def split_alpha_numeric(s: str):
     i = len(s)
@@ -366,6 +379,12 @@ def mini_ccp(P: Tuple[float, float], N=2, eps=0.1):
 
     return k-1
 
+EXPERIMENTS = [
+    # ("SctBench_tests_time.csv", True, "SctBench_time2.csv"),
+    ("correctness_tests_test.csv",False, "SctBench_res2.csv"),
+    # ("baseline.csv",False, "baseline_res2.csv"),
+    # ("HashMap_tests.csv",False,"HashMap_res_test.csv")
+]
 
 if __name__ == "__main__":
 
@@ -374,23 +393,17 @@ if __name__ == "__main__":
         #the rest of the arguments needs to be specifiec with test + number of threads i.e. Wronglock1Bad2
 
     if len(sys.argv) > 1:
+        
         exps = read_input()
-        print("Found")
 
         if sys.argv[2] == "time":
             exps_to_run = convert_to_jpf(exps,True)
-            print(f"length: {len(exps_to_run)}")
             results = run_jpf_files_time(exps_to_run)
-            for res in results:
-                print(f"hello: {res}")
             header = [("test","result")]
             results = header + results
         else:
             exps_to_run = convert_to_jpf(exps,False)
-            print(f"length: {len(exps_to_run)}")
             results = run_jpf_files(exps_to_run)
-            for res in results:
-                print(f"hello: {res}")
             header = [("test","P","violated")]
             results = header + results
 
@@ -398,26 +411,26 @@ if __name__ == "__main__":
 
     else:
         for exp in EXPERIMENTS:
-            print("I am here my guy")
             exps = read_experiment(exp[0])
-
+            
             if exp[1]:
                 exps_to_run = convert_to_jpf(exps,True)
                 results = run_jpf_files_time(exps_to_run)
                 header = [("test","result")]
                 results = header + results
+                write_to_csv(exp[2],results)
             else:
-                print("Hello again")
                 exps_to_run = convert_to_jpf(exps,False)
                 jpf_res = run_jpf_files(exps_to_run)
+                print(f"The length is {len(jpf_res)}")
                 results = []
                 for res in jpf_res:
                     results.append((res[0],res[1],res[2],mini_ccp((float(res[1]),1.0-float(res[1])))))
                 header = [("test","P","violated","k")]
                 results = header + results
-
                 write_to_csv(exp[2],results)
-                run_gradle_tests(exps,exp[2])
+                if "Hash" not in exp[0]: #The hashmap tests do not use the JVM testing
+                    run_gradle_tests(exps,exp[2])
             
 
 

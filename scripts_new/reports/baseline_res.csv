@@ -1,6 +1,6 @@
 test,P,violated,k
-MinimizationTesting,0,0,200000
-DeadlockTesting,0,48169,48170
+MinimizationJVM,0,0,200000
+DeadlockJVM,0,48169,48170
 MinimizationTest,0.5,5,14
 MinimizationTest,0.8,11,24
 MinimizationTest,0.9,22,46

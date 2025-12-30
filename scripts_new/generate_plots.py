@@ -97,18 +97,20 @@ def makePlot(filename, include_tests=None, csv_name="test"):
 
     plt.show()
 
-def separate_combine(csv1: str, csv2: str, combined_name: str):
-    csv1_path = ROOT / "reports" / f"{csv1}.csv"
-    csv2_path = ROOT / "reports" / f"{csv2}.csv"
-    output_path = ROOT / "reports"/ f"{combined_name}.csv"
-    df1 = pd.read_csv(csv1_path)
-    df2 = pd.read_csv(csv2_path)
-    combined_df = pd.concat([df1, df2], ignore_index=True)
-    combined_df = combined_df.fillna(0)
-    combined_df.to_csv(output_path, index=False)
-    return output_path.stem
+
+#I think this is solved in the run_experiments by now, lets discuss tomorrow
+# def separate_combine(csv1: str, csv2: str, combined_name: str):
+#     csv1_path = ROOT / "reports" / f"{csv1}.csv"
+#     csv2_path = ROOT / "reports" / f"{csv2}.csv"
+#     output_path = ROOT / "reports"/ f"{combined_name}.csv"
+#     df1 = pd.read_csv(csv1_path)
+#     df2 = pd.read_csv(csv2_path)
+#     combined_df = pd.concat([df1, df2], ignore_index=True)
+#     combined_df = combined_df.fillna(0)
+#     combined_df.to_csv(output_path, index=False)
+#     return output_path.stem
 
 if __name__ == "__main__":
     # makePlot("Baseline.csv")
-    #makePlot(ROOT/"reports"/"experiments"/"SCT_bench_results.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "SCT_bench_res1")
-    makePlot("SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "SCT_bench_res2")
+    makePlot("reports/SctBench_res.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "figures/SCT_bench_res1")
+    makePlot("reports/SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "figures/SCT_bench_res2")
