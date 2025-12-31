@@ -14,8 +14,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1] #Do we need this???
 #CHANGE
 number_of_runs = 4 #How many times each experiment is run 
 
-# list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
-list_of_probs_correctness = [0.5] #P-variables
+list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
+# list_of_probs_correctness = [0.5] #P-variables
 
 
 #Ensuring that we find the bug
