@@ -4,16 +4,21 @@ from pathlib import Path
 from datetime import datetime
 import time
 from typing import Dict, List, Tuple
-# import pandas as pd
 import tempfile
-# from utilities import populate_csv
+
+#This script is used for running all experiments for the report. 
+#All experiments can be found in csv files in the reports folder
 
 ROOT = pathlib.Path(__file__).resolve().parents[1] #Do we need this???
 
-number_of_runs = 15 #How many times each experiment is run
+#CHANGE
+number_of_runs = 4 #How many times each experiment is run 
 
-list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
+# list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
+list_of_probs_correctness = [0.5] #P-variables
 
+
+#Ensuring that we find the bug
 list_of_probs_time = [0.9999] #time variables
 
 JPF_JAR = ROOT / "jpf-core" / "build" / "jpf.jar"
@@ -22,6 +27,10 @@ JPF_JAR_FOLDER = ROOT / "jpf-core" / "build"
 CONFIGS_DIR = ROOT / "configs"
 
 def resolve_package(package, cwd = False):
+    '''
+    The purpose of this method is to return the correct path to the given experiment in question
+    '''
+
     if package == 'CupTest':
         CUPTEST = ROOT / "CupTest"
         if cwd:
@@ -47,10 +56,14 @@ def resolve_package(package, cwd = False):
         BUILD_RES = HASHMAPS / "app" / "build" / "resources" / "main"
     return BUILD_CLASSES, BUILD_RES, TARGET
 
+
 def convert_to_jpf(tests, time_exp=False):
-    
+    '''
+    The purpose of this method is to make jpf configurations that can be run through subproccesses
+    '''
     jpf_files = {}
 
+    #Check if this is a time experiment or not and provide the correct P-variables
     if time_exp:
         list_of_probs = list_of_probs_time
     else:
@@ -58,24 +71,18 @@ def convert_to_jpf(tests, time_exp=False):
 
     for test, tup in tests.items():
         BUILD_CLASSES, BUILD_RES, TARGET = resolve_package(tup[0])
-        # print(f"build classes: {BUILD_RES}")
         threads = tup[1]
         print(f"test: {test}, threads: {threads}")
         for p in list_of_probs:
             jpf_conf = [
-                # "target = sctbench.cs.origin." + test,
-                # "target = cs." + test,
                 f"target = {TARGET}{test}",
                 f"classpath = {BUILD_CLASSES}",
-                # "native_classpath = CupTest/app/build/classes/java/main",
                 f"native_classpath = {BUILD_RES}",
-                # "native_classpath = out",
                 "vm.args = -ea",
                 "listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.AssertionProperty",
-                # "search.class = SearchAlgorithms.Reset_Search",
                 "search.class = gov.nasa.jpf.search.Reset_Search",
                 f"+search_with_reset.probabilities = {str(p)} {str(1.0-p)}",
-                "+search_with_reset.eps = 0.1", #We should do some logic here with inserting eps and probabilities
+                "+search_with_reset.eps = 0.1", #Constant epsilon value
                 "+numberOfThreads = " + str(threads),
                 "search.multiple_errors = false",
                 "jpf.report.console.property_violation = error",
@@ -86,6 +93,7 @@ def convert_to_jpf(tests, time_exp=False):
                 jpf_files[test] = []
             jpf_files[test].append((jpf_conf, p))
 
+            #If this is a time experiment also make a jpf file for model checking
             if time_exp == True:
                 jpf_conf_MC = [
                 f"target = {TARGET}{test}",
@@ -106,12 +114,14 @@ def convert_to_jpf(tests, time_exp=False):
 
 
 def run_jpf_files_time(jpf_runs):
+    '''
+    The purpose of this method is to run time experiments provided as paremeter argument
+    '''
     times = []
-
+    
     for name, test in jpf_runs.items():
         for tup in test:
             result = 0
-            success = 0
             for x in range(0,number_of_runs):
                 start = time.time()
                 print("Hello i am running!!!")
@@ -127,7 +137,12 @@ def run_jpf_files_time(jpf_runs):
     return times
 
 def run_jpf(jpf_conf, time_exp):
-    print("I am here big bro")
+    '''
+    The purpose of this method is to run the jpf files provided.
+    If time_epx is set to true it will run the experiments with a timer and return the timer
+    if not it will simply report whether the test failed or not
+    '''
+    
     jpf_jar = str(JPF_RUN_JAR)
     with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
         jpf_path = f.name
@@ -170,7 +185,6 @@ def run_jpf_files(map_of_tests):
     for name, test in map_of_tests.items():
 
         fullyDoneFlag = False
-        print("Going in Going in Going in Going in Going in Going in Going in Going in Going in Going in Going in")
         for tup in test:
             successes = 0
             print(f"tup 0 is {tup[0]}")
@@ -186,67 +200,22 @@ def run_jpf_files(map_of_tests):
 
     return results
 
-    
 
-# def run_jpf_files(jpf_runs):
-
-#     results = []
-#     jpf_jar = str(JPF_RUN_JAR)
-
-#     for name, test in jpf_runs.items():
-#         print(f"Running {name}")
-
-#         fullyDoneFlag = False
-#         for tup in test:
-#             result = 0
-#             for x in range(0,number_of_runs):
-#                 with tempfile.NamedTemporaryFile(mode='w', suffix='.jpf', delete=False) as f:
-#                     jpf_path = f.name
-#                     f.write("\n".join(tup[0]))
-            
-#                 cmd = [
-#                     "java",
-#                     "-Xmx8g",
-#                     "-ea",
-#                     "-jar",
-#                     jpf_jar,
-#                     jpf_path
-#                     ]
-                
-#                 process = subprocess.Popen(
-#                         cmd,
-#                         stdout=subprocess.PIPE,
-#                         stderr=subprocess.PIPE,
-#                         universal_newlines=True
-#                     )
-
-#                 stdout, stderr = process.communicate()
-
-#                 output = stdout + stderr
-
-#                 if "violated true" in output:
-#                     result += 1
-#                 else:
-#                     print(output)
-#             results.append((name, str(tup[1]), result))
-#             if result >= number_of_runs and fullyDoneFlag == True:
-#                 break
-#             elif result >= number_of_runs:
-#                 fullyDoneFlag = True
-#             else:
-#                 fullyDoneFlag = False
-    
-#     return results
 
 def write_to_csv(csv_name, results):
+    '''
+    Simple method that writes to a csv files all rows of the list results
+    '''
     with open(f"reports/{csv_name}", "w", newline="") as f:
         writer = csv.writer(f)
-        # rows
         
         for test in results:
             writer.writerow(test)
 
 def read_experiment(csv_name):
+    '''
+    The purpose of this method is to read an experiment from a csv file and return it as a dict
+    '''
     tests = {}
     with open(f"reports/{csv_name}", "r", newline="") as f:
         reader = csv.DictReader(f)
@@ -259,6 +228,10 @@ def read_experiment(csv_name):
     return tests
 
 def run_gradle_tests(gradletestfiles, log_name):
+    '''
+    The purpose of this method is to run the JVM tests through gradle
+    '''
+    print("I am running!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     for name, gradletestfile in gradletestfiles.items():
         x,y,package = resolve_package(gradletestfile[0])
         cwd = resolve_package(gradletestfile[0], True)
@@ -273,7 +246,6 @@ def run_gradle_tests(gradletestfiles, log_name):
             f"{package}{name}Test",
         ]
 
-        print(f"Running Gradle tests for {package}{name} in {cwd}...")
         with open("reports/JVM_tests.csv", "w") as f:
             result = subprocess.run(
                 gradle_cmd,
@@ -282,37 +254,14 @@ def run_gradle_tests(gradletestfiles, log_name):
                 stderr=subprocess.STDOUT,
                 text=True,
             )
-
-        print(f"Gradle test finished with return code {result.returncode}")
-        print(f"Gradle test log saved to {log_name}")
+        #Parse the result to below method in order to write to a csv
         parse_console_log("JVM_tests.csv", log_name)
 
-# def parse_console_log(
-#     log_file: str, output_csv: str
-# ):  # need to make it so it takes str name instead
-
-#     count = {}
-#     reps = {}
-
-#     with open(f"reports/{log_file}", "r") as f:
-#         for line in f:
-#             line = line.strip()
-#             if "repetition" in line:
-#                 name = line.split()[0]
-#                 if name not in count:
-#                     count[name] = 0
-#                 if name not in reps:
-#                     reps[name] = 0
-#                 if line.endswith("FAILED"):
-#                     reps[name] += 1
-#                 count[name] += 1
-
-#     with open(f"reports/{output_csv}", "a", newline="") as f:
-#         writer = csv.writer(f)
-#         for name, violated in count.items():
-#             writer.writerow((name,0,violated,count[name]))
 
 def parse_console_log(log_file: str, output_csv: str):
+    '''
+    This method take the gradle log_file from run_gradle_tests and writes the number of runs per test to 
+    '''
     count = {}
     reps = {}
 
@@ -340,12 +289,19 @@ def parse_console_log(log_file: str, output_csv: str):
     print(f"Parsing done. output -> {output_csv}")   
 
 def split_alpha_numeric(s: str):
+    '''
+    Helper method for finding name and number of threads when runnning single files
+    '''
     i = len(s)
     while i > 0 and s[i-1].isdigit():
         i -= 1
     return s[:i], s[i:]
 
 def read_input():
+    '''
+    This method is used when the script is run with sys.argv arguments and has the purpose of reading the cmd arguments
+    and pass them along for experiments to be run
+    '''
     tests_to_run = {}
     for x in range (3,len(sys.argv)):
         test_str = sys.argv[x]
@@ -364,6 +320,9 @@ def read_input():
     return tests_to_run
 
 def mini_ccp(P: Tuple[float, float], N=2, eps=0.1):
+    '''
+    Method for calculating the k values for csv files based on a tuple P, n = 2 and eps = 0.1 as default
+    '''
     violation_sum = sum(P)
     if violation_sum > 1 + 1e-3:
         raise ValueError("Probabilities must sum to <= 1")
@@ -380,14 +339,16 @@ def mini_ccp(P: Tuple[float, float], N=2, eps=0.1):
     return k-1
 
 EXPERIMENTS = [
-    # ("SctBench_tests_time.csv", True, "SctBench_time2.csv"),
+    ("SctBench_tests_time.csv", True, "SctBench_time2.csv"),
     ("correctness_tests_test.csv",False, "SctBench_res2.csv"),
-    # ("baseline.csv",False, "baseline_res2.csv"),
-    # ("HashMap_tests.csv",False,"HashMap_res_test.csv")
+    ("baseline.csv",False, "baseline_res2.csv"),
+    ("HashMap_tests.csv",False,"HashMap_res_test.csv")
 ]
 
 if __name__ == "__main__":
 
+        #If this script is run without any sys.argv arguments it will run all experiments else it can be run for single experiment
+        #following below pattern
         #sys.argv[2] needs to specify the package
         #sys.argv[3] needs to specify "time" or "correctness"
         #the rest of the arguments needs to be specifiec with test + number of threads i.e. Wronglock1Bad2
@@ -428,6 +389,7 @@ if __name__ == "__main__":
                     results.append((res[0],res[1],res[2],mini_ccp((float(res[1]),1.0-float(res[1])))))
                 header = [("test","P","violated","k")]
                 results = header + results
+                print(f"The result is: {"Hash" not in exp[0]}")
                 write_to_csv(exp[2],results)
                 if "Hash" not in exp[0]: #The hashmap tests do not use the JVM testing
                     run_gradle_tests(exps,exp[2])
