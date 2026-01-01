@@ -242,6 +242,7 @@ def write_to_csv(csv_name, results):
     '''
     Simple method that writes to a csv files all rows of the list results
     '''
+    #Do note that the variabl P represents 1.0-p_min
     with open(REPORTS_DIR / csv_name, "w", newline="") as f:
         writer = csv.writer(f)
         
