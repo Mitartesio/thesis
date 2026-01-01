@@ -32,7 +32,7 @@ def setup():
             print("WARNING: Using wrong version of java. please use java 11")
             sys.exit(1)
 
-    """Here we're building the jars needed for jpf _ NOT CONFIRMED WORKING YET"""
+    """Here we're building the jars needed for jpf"""
 
     if JPF_JAR.exists():
         print("JPF JARs already exist, skipping JAR generation")
