@@ -27,10 +27,21 @@ def write_latex_tabulars(experi_csv: str, tablename: str):
     df = df.fillna(0)
     df["k"] = df["k"].astype(int)
 
-    total = 1000
+    
+    
+    df["divisor"] = 1000
 
+    
+    if experi_csv == "SctBench_res":
+        jvm_mask = df["test"].str.contains("JVM", case=False, na=False)
+        df.loc[jvm_mask, "divisor"] = 100000
+
+    
     mask = ~df["test"].str.contains("Test", case=False, na=False)
-    df.loc[mask, "violated"] = df.loc[mask, "violated"] / total
+    df.loc[mask, "violated"] = df.loc[mask, "violated"] / df.loc[mask, "divisor"]
+
+    
+    df.drop(columns="divisor", inplace=True)
 
     df_to_write = df.set_index("test")[["k", "P", "violated"]].copy()
 
