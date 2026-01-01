@@ -1,5 +1,7 @@
 # Testing Concurrent Programs  
-## Applying the Coupon Collector’s Problem to Concurrent Programs in Java - Weighted Random Walk Applying the Coupon Collector’s Problem
+## Applying the Coupon Collector’s Problem to Concurrent Programs in Java
+
+## Weighted Random Walk Applying the Coupon Collector’s Problem
 
 This project implements a **weighted random walk** for testing concurrent Java
 programs, based on the **Coupon Collector’s Problem**. The approach provides
