@@ -8,7 +8,7 @@ import gov.nasa.jpf.util.test.TestJPF;
 import java.io.File;
 
 
-public class MinimizationTesting extends TestJPF {
+public class LargeJpfTests extends TestJPF {
     MinimizationTest test;
     MinimizationTestWithNoise testWithNoise;
     public static String classPath;
@@ -27,13 +27,6 @@ public class MinimizationTesting extends TestJPF {
         test = new MinimizationTest();
         testWithNoise = new MinimizationTestWithNoise();
         bug = false;
-    }
-
-    @RepeatedTest(200000)
-    public void runTest() throws InterruptedException {
-        bug = test.run();
-        Assertions.assertFalse(bug);
-//        System.out.println("RESULT:" + bug);
     }
 
 

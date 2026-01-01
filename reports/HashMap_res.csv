@@ -1,0 +1,13 @@
+test,P,violated,k
+WrongStripedMap1Bad,0.5,1000,5
+WrongStripedMap1Bad,0.8,1000,11
+WrongStripedMap2Bad,0.5,1000,5
+WrongStripedMap2Bad,0.8,1000,11
+WrongStripedMap3Bad,0.5,1000,5
+WrongStripedMap3Bad,0.8,1000,11
+WrongStripedMap4Bad,0.5,41,5
+WrongStripedMap4Bad,0.8,72,11
+WrongStripedMap4Bad,0.9,132,22
+WrongStripedMap4Bad,0.95,250,45
+WrongStripedMap4Bad,0.99,543,230
+WrongStripedMap4Bad,0.999,1000,2302

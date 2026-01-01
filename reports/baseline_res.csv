@@ -1,0 +1,11 @@
+test,P,violated,k
+MinimizationJVM,0,0,200000
+DeadlockJVM,0,48169,48170
+MinimizationTest,0.5,5,14
+MinimizationTest,0.8,11,24
+MinimizationTest,0.9,22,46
+MinimizationTest,0.95,45,81
+MinimizationTest,0.99,230,327
+MinimizationTest,0.999,2302,989
+DeadlockExample,0.5,5,1.0
+DeadlockExample,0.8,11,1.0

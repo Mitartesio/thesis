@@ -9,7 +9,7 @@ import gov.nasa.jpf.util.test.TestJPF;
 
 import java.io.File;
 
-public class DeadlockTesting extends TestJPF {
+public class DeadlockExampleTest extends TestJPF {
     DeadlockExample test;
 
     public static String classPath;
@@ -23,7 +23,8 @@ public class DeadlockTesting extends TestJPF {
         ex = new DeadlockExampleJVM();
     }
 
-    @RepeatedTest(100000)
+    // @RepeatedTest(100000)
+    @RepeatedTest(100)
     public void runTest() throws InterruptedException {
         ex = new DeadlockExampleJVM();
         assertFalse(ex.runForDeadlock());

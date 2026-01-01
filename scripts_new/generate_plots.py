@@ -7,48 +7,7 @@ import csv
 from collections import defaultdict
 import matplotlib.pyplot as plt
 
-# def makePlot(filename, include_tests=None, csv_name = "test"):
-#     """
-#     Plot P vs violated for each test in the CSV.
-
-#     Parameters:
-#     - filename: CSV file to read.
-#     - include_tests: Optional list of test names to include. 
-#                      If None or empty, include all tests.
-#     """
-#     # Dictionary: test_value → list of (P, violated)
-#     groups = defaultdict(lambda: {"P": [], "violated": [], "k": []})
-
-#     # Read CSV
-#     with open(filename, newline='') as f:
-#         reader = csv.DictReader(f)
-#         for row in reader:
-#             test_value = row["test"]
-#             groups[test_value]["P"].append(float(row["P"]))
-#             groups[test_value]["violated"].append(float(row["violated"]))
-#             groups[test_value]["k"].append(int(row["k"]))
-
-#     # Plot each test as its own line
-#     for test_value, data in groups.items():
-#         if include_tests and test_value not in include_tests:
-#             continue  # skip tests not in the include list
-#         P_sorted, violated_sorted = zip(*sorted(zip(data["P"], data["violated"])))
-#         k_sorted, violated_sorted = zip(*sorted(zip(data["k"], data["violated"])))
-#         # plt.plot(P_sorted, violated_sorted, label=f"test = {test_value}", linewidth=2)
-#         plt.plot(k_sorted, violated_sorted, label=f"test = {test_value}", linewidth=2)
-
-#     plt.xlabel("k")
-#     plt.ylabel("violated")
-#     plt.title("k vs violated for each test")
-#     plt.legend()
-#     plt.grid(True)
-
-#     # Save plot to file
-#     outpath = "plots" / f"{csv_name}.png"
-#     plt.savefig(outpath, dpi=300, bbox_inches="tight")
-#     print(f"Saved plot as f{outpath.stem}")
-
-#     plt.show()
+#Simple script for making the plots needed for the overleaf report
 
 def makePlot(filename, include_tests=None, csv_name="test"):
     """
@@ -90,12 +49,12 @@ def makePlot(filename, include_tests=None, csv_name="test"):
     plt.legend()
     plt.grid(True)
 
-    # 🔹 THIS is the key line
     plt.gca().invert_xaxis()
 
     plt.savefig(csv_name, dpi=300, bbox_inches="tight")
 
     plt.show()
+
 
 
 #I think this is solved in the run_experiments by now, lets discuss tomorrow
@@ -107,10 +66,9 @@ def makePlot(filename, include_tests=None, csv_name="test"):
 #     df2 = pd.read_csv(csv2_path)
 #     combined_df = pd.concat([df1, df2], ignore_index=True)
 #     combined_df = combined_df.fillna(0)
-#     combined_df.to_csv(output_path, index=False)
+#     combined_df.to_csv(output_path, index=False)j
 #     return output_path.stem
 
 if __name__ == "__main__":
-    # makePlot("Baseline.csv")
     makePlot("reports/SctBench_res.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "figures/SCT_bench_res1")
     makePlot("reports/SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "figures/SCT_bench_res2")

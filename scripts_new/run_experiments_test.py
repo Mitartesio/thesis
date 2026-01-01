@@ -6,16 +6,22 @@ import time
 from typing import Dict, List, Tuple
 import tempfile
 
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+REPORTS_DIR = PROJECT_ROOT / "reports"
+CONFIGS_DIR = PROJECT_ROOT / "configs"
+
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
 #This script is used for running all experiments for the report. 
 #All experiments can be found in csv files in the reports folder
 
-ROOT = pathlib.Path(__file__).resolve().parents[1] #Do we need this???
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 #CHANGE
 number_of_runs = 4 #How many times each experiment is run 
 
-# list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
-list_of_probs_correctness = [0.5] #P-variables
+list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
 
 
 #Ensuring that we find the bug
@@ -206,7 +212,7 @@ def write_to_csv(csv_name, results):
     '''
     Simple method that writes to a csv files all rows of the list results
     '''
-    with open(f"reports/{csv_name}", "w", newline="") as f:
+    with open(REPORTS_DIR / csv_name, "w", newline="") as f:
         writer = csv.writer(f)
         
         for test in results:
@@ -217,7 +223,7 @@ def read_experiment(csv_name):
     The purpose of this method is to read an experiment from a csv file and return it as a dict
     '''
     tests = {}
-    with open(f"reports/{csv_name}", "r", newline="") as f:
+    with open(REPORTS_DIR / csv_name, "r", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             name = row["test"]
@@ -246,7 +252,7 @@ def run_gradle_tests(gradletestfiles, log_name):
             f"{package}{name}Test",
         ]
 
-        with open("reports/JVM_tests.csv", "w") as f:
+        with open(REPORTS_DIR / "JVM_tests.csv", "w") as f:
             result = subprocess.run(
                 gradle_cmd,
                 cwd=str(cwd),
@@ -265,7 +271,7 @@ def parse_console_log(log_file: str, output_csv: str):
     count = {}
     reps = {}
 
-    with open(f"reports/{log_file}", "r") as f:
+    with open(REPORTS_DIR / log_file, "r") as f:
         for line in f:
             line = line.strip()
             if "repetition" in line:
@@ -279,7 +285,7 @@ def parse_console_log(log_file: str, output_csv: str):
                 if line.endswith("FAILED") or line.endswith("PASSED"):
                     count[name] += 1
 
-    with open(f"reports/{output_csv}", "a", newline="") as f:
+    with open(REPORTS_DIR / output_csv, "a", newline="") as f:
         writer = csv.writer(f)
         for name in count:
             #test,P,violated,k
@@ -339,10 +345,10 @@ def mini_ccp(P: Tuple[float, float], N=2, eps=0.1):
     return k-1
 
 EXPERIMENTS = [
-    # ("SctBench_tests_time.csv", True, "SctBench_time2.csv"),
-    # ("correctness_tests_test.csv",False, "SctBench_res2.csv"),
-    ("baseline.csv",False, "baseline_res2.csv"),
-    # ("HashMap_tests.csv",False,"HashMap_res_test.csv")
+    ("SctBench_tests_time.csv", True, "SctBench_time.csv"),
+    ("correctness_tests.csv",False, "SctBench_res.csv"),
+    ("baseline.csv",False, "baseline_res.csv"),
+    ("HashMap_tests.csv",False,"HashMap_res.csv")
 ]
 
 if __name__ == "__main__":
