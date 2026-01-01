@@ -18,8 +18,44 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
+def setup():
+    """ Check whether script is run with correct version of java (only checks if its java 11)"""
+    result = subprocess.run(["java","-version"], stderr=subprocess.PIPE, universal_newlines=True)
+
+    output = result.stderr
+    if 'version' in output:
+        versionLine = output.splitlines()[0]
+        java_version = versionLine.split('"')[1]
+        if java_version.split(".")[0] == '11':
+            print("Correctly using java 11.xx.xx")
+        else:
+            print("WARNING: Using wrong version of java. please use java 11")
+            sys.exit(1)
+
+    """Here we're building the jars needed for jpf _ NOT CONFIRMED WORKING YET"""
+
+    if JPF_JAR.exists():
+        print("JPF JARs already exist, skipping JAR generation")
+    else:
+        try:
+            print("generating JPF jars...")
+            subprocess.run(["./jpf-core/gradlew","-p","./jpf-core","buildJars"],check=True, cwd=ROOT)
+            print("Finished JPF JAR building")
+        except subprocess.CalledProcessError as e:
+            sys.exit(f"[error] JAR generation failed: {e}")
+
+    list_of_projects = ["CupTest", "HashMaps", "SctBench"]
+
+    for project in list_of_projects:
+        try:
+            print("Compiling with Gradle...")
+            subprocess.run([f"./{project}/gradlew","-p",f"./{project}","build","-x","test"],check=True, cwd=ROOT)
+            print("Finished Gradle compilation")
+        except subprocess.CalledProcessError as e:
+            sys.exit(f"[error] Gradle build failed: {e}")
+
 #CHANGE
-number_of_runs = 2 #How many times each experiment is run 
+number_of_runs = 1000 #How many times each experiment is run 
 
 list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
 
@@ -52,7 +88,6 @@ def resolve_package(package, cwd = False):
         BUILD_RES = SCTBENCH / "app" / "build" / "resources" / "main"
         BUILD_CLASSES = SCTBENCH / "app" / "build" / "classes" / "java" / "main"
     else:
-        print("Hello hash")
         HASHMAPS = ROOT / "HashMaps"
         # /home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/src/main/java/org/example
         if cwd:
@@ -78,7 +113,6 @@ def convert_to_jpf(tests, time_exp=False):
     for test, tup in tests.items():
         BUILD_CLASSES, BUILD_RES, TARGET = resolve_package(tup[0])
         threads = tup[1]
-        print(f"test: {test}, threads: {threads}")
         for p in list_of_probs:
             jpf_conf = [
                 f"target = {TARGET}{test}",
@@ -130,11 +164,9 @@ def run_jpf_files_time(jpf_runs):
             result = 0
             for x in range(0,number_of_runs):
                 start = time.time()
-                print("Hello i am running!!!")
                 result = run_jpf(tup[0], True)
                 end = time.time()
                 res_time = end-start
-                print(f"hello: {name}, {res_time}")
                 if result == 1:
                     times.append((name,res_time))
                 else:
@@ -178,14 +210,14 @@ def run_jpf(jpf_conf, time_exp):
         stdout, stderr = process.communicate()
     output = stdout + stderr
     if "violated true" in output or "search.class = gov.nasa.jpf.search.DFSearch" in jpf_conf:
-        print("correct")
         return 1
     else:
-        print(output)
         return 0
 
 def run_jpf_files(map_of_tests):
-    
+    '''
+    The purpose of this method is to run every jpf file in map_of_tests
+    '''
     results = []
 
     for name, test in map_of_tests.items():
@@ -193,7 +225,6 @@ def run_jpf_files(map_of_tests):
         fullyDoneFlag = False
         for tup in test:
             successes = 0
-            print(f"tup 0 is {tup[0]}")
             for x in range(0,number_of_runs):
                 successes += run_jpf(tup[0],False)
             results.append((name, str(tup[1]), successes))
@@ -240,10 +271,8 @@ def run_gradle_tests(gradletestfiles, log_name):
     for name, gradletestfile in gradletestfiles.items():
         x,y,package = resolve_package(gradletestfile[0])
         cwd = resolve_package(gradletestfile[0], True)
-        print(f"cwd: {cwd}, package: {package}")
         log_file = ROOT / "reports" / f"{log_name}.log"
         log_file.parent.mkdir(parents=True, exist_ok=True)
-        print(f"running {package}{name}Test")
         gradle_cmd = [
             "./gradlew",
             "test",
@@ -291,8 +320,6 @@ def parse_console_log(log_file: str, output_csv: str):
             writer.writerow((name,0, reps[name], count[name]))
 
 
-    print(f"Parsing done. output -> {output_csv}")   
-
 def split_alpha_numeric(s: str):
     '''
     Helper method for finding name and number of threads when runnning single files
@@ -320,7 +347,6 @@ def read_input():
 
         tests_to_run[test] = (sys.argv[1], number_of_threads)
 
-        print(f"this is hte name: {test}, this is the number: {number_of_threads}")
     
     return tests_to_run
 
@@ -351,6 +377,9 @@ EXPERIMENTS = [
 ]
 
 if __name__ == "__main__":
+
+    #Check for java 11 
+    setup()
 
         #If this script is run without any sys.argv arguments it will run all experiments else it can be run for single experiment
         #following below pattern
@@ -388,13 +417,11 @@ if __name__ == "__main__":
             else:
                 exps_to_run = convert_to_jpf(exps,False)
                 jpf_res = run_jpf_files(exps_to_run)
-                print(f"The length is {len(jpf_res)}")
                 results = []
                 for res in jpf_res:
                     results.append((res[0],res[1],res[2],mini_ccp((float(res[1]),1.0-float(res[1])))))
                 header = [("test","P","violated","k")]
                 results = header + results
-                print(f"The result is: {"Hash" not in exp[0]}")
                 write_to_csv(exp[2],results)
                 if "Hash" not in exp[0]: #The hashmap tests do not use the JVM testing
                     run_gradle_tests(exps,exp[2])
