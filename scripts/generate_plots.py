@@ -15,6 +15,14 @@ FIGURES_DIR = PROJECT_ROOT / "figures"
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
+TEST_COLORS = {
+    "WronglockBad": "tab:blue",
+    "Wronglock3Bad": "tab:orange",
+    "TwostageBad": "tab:green",
+    "Wronglock1Bad": "tab:red",
+    "StackBad": "tab:purple",
+}
+
 #Simple script for making the plots needed for the overleaf report
 
 def makePlot(filename, include_tests=None, csv_name="test"):
@@ -43,12 +51,14 @@ def makePlot(filename, include_tests=None, csv_name="test"):
             *sorted(zip(data["P_min"], data["violated"]))
         )
 
+        color = TEST_COLORS.get(test_value, None)
         plt.plot(
             x_sorted,
             violated_sorted,
-            label=f"test = {test_value}",
+            label=test_value,
             linewidth=2,
-            marker="o"
+            marker="o",
+            color=color
         )
 
     plt.xlabel("P_min")
@@ -79,4 +89,4 @@ def makePlot(filename, include_tests=None, csv_name="test"):
 
 if __name__ == "__main__":
     makePlot("SctBench_res.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "SCT_bench_res1")
-    makePlot("SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "SCT_bench_res2")
+    makePlot("SctBench_res.csv", ["WronglockBad", "Wronglock3Bad", "TwostageBad", "Wronglock1Bad", "StackBad"], "SCT_bench_res2")
