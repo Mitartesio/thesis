@@ -2,6 +2,8 @@ package org.example;
 
 import gov.nasa.jpf.util.test.TestJPF;
 
+import java.io.File;
+
 import org.junit.jupiter.api.*;
 
 
@@ -9,9 +11,11 @@ import org.junit.jupiter.api.*;
 //This test class has been used as guiding for correctness, while most of our testing comes from the benchmarks and gradle tests we run
 public class Reset_search_tests extends TestJPF{
     private static int x;
+     public static String classPath;
 
     @BeforeEach
     public void setup() {
+        classPath = getClassPath();
         x = 0;
     }
     
@@ -19,7 +23,7 @@ public class Reset_search_tests extends TestJPF{
     public void smallTestJPF() throws Exception{
         //We use the Listener_For_Testing here to check whether 
         if(verifyNoPropertyViolation(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
+                "+classpath=" + classPath,
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.Listener_For_Testing",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
                 "+search_with_reset.k = 100",
@@ -62,13 +66,10 @@ public class Reset_search_tests extends TestJPF{
     public void smallLoopTestJPF() throws Exception{
         //We use the Listener_For_Testing here to check whether 
         if(verifyNoPropertyViolation(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
-//                "+native_classpath=/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf.jar:/Users/frederikkolbel/ITU/fifth semester/Thesis/simpleExample/jpf-core/build/jpf-classes.jar",
+                "+classpath=" + classPath,
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States,gov.nasa.jpf.listener.Listener_For_Testing",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
                 "+search_with_reset.k = 100",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 3",
                 "+threads = t1 t2 t3",
                 "+operations = 13 5 21",
@@ -120,12 +121,10 @@ public class Reset_search_tests extends TestJPF{
         //This test is very difficult to get right with a completely random scheduler due to the fact that that thread t1 needs to
         //be called multiple time for x to be 10 and then execute thread t1
         if(verifyAssertionError(
-                "+classpath=/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/main;/home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/build/classes/java/test",
+                "+classpath=" + classPath,
                 "+vm.args=-ea", "+listener = gov.nasa.jpf.listener.Listener_Uniform_Adapts,gov.nasa.jpf.listener.Listener_For_Counting_States",
                 "+search.class = gov.nasa.jpf.search.Reset_Search",
                 "+search_with_reset.k = 2500",
-                // "+search_with_reset.probabilities = 0.99 0.01",
-                // "+search_with_reset.eps = 0.5",
                 "+numberOfThreads = 2",
                 "+search.multiple_errors = false",
                 "+jpf.report.console.property_violation = error",
@@ -155,5 +154,17 @@ public class Reset_search_tests extends TestJPF{
             t2.join();
 
         }
+    }
+
+        public static String getClassPath() {
+        String userDir = System.getProperty("user.dir");   //
+//        System.out.println(userDir);
+        String fs = File.separator;                   // For / or \ for win/osx, neet help which works, as \ escapes space in absolutep aths on osx. This is where our problem is if we have problem on windows.
+        String ps = File.pathSeparator;
+
+        String testClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "test";
+        String mainClasses = userDir + fs + "build" + fs + "classes" + fs + "java" + fs + "main";
+
+        return testClasses + ps + mainClasses;
     }
 }
