@@ -88,7 +88,7 @@ def resolve_package(package, cwd = False):
         BUILD_CLASSES = SCTBENCH / "app" / "build" / "classes" / "java" / "main"
     else:
         HASHMAPS = ROOT / "HashMaps"
-        # /home/anmv/projects/jpf_thesis_work/Simple_Example_Thesis/HashMaps/app/src/main/java/org/example
+
         if cwd:
             HASHMAPS
         TARGET = "org.example."
