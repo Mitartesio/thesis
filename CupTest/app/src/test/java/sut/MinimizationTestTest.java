@@ -29,8 +29,7 @@ public class MinimizationTestTest extends TestJPF {
         bug = false;
     }
 
-    // @RepeatedTest(200000)
-    @RepeatedTest(100)
+    @RepeatedTest(200000)
     public void runTest() throws InterruptedException {
         bug = test.run();
         Assertions.assertFalse(bug);

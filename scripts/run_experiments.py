@@ -54,7 +54,6 @@ def setup():
         except subprocess.CalledProcessError as e:
             sys.exit(f"[error] Gradle build failed: {e}")
 
-#CHANGE
 number_of_runs = 1000 #How many times each experiment is run 
 
 list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables

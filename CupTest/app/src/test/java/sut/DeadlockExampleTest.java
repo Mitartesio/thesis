@@ -23,8 +23,7 @@ public class DeadlockExampleTest extends TestJPF {
         ex = new DeadlockExampleJVM();
     }
 
-    // @RepeatedTest(100000)
-    @RepeatedTest(100)
+    @RepeatedTest(100000)
     public void runTest() throws InterruptedException {
         ex = new DeadlockExampleJVM();
         assertFalse(ex.runForDeadlock());

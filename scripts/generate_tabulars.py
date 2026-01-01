@@ -129,7 +129,7 @@ def write_to_csv_and_latex(experi_csv: str, tablename: str):
 if __name__ == '__main__':
     write_latex_tabulars("SctBench_res", "SctBench_res")
     write_latex_tabulars("baseline_res","baseline_res")
-    write_to_csv_and_latex("SctBench_time", "SctBench_time_tab")
+    write_to_csv_and_latex("SctBench_time_res", "SctBench_time_tab")
     write_latex_tabulars("HashMap_res","HashMap_res")
 
     #Delete???
