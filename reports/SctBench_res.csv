@@ -36,3 +36,13 @@ WronglockBad,0.8,960,11
 WronglockBad,0.9,999,22
 WronglockBad,0.95,1000,45
 WronglockBad,0.99,1000,230
+AccountBadJVM,0,95000,100000
+Carter01BadJVM,0,4,100000
+FsbenchBadJVM0,100000,100000
+Phase01BadJVM,0,100000,100000
+StackBadJVM,0,8,100000
+TokenRingBadJVM,0,2000,100000
+TwostageBadJVM,0,0,100000
+Wronglock1BadJVM,0,1,100000
+Wronglock3BadJVM,0,0,100000
+WronglockBadJVM,0,0,100000

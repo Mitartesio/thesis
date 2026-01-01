@@ -1,4 +1,5 @@
 import csv
+import pathlib
 import statistics
 from typing import List, Dict, Tuple
 import numpy as np
@@ -6,13 +7,19 @@ import pandas as pd
 
 #Methods provided for making latex and csv files for time- and correctness tests
 
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+REPORTS_DIR = PROJECT_ROOT / "reports"
+FIGURES_DIR = PROJECT_ROOT / "figures"
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def write_latex_tabulars(experi_csv: str, tablename: str):
     '''
     Method with the purpose of converting correctness tests into latex tabulars
     '''
-    csv_file =  f"reports/{experi_csv}.csv"
+    csv_file = REPORTS_DIR / f"{experi_csv}.csv"
     df = pd.read_csv(csv_file)
     df.columns = df.columns.str.strip()
 
@@ -24,14 +31,28 @@ def write_latex_tabulars(experi_csv: str, tablename: str):
 
     mask = ~df["test"].str.contains("Test", case=False, na=False)
     df.loc[mask, "violated"] = df.loc[mask, "violated"] / total
+
     df_to_write = df.set_index("test")[["k", "P", "violated"]].copy()
 
     df_to_write["P"] = df_to_write["P"].round(3)
     df_to_write["violated"] = df_to_write["violated"].apply(
-    lambda x: "0" if x == 0 else (str(int(x)) if x >= 1 else f"{x:.3f}" if x >= 0.001 else f"{x:.1e}")
-        )
+        lambda x: "0"
+        if x == 0
+        else (str(int(x)) if x >= 1 else f"{x:.3f}" if x >= 0.001 else f"{x:.1e}")
+    )
 
-    df_to_write.columns = df_to_write.columns.astype(str)
+    FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+
+    out_file = FIGURES_DIR / f"{tablename}.tex"
+    with open(out_file, "w") as f:
+        col_align = "l" + "r" * len(df_to_write.columns)
+        f.write(r"\begin{tabular}{" + col_align + "}\n")
+        f.write("test & " + " & ".join(df_to_write.columns) + r"\\\hline" + "\n")
+
+        for test, row in df_to_write.iterrows():
+            f.write(f"{test} & " + " & ".join(map(str, row.values)) + r"\\ " + "\n")
+
+        f.write(r"\end{tabular}" + "\n")
 
 
 def write_to_csv_and_latex(experi_csv: str, tablename: str):
@@ -42,7 +63,7 @@ def write_to_csv_and_latex(experi_csv: str, tablename: str):
     data = {}
 
    
-    with open(f"reports/{experi_csv}.csv", newline='') as csvfile:
+    with open(REPORTS_DIR / f"{experi_csv}.csv", "r", newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             test = row["test"]
@@ -91,10 +112,10 @@ def write_to_csv_and_latex(experi_csv: str, tablename: str):
             values["count_time_<30"]
         ]
 
-    df_to_write.to_csv(f"reports/{tablename}.csv", index_label="test")
+    df_to_write.to_csv(FIGURES_DIR / f"{tablename}.csv", index_label="test")
 
-    out_file = f"figures/{tablename}.tex"
-    with open(out_file, "w") as f:
+    out_file = f"{tablename}.tex"
+    with open(FIGURES_DIR / out_file, "w") as f:
         col_align = "l" + "r" * len(df_to_write.columns)
         f.write(r"\begin{tabular}{" + col_align + "}\n")
         f.write("& " + " & ".join(df_to_write.columns) + r"\\\hline" + "\n")
@@ -108,8 +129,8 @@ def write_to_csv_and_latex(experi_csv: str, tablename: str):
 if __name__ == '__main__':
     write_latex_tabulars("SctBench_res", "SctBench_res")
     write_latex_tabulars("baseline_res","baseline_res")
-    write_to_csv_and_latex("SctBench_time", "SctBench_time_overview")
-    write_latex_tabulars("HashMap_res_test","HashMap_res_test")
+    write_to_csv_and_latex("SctBench_time", "SctBench_time_tab")
+    write_latex_tabulars("HashMap_res","HashMap_res")
 
     #Delete???
     # iter_csvs("jvm_experiments", "experiments")

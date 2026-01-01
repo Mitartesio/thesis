@@ -2,4 +2,3 @@ test,threads,package
 WrongStripedMap1Bad,5,HashMap
 WrongStripedMap2Bad,10,HashMap
 WrongStripedMap3Bad,10,HashMap
-WrongStripedMap4Bad,5,HashMap

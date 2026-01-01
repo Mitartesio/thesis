@@ -19,7 +19,7 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 #CHANGE
-number_of_runs = 4 #How many times each experiment is run 
+number_of_runs = 2 #How many times each experiment is run 
 
 list_of_probs_correctness = [0.5,0.8,0.9,0.95,0.99,0.999] #P-variables
 
@@ -237,7 +237,6 @@ def run_gradle_tests(gradletestfiles, log_name):
     '''
     The purpose of this method is to run the JVM tests through gradle
     '''
-    print("I am running!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     for name, gradletestfile in gradletestfiles.items():
         x,y,package = resolve_package(gradletestfile[0])
         cwd = resolve_package(gradletestfile[0], True)
@@ -345,7 +344,7 @@ def mini_ccp(P: Tuple[float, float], N=2, eps=0.1):
     return k-1
 
 EXPERIMENTS = [
-    ("SctBench_tests_time.csv", True, "SctBench_time.csv"),
+    ("SctBench_tests_time.csv", True, "SctBench_time_res.csv"),
     ("correctness_tests.csv",False, "SctBench_res.csv"),
     ("baseline.csv",False, "baseline_res.csv"),
     ("HashMap_tests.csv",False,"HashMap_res.csv")

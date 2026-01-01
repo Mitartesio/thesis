@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
 from collections import defaultdict
 import csv
+import pathlib
 import matplotlib.pyplot as plt
 
 import csv
 from collections import defaultdict
 import matplotlib.pyplot as plt
+
+SCRIPT_DIR = pathlib.Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+REPORTS_DIR = PROJECT_ROOT / "reports"
+FIGURES_DIR = PROJECT_ROOT / "figures"
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 
 #Simple script for making the plots needed for the overleaf report
 
@@ -17,7 +25,7 @@ def makePlot(filename, include_tests=None, csv_name="test"):
     groups = defaultdict(lambda: {"P_min": [], "violated": []})
 
     # Read CSV
-    with open(filename, newline="") as f:
+    with open(REPORTS_DIR / filename, "r", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             test_value = row["test"]
@@ -51,7 +59,7 @@ def makePlot(filename, include_tests=None, csv_name="test"):
 
     plt.gca().invert_xaxis()
 
-    plt.savefig(csv_name, dpi=300, bbox_inches="tight")
+    plt.savefig(FIGURES_DIR / f"{csv_name}.png", dpi=300, bbox_inches="tight")
 
     plt.show()
 
@@ -70,5 +78,5 @@ def makePlot(filename, include_tests=None, csv_name="test"):
 #     return output_path.stem
 
 if __name__ == "__main__":
-    makePlot("reports/SctBench_res.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "figures/SCT_bench_res1")
-    makePlot("reports/SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "figures/SCT_bench_res2")
+    makePlot("SctBench_res.csv", ["WronglockBad" , "Wronglock3Bad", "TwostageBad"], "SCT_bench_res1")
+    makePlot("SctBench_res.csv", ["StackBad" , "Wronglock1Bad", "Wronglock3Bad", "WronglockBad", "TwostageBad", "StackBad"], "SCT_bench_res2")
