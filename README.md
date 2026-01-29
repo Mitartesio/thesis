@@ -10,6 +10,8 @@ concurrent executions toward previously uncovered behaviors.
 The algorithm is implemented as an extension to the **Java Pathfinder (JPF)**
 core and is realized through custom `Search` and `Listener` classes.
 
+** Note that this thesis project was created in collaboration with my thesis partners and done on our university githubs. Meaning this is a copied repo of the original. **
+
 ## Running Experiments
 
 This project includes experiments comparing the proposed approach against
